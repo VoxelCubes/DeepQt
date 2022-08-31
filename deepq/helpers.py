@@ -39,22 +39,27 @@ def show_question(parent, title: str, msg: str) -> bool:
 def format_char_count(count: int) -> str:
     """
     Format the count to be more human readable.
-    For large numbers, write with a K suffix and
-    provide 1 decimal place, if it is needed.
+    For large numbers, write with a K suffix and provide 1 decimal place, if it is needed.
     Separate the thousands with a comma.
+    Should it be necessary, use the M suffix for millions.
 
     :param count: Count to format.
     :return: Formatted string.
     """
-    if count < 10_000:
+    if count < 1_000:
         return str(count)
-    else:
+    elif count < 1_000_000:
         rounded = round(count / 1_000, 1)
         if rounded == int(rounded):
             return f"{int(rounded):n}K"
         else:
-            # return f"{rounded}K"
             return f"{rounded:n}K"
+    else:
+        rounded = round(count / 1_000_000, 1)
+        if rounded == int(rounded):
+            return f"{int(rounded):n}M"
+        else:
+            return f"{rounded:n}M"
 
 
 def f_plural(value, singular: str, plural: str):
