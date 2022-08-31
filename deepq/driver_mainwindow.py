@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from functools import partial
 from pathlib import Path
 from math import ceil
@@ -52,7 +51,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Set debug flag.
         self.config.tl_mock = mock
 
-        logger.debug(f"Loaded config: {safe_dump_conf(self.config)}")
+        logger.debug(f"Loaded config: {self.config.safe_dump()}")
         self.load_config_to_ui()
         # Share config with the file table.
         self.file_table.set_config(self.config)
