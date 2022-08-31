@@ -58,6 +58,13 @@ class FileTable(CTableWidget):
 
     def add_file(self, path: Path):
         logger.info(f"Added {path}")
+        # Make sure the file is not already in the table.
+        paths_in_table = [file.path for file in self.files.values()]
+        if path in paths_in_table:
+            logger.warning(f"File {path} already in table.")
+            hp.show_warning(self, "Duplicate file", f"File {path} is already in the table.")
+            return
+
         self.not_ready_for_translation.emit()
         file_id = str(uuid4())
 
