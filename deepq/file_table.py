@@ -378,4 +378,6 @@ def make_output_filename(input_file: st.InputFile, config: cfg.Config) -> Path:
     if config.use_fixed_output_path:
         path = Path(config.fixed_output_path) / path.name
 
+    path = hp.ensure_unique_file_path(path)
+
     return path

@@ -97,6 +97,20 @@ def open_file(path: Path):
         logger.exception(e)
 
 
+def ensure_unique_file_path(file_path: Path) -> Path:
+    """
+    Ensure that the file path is unique.
+    If the file already exists, append a number to the file name,
+    incrementing it until a unique file path is found.
+    """
+    counter = 1
+    output_file_path = file_path
+    while output_file_path.exists():
+        output_file_path = file_path.parent / (file_path.stem + "_" + str(counter) + file_path.suffix)
+        counter += 1
+    return output_file_path
+
+
 def weighted_average(old_value: float, new_value: float, weight: float = 0.25) -> float:
     """
     Calculate a weighted average.
