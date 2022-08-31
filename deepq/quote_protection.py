@@ -25,16 +25,16 @@ p_raphael_e_re = re.compile(r"^<<(.*)>>$")
 p_raphael = (p_raphael_j_re, p_raphael_e_re, r"[RAPHAEL]\n\1\n[ENDRAPHAEL]")
 
 # ============================================== Restoration ==============================================
-r_direct_speech_re = re.compile(r"\[QUOTE\][. ]*\n+(.*?)\n+?\[ENDQUOTE\]")
+r_direct_speech_re = re.compile(r"\[QUOTE\].*?\n+(.*?)\n+?\[ENDQUOTE\]")
 r_direct_speech = (r_direct_speech_re, r"“\1”")
 
-r_thought_speech_re = re.compile(r"\[TELNET\][. ]*\n+(.*?)\n+?\[ENDTELNET\]")
+r_thought_speech_re = re.compile(r"\[TELNET\].*?\n+(.*?)\n+?\[ENDTELNET\]")
 r_thought_speech = (r_thought_speech_re, r"<\1>")
 
-r_thought_internal_re = re.compile(r"\[THOUGHT\][. ]*\n+(.*?)\n+?\[ENDTHOUGHT\]")
+r_thought_internal_re = re.compile(r"\[THOUGHT\].*?\n+(.*?)\n+?\[ENDTHOUGHT\]")
 r_thought_internal = (r_thought_internal_re, r"(\1)")
 
-r_raphael_re = re.compile(r"\[RAPHAEL\][. ]*\n+(.*?)\n+?\[ENDRAPHAEL\]")
+r_raphael_re = re.compile(r"\[RAPHAEL\].*?\n+(.*?)\n+?\[ENDRAPHAEL\]")
 r_raphael = (r_raphael_re, r"<<\1>>")
 
 
