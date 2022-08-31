@@ -344,6 +344,7 @@ class FileTable(CTableWidget):
             self.ready_for_translation.emit()
         else:
             self.not_ready_for_translation.emit()
+        self.recalculate_char_total.emit()
 
     def remove_all_files(self):
         """
@@ -352,6 +353,7 @@ class FileTable(CTableWidget):
         self.clearAll()
         self.files.clear()
         self.not_ready_for_translation.emit()
+        self.recalculate_char_total.emit()
 
     def recalculate_char_count(self, file_id: str):
         """

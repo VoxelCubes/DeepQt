@@ -149,6 +149,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         Apply data from config to ui widgets.
         """
+        logger.debug("Loading config to UI.")
 
         self.checkBox_file_fixed_dir.setChecked(self.config.use_fixed_output_path)
         self.lineEdit_file_out_dir.setText(self.config.fixed_output_path)
@@ -448,6 +449,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.progressBar.setValue(0)
         self.show_progress()
         self.label_progress.setText("Preparing...")
+        self.statusbar.showMessage("Translating...")
 
         # Send the data off to the worker.
         worker = ai.DeeplWorker(translator=translator, input_files=self.file_table.files, config=self.config)
@@ -466,7 +468,10 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         remaining_chars = allowed_chars - total_chars
         warning_msg = (
             f"You are about to translate {hp.format_char_count(total_chars)} "
-            f"{hp.f_plural(total_chars, 'character', 'characters')}.\nProceed?"
+            f"{hp.f_plural(total_chars, 'character', 'characters')},\n"
+            f"leaving you with {hp.format_char_count(remaining_chars)} "
+            f"{hp.f_plural(remaining_chars, 'character', 'characters')}."
+            f"\nProceed?"
         )
         if api_usage.character.limit_reached:
             warning_msg = "You have reached your character limit.\nProceed anyway?"
@@ -484,12 +489,30 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             return False
         return True
 
-    def translation_worker_result(self):
+    def translation_worker_result(self, exit_code: ai.State):
+        """
+        If we made it here, the translation was either successful or aborted.
+        Notify the user, write the output, and reset the ui.
+
+        :param exit_code: The exit code of the translation.
+        """
+
         logger.info("Translation finished.")
         self.text_output_changed.emit()
-        show_info(self, "Finished", "Translations successfully completed.")
-        for file_id in self.file_table.files:
-            self.write_output_file(file_id)
+
+        if exit_code == ai.State.DONE:
+            self.statusbar.showMessage("Translation finished.")
+            show_info(self, "Finished", "Translations successfully completed.")
+            for file_id in self.file_table.files:
+                self.write_output_file(file_id)
+
+        elif exit_code == ai.State.ABORTED:
+            self.statusbar.showMessage("Translation aborted.")
+            show_info(self, "Aborted", "Translation aborted.")
+            if self.config.dump_on_abort:
+                for file_id in self.file_table.files:
+                    self.write_output_file(file_id)
+
         self.translation_worker_finished()
 
     def translation_worker_progress(self, key: str, message: str, processed_chars: int | None, total_chars: int | None):
