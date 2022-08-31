@@ -9,6 +9,7 @@ import deepq.config as cfg
 from driver_mainwindow import MainWindow
 
 # TODO Time estimates
+# TODO refresh button for config load
 # TODO support ODS files
 # TODO maybe support csv files
 # TODO maybe port away from openpyxl to only pyexcel
