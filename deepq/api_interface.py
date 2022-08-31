@@ -1,7 +1,7 @@
 import sys
 import time
 import traceback
-from enum import IntEnum
+from enum import IntEnum, auto
 from math import ceil
 
 import deepl
@@ -13,32 +13,6 @@ import deepq.helpers as hp
 import deepq.quote_protection as qp
 import deepq.structures as st
 import deepq.worker_thread as wt
-
-
-class DeeplSignals(QObject):
-    """
-    Defines the signals available from a running deepl worker thread.
-
-    Supported signals are:
-
-    finished
-        Nothing.
-
-    error
-        An instance of WorkerError.
-
-    result
-        Nothing.
-
-    progress
-        The file_id, progress message, processed chars, and total chars.
-
-    """
-
-    finished = Signal()
-    result = Signal()
-    error = Signal(wt.WorkerError)
-    progress = Signal(str, str, int, int)
 
 
 class Abort(Exception):
@@ -54,10 +28,33 @@ class State(IntEnum):
     The state of the worker.
     """
 
-    WORKING = 1
-    ABORTED = 2
-    QUOTA_EXCEEDED = 3
-    ERROR = 4
+    WORKING = auto()
+    DONE = auto()
+    ABORTED = auto()
+    QUOTA_EXCEEDED = auto()
+    ERROR = auto()
+
+
+class DeeplSignals(QObject):
+    """
+    Defines the signals available from a running deepl worker thread.
+
+    Supported signals are:
+
+    error
+        An instance of WorkerError.
+
+    result
+        Exit code.
+
+    progress
+        The file_id, progress message, processed chars, and total chars.
+
+    """
+
+    result = Signal(State)
+    error = Signal(wt.WorkerError)
+    progress = Signal(str, str, int, int)
 
 
 # noinspection PyUnresolvedReferences
@@ -121,16 +118,14 @@ class DeeplWorker(QRunnable):
             logger.warning("Deepl Aborted.")
             if self.state == State.ABORTED and self.current_file_id is not None:
                 self.signals.progress.emit(self.current_file_id, "Translation manually aborted.", None, None)
+            self.signals.result.emit(State.ABORTED)
 
         except:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit(wt.WorkerError(exctype, value, traceback.format_exc()))
         else:
-            if not self.state >= State.ABORTED:
-                self.signals.result.emit()  # Return the result of the processing
-        finally:
-            self.signals.finished.emit()  # Done
+            self.signals.result.emit(State.DONE)  # Return the result of the processing
 
     def main(self):
         """
