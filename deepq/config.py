@@ -30,6 +30,8 @@ class Config:
     tl_preserve_formatting: bool
     tl_mock: bool
     dump_on_abort: bool
+    # Timing history.
+    avg_time_per_mille: float
 
     def save(self):
         conf_path = config_path()
@@ -72,6 +74,17 @@ class Config:
             conf.save()
 
         return conf
+
+    def safe_dump(self) -> str:
+        """
+        Dump the config to a dict and obfuscate the api key to prevent it from leaking into logs.
+
+        :return: Stringified dictionary.
+        """
+
+        conf = asdict(self)
+        conf["api_key"] = "".join(["X" if char.isalnum() else char for char in conf["api_key"]])
+        return str(conf)
 
 
 def config_path() -> Path:
@@ -121,6 +134,8 @@ def default_config() -> Config:
         tl_min_chunk_size=10_000,
         tl_preserve_formatting=True,
         tl_mock=False,
+        dump_on_abort=False,
+        avg_time_per_mille=0.33,  # This was measured experimentally. Depends on local internet connection.
     )
 
 

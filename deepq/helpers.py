@@ -57,6 +57,30 @@ def f_plural(value, singular: str, plural: str):
     return singular if value == 1 else plural
 
 
+def f_time(seconds: int) -> str:
+    """
+    Format a time in seconds to a human readable string.
+    Return a format like:
+    1 second
+    2 minutes 3 seconds
+    4 hours 5 minutes
+    """
+    if seconds < 60:
+        return f"{seconds} {f_plural(seconds, 'second', 'seconds')}"
+    elif seconds < 60 * 60:
+        minutes = seconds // 60
+        seconds = seconds % 60
+        return f"{minutes} {f_plural(minutes, 'minute', 'minutes')} {seconds} {f_plural(seconds, 'second', 'seconds')}"
+    else:
+        hours = seconds // (60 * 60)
+        minutes = (seconds % (60 * 60)) // 60
+        return (
+            f"{hours} {f_plural(hours, 'hour', 'hours')} "
+            f"{minutes} {f_plural(minutes, 'minute', 'minutes')}"
+            f"   [You're batshit insane!]"
+        )
+
+
 def open_file(path: Path):
     """
     Open any given file with the default application.
@@ -71,3 +95,11 @@ def open_file(path: Path):
             subprocess.run(["open", path])
     except Exception as e:
         logger.exception(e)
+
+
+def weighted_average(old_value: float, new_value: float, weight: float = 0.25) -> float:
+    """
+    Calculate a weighted average.
+    When chained several times, it's an exponential moving average.
+    """
+    return old_value * (1 - weight) + new_value * weight

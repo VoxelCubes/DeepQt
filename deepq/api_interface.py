@@ -188,6 +188,9 @@ class DeeplWorker(QRunnable):
             if isinstance(input_file, st.TextFile):
                 for i, chunk in enumerate(input_file.text_chunks):
                     self.check_aborted()
+                    if not chunk:
+                        logger.warning(f"Empty chunk {i} in {input_file.path.name}.")
+                        continue
                     self.signals.progress.emit(
                         key,
                         f"Translating chunk {i + 1} / {len(input_file.text_chunks)}",
@@ -204,7 +207,7 @@ class DeeplWorker(QRunnable):
                         translation = self.try_translate(chunk, key)
 
                     input_file.translation_chunks.append(translation.text)
-                    logger.debug(f"Translation: {translation.text}")
+                    # logger.debug(f"Translation: {translation.text}")
                 # Smelt the translation chunks into a single translation.
                 input_file.translation = "".join(input_file.translation_chunks)
                 # If quote protection was used, remove it.
@@ -220,7 +223,7 @@ class DeeplWorker(QRunnable):
                     self.total_chars,
                 )
 
-    def try_translate(self, chunk: str, key: str):
+    def try_translate(self, chunk: str, key: str) -> deepl.TextResult:
         """
         Try to translate the text.
 
@@ -230,6 +233,7 @@ class DeeplWorker(QRunnable):
         tries = 1
         while True:
             try:
+                t_start = time.time()
                 translation = self.translator.translate_text(
                     chunk,
                     source_lang=self.config.lang_from,
@@ -240,6 +244,11 @@ class DeeplWorker(QRunnable):
                     raise deepl.DeepLException()
                 # Claim the chunk as translated.
                 self.processed_chars += len(chunk)
+                d_time = time.time() - t_start
+                # Calculate how long it took per 1000 chars. Update the average.
+                time_per_mille = d_time / (len(chunk) / 1000)
+                self.config.avg_time_per_mille = hp.weighted_average(self.config.avg_time_per_mille, time_per_mille)
+                logger.info(f"Translation took {d_time:.2f} seconds, {time_per_mille:.3f} seconds per 1000 chars.")
                 return translation
 
             except deepl.TooManyRequestsException:

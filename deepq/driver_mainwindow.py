@@ -1,6 +1,7 @@
 from dataclasses import asdict
 from functools import partial
 from pathlib import Path
+from math import ceil
 
 import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
@@ -463,6 +464,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         total_chars = sum(file.char_count for file in self.file_table.files.values())
         api_usage = translator.get_usage()
         allowed_chars = api_usage.character.limit - api_usage.character.count
+        remaining_chars = allowed_chars - total_chars
         warning_msg = (
             f"You are about to translate {hp.format_char_count(total_chars)} "
             f"{hp.f_plural(total_chars, 'character', 'characters')}.\nProceed?"
@@ -521,6 +523,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.abort_button_enabled(False)
         self.show_button_start()
         self.hide_progress()
+        self.config.save()  # Save the last average time/1000 characters.
         self.load_config_to_ui()
 
     def abort_translating(self):
@@ -698,32 +701,29 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
     def recalculate_char_total(self):
         """
-        Calculate a new total of characters to translate.
+        Calculate a new total of characters to translate and display it in the status bar.
         """
         char_total = sum(file.char_count for file in self.file_table.files.values())
-        self.label_stats.setText(
-            hp.format_char_count(char_total) + hp.f_plural(char_total, " character", " characters")
-        )
+        if char_total == 0:
+            self.label_stats.setText("")
+            return
 
-    def update_translation_status(self, processed_chars: int, total_chars: int):
+        time_total = ceil(self.config.avg_time_per_mille * char_total / 1000)
+        char_text = hp.format_char_count(char_total) + hp.f_plural(char_total, " character", " characters")
+        time_text = f"Approx. {hp.f_time(time_total)}"
+        self.label_stats.setText(char_text + "   " + time_text)
+
+    def update_translation_status(self, processed_chars: int, char_total: int):
         """
         Update the translation status label.
         """
-        if total_chars == 0:
+        if char_total == 0:
             logger.error("Total character count is 0. Nothing to do.")
             return
-        self.label_progress.setText(hp.format_char_count(processed_chars) + " / " + hp.format_char_count(total_chars))
-        self.progressBar.setValue(processed_chars / total_chars * 100)
-
-
-def safe_dump_conf(config: cfg.Config) -> str:
-    """
-    Dump the config to a dict and obfuscate the api key to prevent it from leaking into logs.
-
-    :param config: The config to dump.
-    :return: Stringified dictionary.
-    """
-
-    conf = asdict(config)
-    conf["api_key"] = "".join(["X" if char.isalnum() else char for char in conf["api_key"]])
-    return str(conf)
+        char_text = hp.format_char_count(processed_chars) + " / " + hp.format_char_count(char_total)
+        time_total = ceil(self.config.avg_time_per_mille * (char_total - processed_chars) / 1000)
+        self.label_progress.setText(
+            f"Translated {char_text} {hp.f_plural(char_total, 'character', 'characters')}\n"
+            f"Approximately {hp.f_time(time_total)} remaining"
+        )
+        self.progressBar.setValue(processed_chars / char_total * 100)
