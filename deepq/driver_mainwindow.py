@@ -756,7 +756,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         Show the glossary documentation in a web browser.
         Open the github page for this.
-        link: https://github.com/VoxelCubes/DeepQ/blob/master/glossary_docs.md
         """
         show_info(
             self,

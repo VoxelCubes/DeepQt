@@ -26,7 +26,6 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
         """
         Show the deepl api documentation in a web browser.
         Open the github page for this.
-        link: https://github.com/VoxelCubes/DeepQ/blob/master/glossary_docs.md
         """
         show_info(
             self,
