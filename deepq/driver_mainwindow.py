@@ -19,7 +19,7 @@ from deepq import helpers as hp
 from deepq.driver_api_config import ConfigureAccount
 from deepq.file_table import Column, make_output_filename
 from deepq.ui_generated_files.ui_mainwindow import Ui_MainWindow
-from helpers import show_warning, show_info, show_question
+from deepq.helpers import show_warning, show_info, show_question
 
 
 # noinspection PyUnresolvedReferences

@@ -5,7 +5,7 @@ from enum import IntEnum
 from functools import partial
 from pathlib import Path
 
-import trie
+from deepq import trie
 
 
 class ProcessLevel(IntEnum):

@@ -6,7 +6,7 @@ import logzero
 from logzero import logger
 
 import deepq.config as cfg
-from driver_mainwindow import MainWindow
+from deepq.driver_mainwindow import MainWindow
 
 # TODO support ODS files
 # TODO maybe support csv files
