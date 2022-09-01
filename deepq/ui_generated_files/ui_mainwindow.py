@@ -173,6 +173,7 @@ class Ui_MainWindow(object):
             icon4.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
         
         self.pushButton_file_dir_browse.setIcon(icon4)
+        self.pushButton_file_dir_browse.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.pushButton_file_dir_browse)
 
@@ -235,6 +236,7 @@ class Ui_MainWindow(object):
             icon6.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
         
         self.pushButton_glossary_file_browse.setIcon(icon6)
+        self.pushButton_glossary_file_browse.setFlat(True)
 
         self.horizontalLayout.addWidget(self.pushButton_glossary_file_browse)
 
@@ -256,7 +258,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.formLayout_2 = QFormLayout()
         self.formLayout_2.setObjectName(u"formLayout_2")
-        self.formLayout_2.setFieldGrowthPolicy(QFormLayout.FieldsStayAtSizeHint)
         self.label_5 = QLabel(self.groupBox_api)
         self.label_5.setObjectName(u"label_5")
 
@@ -283,6 +284,19 @@ class Ui_MainWindow(object):
         self.label_api_status_bad.setObjectName(u"label_api_status_bad")
 
         self.horizontalLayout_2.addWidget(self.label_api_status_bad)
+
+        self.horizontalSpacer_2 = QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
+
+        self.pushButton_refresh = QPushButton(self.groupBox_api)
+        self.pushButton_refresh.setObjectName(u"pushButton_refresh")
+        self.pushButton_refresh.setText(u"")
+        icon7 = QIcon(QIcon.fromTheme(u"view-refresh"))
+        self.pushButton_refresh.setIcon(icon7)
+        self.pushButton_refresh.setFlat(True)
+
+        self.horizontalLayout_2.addWidget(self.pushButton_refresh)
 
 
         self.formLayout_2.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout_2)
@@ -317,14 +331,14 @@ class Ui_MainWindow(object):
 
         self.pushButton_api_config = QPushButton(self.groupBox_api)
         self.pushButton_api_config.setObjectName(u"pushButton_api_config")
-        icon7 = QIcon()
+        icon8 = QIcon()
         iconThemeName = u"configure"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon7 = QIcon.fromTheme(iconThemeName)
+            icon8 = QIcon.fromTheme(iconThemeName)
         else:
-            icon7.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon8.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
         
-        self.pushButton_api_config.setIcon(icon7)
+        self.pushButton_api_config.setIcon(icon8)
 
         self.verticalLayout_3.addWidget(self.pushButton_api_config)
 
@@ -343,28 +357,28 @@ class Ui_MainWindow(object):
         font1.setPointSize(10)
         font1.setBold(True)
         self.pushButton_start.setFont(font1)
-        icon8 = QIcon()
+        icon9 = QIcon()
         iconThemeName = u"media-playback-start"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon8 = QIcon.fromTheme(iconThemeName)
+            icon9 = QIcon.fromTheme(iconThemeName)
         else:
-            icon8.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon9.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
         
-        self.pushButton_start.setIcon(icon8)
+        self.pushButton_start.setIcon(icon9)
 
         self.horizontalLayout_9.addWidget(self.pushButton_start)
 
         self.pushButton_abort = QPushButton(self.centralwidget)
         self.pushButton_abort.setObjectName(u"pushButton_abort")
         self.pushButton_abort.setFont(font1)
-        icon9 = QIcon()
+        icon10 = QIcon()
         iconThemeName = u"process-stop"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon9 = QIcon.fromTheme(iconThemeName)
+            icon10 = QIcon.fromTheme(iconThemeName)
         else:
-            icon9.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon10.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
         
-        self.pushButton_abort.setIcon(icon9)
+        self.pushButton_abort.setIcon(icon10)
 
         self.horizontalLayout_9.addWidget(self.pushButton_abort)
 
@@ -414,7 +428,7 @@ class Ui_MainWindow(object):
 
         self.progressBar = QProgressBar(self.centralwidget)
         self.progressBar.setObjectName(u"progressBar")
-        self.progressBar.setValue(24)
+        self.progressBar.setValue(0)
 
         self.gridLayout.addWidget(self.progressBar, 1, 1, 1, 1)
 
@@ -440,10 +454,19 @@ class Ui_MainWindow(object):
         self.pushButton_file_add.setText(QCoreApplication.translate("MainWindow", u"Add text file", None))
         self.pushButton_file_preview.setText(QCoreApplication.translate("MainWindow", u"Preview", None))
         self.checkBox_file_fixed_dir.setText(QCoreApplication.translate("MainWindow", u"Use fixed output directory:", None))
+#if QT_CONFIG(tooltip)
+        self.pushButton_file_dir_browse.setToolTip(QCoreApplication.translate("MainWindow", u"Browse", None))
+#endif // QT_CONFIG(tooltip)
         self.pushButton_file_dir_browse.setText("")
         self.groupBox_glossary.setTitle(QCoreApplication.translate("MainWindow", u"Glossary", None))
         self.checkBox_use_glossary.setText(QCoreApplication.translate("MainWindow", u"Use glossary:", None))
+#if QT_CONFIG(tooltip)
+        self.pushButton_glossary_help.setToolTip(QCoreApplication.translate("MainWindow", u"This glossary does not use DeepL's glossaries. Click for more details.", None))
+#endif // QT_CONFIG(tooltip)
         self.pushButton_glossary_help.setText("")
+#if QT_CONFIG(tooltip)
+        self.pushButton_glossary_file_browse.setToolTip(QCoreApplication.translate("MainWindow", u"Browse", None))
+#endif // QT_CONFIG(tooltip)
         self.pushButton_glossary_file_browse.setText("")
         self.checkBox_extra_quote_protection.setText(QCoreApplication.translate("MainWindow", u"Use extra quotation protection", None))
         self.groupBox_api.setTitle(QCoreApplication.translate("MainWindow", u"API", None))
@@ -452,6 +475,9 @@ class Ui_MainWindow(object):
         self.label_api_status_good.setText(QCoreApplication.translate("MainWindow", u"Okay", None))
         self.label_api_status_bad_icon.setText(QCoreApplication.translate("MainWindow", u"error_icon", None))
         self.label_api_status_bad.setText(QCoreApplication.translate("MainWindow", u"Error", None))
+#if QT_CONFIG(tooltip)
+        self.pushButton_refresh.setToolTip(QCoreApplication.translate("MainWindow", u"Refresh", None))
+#endif // QT_CONFIG(tooltip)
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Usage:", None))
         self.label_api_usage_error_icon.setText(QCoreApplication.translate("MainWindow", u"error_icon", None))
         self.label_api_usage_warn_icon.setText(QCoreApplication.translate("MainWindow", u"warn_icon", None))

@@ -97,6 +97,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.lineEdit_glossary_file.editingFinished.connect(partial(self.glossary_file_updated, self, True))
 
         self.pushButton_api_config.clicked.connect(self.configure_api)
+        self.pushButton_refresh.clicked.connect(self.load_config_to_ui)
 
         self.text_output_changed.connect(self.file_table.update_all_output_filenames)
         self.text_params_changed.connect(self.file_table.update_all_text_params)

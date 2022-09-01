@@ -163,12 +163,18 @@
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_file_dir_browse">
+             <property name="toolTip">
+              <string>Browse</string>
+             </property>
              <property name="text">
               <string/>
              </property>
              <property name="icon">
               <iconset theme="document-open-folder">
                <normaloff>.</normaloff>.</iconset>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -203,6 +209,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_glossary_help">
+             <property name="toolTip">
+              <string>This glossary does not use DeepL's glossaries. Click for more details.</string>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -241,12 +250,18 @@
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_glossary_file_browse">
+             <property name="toolTip">
+              <string>Browse</string>
+             </property>
              <property name="text">
               <string/>
              </property>
              <property name="icon">
               <iconset theme="document-open">
                <normaloff>.</normaloff>.</iconset>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -273,9 +288,6 @@
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <layout class="QFormLayout" name="formLayout_2">
-           <property name="fieldGrowthPolicy">
-            <enum>QFormLayout::FieldsStayAtSizeHint</enum>
-           </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_5">
              <property name="text">
@@ -310,6 +322,35 @@
               <widget class="QLabel" name="label_api_status_bad">
                <property name="text">
                 <string>Error</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_refresh">
+               <property name="toolTip">
+                <string>Refresh</string>
+               </property>
+               <property name="text">
+                <string notr="true"/>
+               </property>
+               <property name="icon">
+                <iconset theme="view-refresh"/>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -496,7 +537,7 @@
     <item row="1" column="1">
      <widget class="QProgressBar" name="progressBar">
       <property name="value">
-       <number>24</number>
+       <number>0</number>
       </property>
      </widget>
     </item>
