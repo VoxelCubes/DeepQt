@@ -95,6 +95,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.pushButton_glossary_file_browse.clicked.connect(self.browse_glossary_file)
         self.lineEdit_glossary_file.textEdited.connect(partial(self.glossary_file_updated, self, False))
         self.lineEdit_glossary_file.editingFinished.connect(partial(self.glossary_file_updated, self, True))
+        self.pushButton_glossary_help.clicked.connect(self.show_glossary_help)
 
         self.pushButton_api_config.clicked.connect(self.configure_api)
         self.pushButton_refresh.clicked.connect(self.load_config_to_ui)
@@ -750,3 +751,31 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             f"Approximately {hp.f_time(time_total)} remaining"
         )
         self.progressBar.setValue(processed_chars / char_total * 100)
+
+    def show_glossary_help(self):
+        """
+        Show the glossary documentation in a web browser.
+        Open the github page for this.
+        link: https://github.com/VoxelCubes/DeepQ/blob/master/glossary_docs.md
+        """
+        show_info(
+            self,
+            "Glossary info",
+            """<html>
+                    <head/>
+                    <body>
+                        <p> DeepQ uses glossary files to pre-process files before sending them to the API; 
+                            this is not the same as DeepL's glossary functions. Therefore, they can be used
+                            with any language and offer special features, which DeepL's glossaries cannot
+                            offer.
+                        </p>
+                        <p>
+                           The format of these glossaries is outlined in the 
+                            <a href="https://github.com/VoxelCubes/DeepQ/blob/master/glossary_docs.md">
+                                online documentation
+                            </a>
+                            .
+                        </p>
+                    </body>
+                </html>""",
+        )
