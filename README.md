@@ -6,19 +6,19 @@
 
 Harness the power of the DeepL API with this friendly user interface.
 
-![Example screenshot](https://github.com/VoxelCubes/DeepQt/raw/master/media/example_screenshot.png)
+![](/media/example_screenshot.png)
 
 ## Features
 
 - Batch processing.
 
-- Higher-level glossaries. [How do they work?](docs/glossary_help.md)
+- Higher-level glossaries. [How do they work?](https://github.com/VoxelCubes/DeepQt/blob/master/docs/glossary_help.md)
 
 - Support for text files (epub coming eventually)
 
 ## Requires
 
-- A DeepL API license, either free or pro. [How do I get this?](docs/api_help.md)
+- A DeepL API license, either free or pro. [How do I get this?](https://github.com/VoxelCubes/DeepQt/blob/master/docs/api_help.md)
 
 - A Python installation, version **3.10** or higher. On Linux you will probably already have this installed. On Windows, you will likely need to set it up. [Download Python | Python.org](https://www.python.org/downloads/) or use your package manager (apt, pacman, dnf, chocolatey, winget etc.)
 
