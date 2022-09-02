@@ -1,6 +1,7 @@
 <RCC>
   <qresource prefix="/">
     <file>icons/Breeze/actions/16/data-error.svg</file>
+    <file>icons/logo.png</file>
     <file>icons/Breeze/actions/16/data-warning.svg</file>
     <file>icons/Breeze/actions/16/state-ok.svg</file>
     <file>icons/Breeze/actions/16/state-error.svg</file>

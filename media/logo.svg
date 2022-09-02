@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1cm"
+   height="1cm"
+   viewBox="0 0 10 10"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="20.70196"
+     inkscape:cx="6.1346848"
+     inkscape:cy="19.20108"
+     inkscape:window-width="2560"
+     inkscape:window-height="1366"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2" />
+  <defs
+     id="defs2">
+    <rect
+       x="-36.271347"
+       y="0.53654995"
+       width="24.012456"
+       height="25.010333"
+       id="rect1006" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#1d1d1d;fill-rule:evenodd;stroke-width:0.264583;fill-opacity:1"
+       id="rect165"
+       width="10"
+       height="10"
+       x="0"
+       y="0" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 2">
+    <text
+       xml:space="preserve"
+       transform="matrix(0.56444356,0,0,0.56444356,20.995081,0.57050591)"
+       id="text1004"
+       style="font-size:11.3386px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect1006)"><tspan
+         x="-36.271484"
+         y="10.85382"
+         id="tspan308"><tspan
+           style="font-weight:bold;font-family:Carlito;-inkscape-font-specification:'Carlito Bold';fill:#8771ff"
+           id="tspan306">DQ</tspan></tspan></text>
+  </g>
+</svg>

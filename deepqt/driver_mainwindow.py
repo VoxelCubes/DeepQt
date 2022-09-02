@@ -39,6 +39,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
         self.setWindowTitle(f"{__program__} {__version__}")
+        self.setWindowIcon(Qg.QIcon(":/icons/logo.png"))
         self.translating = False  # If true, the translation is in progress.
         self.glossary = st.Glossary()  # Create a dummy glossary
 
