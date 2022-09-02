@@ -42,4 +42,4 @@ pip install deepqt
 
 - [ ] API help documentation.
 
-- [ ] Build AppImage or Flatpak and Windows EXE.
+- [ ] Build AppImage or Flatpak.
