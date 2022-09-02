@@ -24,7 +24,7 @@ Harness the power of the DeepL API with this friendly user interface.
 
 Download the latest release from PyPi
 
-`pip install deepqt`
+```pip install deepqt```
 
 ## Roadmap
 
