@@ -37,3 +37,5 @@ Download the latest release from PyPi
 - [ ] Glossary documentation.
 
 - [ ] API help documentation.
+
+- [ ] Build AppImage or Flatpak and Windows EXE.
