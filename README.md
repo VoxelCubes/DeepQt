@@ -29,6 +29,13 @@ Download the latest release from [PyPi](https://pypi.org/project/deepqt/).
 ```
 pip install deepqt
 ```
+Run it with `deepqt` from the terminal.
+
+Or download a prepackaged format from the [releases](https://github.com/VoxelCubes/DeepQt/releases/latest) page:
+
+- .whl (Manual pip installation)
+- .elf (Linux)
+- .exe (Windows)
 
 ## Roadmap
 
