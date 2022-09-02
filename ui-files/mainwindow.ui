@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1280</width>
-    <height>732</height>
+    <height>742</height>
    </rect>
   </property>
   <property name="font">
@@ -347,7 +347,8 @@
                 <string notr="true"/>
                </property>
                <property name="icon">
-                <iconset theme="view-refresh"/>
+                <iconset theme="view-refresh">
+                 <normaloff>.</normaloff>.</iconset>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -549,12 +550,12 @@
   <customwidget>
    <class>FileTable</class>
    <extends>QTableWidget</extends>
-   <header>deepq.file_table</header>
+   <header>deepqt.file_table</header>
   </customwidget>
   <customwidget>
    <class>CComboBox</class>
    <extends>QComboBox</extends>
-   <header>deepq.CustomQ.CComboBox</header>
+   <header>deepqt.CustomQ.CComboBox</header>
   </customwidget>
  </customwidgets>
  <resources/>

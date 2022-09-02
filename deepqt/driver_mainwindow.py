@@ -771,7 +771,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
                         </p>
                         <p>
                            The format of these glossaries is outlined in the 
-                            <a href="https://github.com/VoxelCubes/DeepQ/blob/master/docs/glossary_help.md">
+                            <a href="https://github.com/VoxelCubes/DeepQt/blob/master/docs/glossary_help.md">
                                 online documentation
                             </a>
                             .

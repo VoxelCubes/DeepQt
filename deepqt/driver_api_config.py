@@ -42,7 +42,7 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
                         </p>
                         <p>
                            For more information on the API, see the 
-                            <a href="https://github.com/VoxelCubes/DeepQ/blob/master/docs/api_help.md">
+                            <a href="https://github.com/VoxelCubes/DeepQt/blob/master/docs/api_help.md">
                                 online documentation
                             </a>
                             .
