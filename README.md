@@ -1,12 +1,12 @@
 # DeepQt
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![PyPI version](https://badge.fury.io/py/deepqt.svg)](https://badge.fury.io/py/deepqt)
+[![PyPI version](https://img.shields.io/pypi/v/deepqt)](https://pypi.org/project/deepqt/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Harness the power of the DeepL API with this friendly user interface.
 
-![Example screenshot](media/example_screenshot.png)
+![Example screenshot](https://github.com/VoxelCubes/DeepQt/raw/master/media/example_screenshot.png)
 
 ## Features
 
