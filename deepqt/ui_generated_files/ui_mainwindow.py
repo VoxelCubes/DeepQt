@@ -111,7 +111,7 @@ class Ui_MainWindow(object):
         self.pushButton_file_remove_all = QPushButton(self.groupBox_files)
         self.pushButton_file_remove_all.setObjectName(u"pushButton_file_remove_all")
         icon1 = QIcon()
-        iconThemeName = u"delete"
+        iconThemeName = u"edit-delete"
         if QIcon.hasThemeIcon(iconThemeName):
             icon1 = QIcon.fromTheme(iconThemeName)
         else:

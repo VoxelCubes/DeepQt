@@ -116,7 +116,7 @@
               <string>Clear all</string>
              </property>
              <property name="icon">
-              <iconset theme="delete">
+              <iconset theme="edit-delete">
                <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>

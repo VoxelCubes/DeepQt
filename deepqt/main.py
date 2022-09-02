@@ -1,8 +1,11 @@
 import os
 import sys
 import argparse
+import platform
 
 import PySide6.QtWidgets as Qw
+import PySide6.QtGui as Qg
+import PySide6.QtCore as Qc
 import logzero
 from logzero import logger
 
@@ -17,6 +20,11 @@ from deepqt import __program__, __version__, __description__
 # TODO epub files
 # TODO Testing
 
+import deepqt.rc_generated_files.fallback_icons_rc
+
+# import deepqt.rc_generated_files.icons_light_rc
+# import deepqt.rc_generated_files.icons_dark_rc
+
 
 def main():
     # Parse command line arguments
@@ -24,11 +32,18 @@ def main():
     #   --mock: Use the deepl mock server on localhost:3000.
     #   --debug-api: Show DeepL API debug messages.
     #   --quieter-logs: Don't log debug messages.
+    #   --icon-theme: Use the specified icon theme. Included are "Breeze" and "BreezeDark". Default to system theme.
 
     parser = argparse.ArgumentParser(description=__description__)
     parser.add_argument("--mock", action="store_true", help="Use the deepl mock server on localhost:3000.")
     parser.add_argument("--debug-api", action="store_true", help="Show DeepL API debug messages.")
     parser.add_argument("--quieter-logs", action="store_true", help="Don't log debug messages.")
+    parser.add_argument(
+        "--icon-theme",
+        choices=["Breeze", "BreezeDark"],
+        default=None,
+        help='Use the specified icon theme. Included are "Breeze" and "BreezeDark". Default to system theme.',
+    )
     args = parser.parse_args()
 
     # Set up logging.
@@ -56,6 +71,23 @@ def main():
         os.environ["DEEPL_MOCK_PROXY_SERVER_PORT"] = "3001"
         os.environ["DEEPL_SERVER_URL"] = "http://localhost:3000"
         os.environ["DEEPL_PROXY_URL"] = "http://localhost:3001"
+
+    Qw.QApplication.setAttribute(Qc.Qt.AA_EnableHighDpiScaling, True)
+
+    # Set up icon theme.
+    if args.icon_theme:
+        if args.icon_theme == "Breeze":
+            logger.info("Using Breeze icon theme.")
+            Qg.QIcon.setThemeName("Breeze")
+        elif args.icon_theme == "BreezeDark":
+            logger.info("Using BreezeDark icon theme.")
+            Qg.QIcon.setThemeName("BreezeDark")
+        else:
+            raise ValueError(f"Unknown icon theme: {args.icon_theme}")
+    elif platform.system() == "Windows":
+        # Default to Breeze on Windows.
+        logger.info("Using Breeze icon theme.")
+        Qg.QIcon.setThemeName("Breeze")
 
     # Start the main window.
     app = Qw.QApplication(sys.argv)
