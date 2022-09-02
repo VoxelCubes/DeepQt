@@ -8,11 +8,11 @@ import deepl
 from PySide6.QtCore import QRunnable, Slot, Signal, QObject
 from logzero import logger
 
-import deepq.config as cfg
-import deepq.helpers as hp
-import deepq.quote_protection as qp
-import deepq.structures as st
-import deepq.worker_thread as wt
+import deepqt.config as cfg
+import deepqt.helpers as hp
+import deepqt.quote_protection as qp
+import deepqt.structures as st
+import deepqt.worker_thread as wt
 
 
 class Abort(Exception):

@@ -6,7 +6,7 @@ import pandas as pd
 import pyexcel_odsr as ods
 from logzero import logger
 
-import deepq.structures as st
+import deepqt.structures as st
 
 
 def process_text(text: str, glossary: st.Glossary) -> str:

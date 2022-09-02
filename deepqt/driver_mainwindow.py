@@ -9,17 +9,17 @@ import deepl
 from PySide6.QtCore import Signal
 from logzero import logger
 
-import deepq.api_interface as ai
-import deepq.config as cfg
-import deepq.glossary as gl
-import deepq.structures as st
-import deepq.worker_thread as wt
-from deepq import __program__, __version__
-from deepq import helpers as hp
-from deepq.driver_api_config import ConfigureAccount
-from deepq.file_table import Column, make_output_filename
-from deepq.ui_generated_files.ui_mainwindow import Ui_MainWindow
-from deepq.helpers import show_warning, show_info, show_question
+import deepqt.api_interface as ai
+import deepqt.config as cfg
+import deepqt.glossary as gl
+import deepqt.structures as st
+import deepqt.worker_thread as wt
+from deepqt import __program__, __version__
+from deepqt import helpers as hp
+from deepqt.driver_api_config import ConfigureAccount
+from deepqt.file_table import Column, make_output_filename
+from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
+from deepqt.helpers import show_warning, show_info, show_question
 
 
 # noinspection PyUnresolvedReferences
@@ -764,7 +764,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             """<html>
                     <head/>
                     <body>
-                        <p> DeepQ uses glossary files to pre-process files before sending them to the API; 
+                        <p> DeepQt uses glossary files to pre-process files before sending them to the API; 
                             this is not the same as DeepL's glossary functions. Therefore, they can be used
                             with any language and offer special features, which DeepL's glossaries cannot
                             offer.

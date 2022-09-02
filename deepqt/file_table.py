@@ -9,14 +9,14 @@ import PySide6.QtWidgets as Qw
 from PySide6.QtCore import Slot
 from logzero import logger
 
-import deepq.config as cfg
-import deepq.driver_text_preview as dtp
-import deepq.glossary as gls
-import deepq.helpers as hp
-import deepq.quote_protection as qp
-import deepq.structures as st
-import deepq.worker_thread as wt
-from deepq.CustomQ.CTableWidget import CTableWidget
+import deepqt.config as cfg
+import deepqt.driver_text_preview as dtp
+import deepqt.glossary as gls
+import deepqt.helpers as hp
+import deepqt.quote_protection as qp
+import deepqt.structures as st
+import deepqt.worker_thread as wt
+from deepqt.CustomQ.CTableWidget import CTableWidget
 
 
 class Column(IntEnum):

@@ -1,8 +1,8 @@
 import PySide6.QtWidgets as Qw
 
-import deepq.config as cfg
-import deepq.structures as st
-from deepq.ui_generated_files.ui_text_preview import Ui_TextPreview
+import deepqt.config as cfg
+import deepqt.structures as st
+from deepqt.ui_generated_files.ui_text_preview import Ui_TextPreview
 
 
 class TextPreview(Qw.QDialog, Ui_TextPreview):

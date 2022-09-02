@@ -6,7 +6,7 @@ from pathlib import Path
 
 from logzero import logger
 
-from deepq import __program__, helpers as hp
+from deepqt import __program__, helpers as hp
 
 
 @dataclass(slots=True)

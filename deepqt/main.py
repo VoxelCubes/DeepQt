@@ -1,12 +1,14 @@
 import os
 import sys
+import argparse
 
 import PySide6.QtWidgets as Qw
 import logzero
 from logzero import logger
 
-import deepq.config as cfg
-from deepq.driver_mainwindow import MainWindow
+import deepqt.config as cfg
+from deepqt.driver_mainwindow import MainWindow
+from deepqt import __program__, __version__, __description__
 
 # TODO support ODS files
 # TODO maybe support csv files
@@ -17,8 +19,20 @@ from deepq.driver_mainwindow import MainWindow
 
 
 def main():
+    # Parse command line arguments
+    # args:
+    #   --mock: Use the deepl mock server on localhost:3000.
+    #   --debug-api: Show DeepL API debug messages.
+    #   --quieter-logs: Don't log debug messages.
+
+    parser = argparse.ArgumentParser(description=__description__)
+    parser.add_argument("--mock", action="store_true", help="Use the deepl mock server on localhost:3000.")
+    parser.add_argument("--debug-api", action="store_true", help="Show DeepL API debug messages.")
+    parser.add_argument("--quieter-logs", action="store_true", help="Don't log debug messages.")
+    args = parser.parse_args()
+
     # Set up logging.
-    if "--quiet" in sys.argv:
+    if args.quieter_logs:
         logzero.loglevel(logzero.INFO)
     else:
         logzero.loglevel(logzero.DEBUG)
@@ -29,27 +43,25 @@ def main():
     logger.info("---- Starting up ----")
     logger.info(f"Log file is {cfg.log_path()}")
 
-    if "--debug-api" in sys.argv:
+    if args.debug_api:
         import logging
 
         logger.info("Enabled debugging network requests.")
         logging.basicConfig()
         logging.getLogger("deepl").setLevel(logging.DEBUG)
 
-    # Set debug environment variables if "--mock" is passed as an argument.
-    mock = "--mock" in sys.argv
-    # Set up the mock server.
-    if mock:
+    if args.mock:
         logger.info("Mock server enabled.")
         os.environ["DEEPL_MOCK_SERVER_PORT"] = "3000"
         os.environ["DEEPL_MOCK_PROXY_SERVER_PORT"] = "3001"
         os.environ["DEEPL_SERVER_URL"] = "http://localhost:3000"
         os.environ["DEEPL_PROXY_URL"] = "http://localhost:3001"
 
+    # Start the main window.
     app = Qw.QApplication(sys.argv)
 
     try:
-        window = MainWindow(mock)
+        window = MainWindow(args.mock)
         window.show()
         sys.exit(app.exec())
     except Exception as e:
