@@ -71,7 +71,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.pushButton_start.setMinimumHeight(self.pushButton_start.height() * 1.5)
         self.pushButton_abort.setMinimumHeight(self.pushButton_abort.height() * 1.5)
 
-        self.label_api_status_good_icon.setPixmap(Qg.QIcon.fromTheme("checkmark").pixmap(Qc.QSize(16, 16)))
+        self.label_api_status_good_icon.setPixmap(Qg.QIcon.fromTheme("state-ok").pixmap(Qc.QSize(16, 16)))
         self.label_api_status_bad_icon.setPixmap(Qg.QIcon.fromTheme("state-error").pixmap(Qc.QSize(16, 16)))
         self.label_api_usage_error_icon.setPixmap(Qg.QIcon.fromTheme("data-error").pixmap(Qc.QSize(16, 16)))
         self.label_api_usage_warn_icon.setPixmap(Qg.QIcon.fromTheme("data-warning").pixmap(Qc.QSize(16, 16)))
