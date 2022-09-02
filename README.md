@@ -24,7 +24,7 @@ Harness the power of the DeepL API with this friendly user interface.
 
 ## Installation
 
-Download the latest release from PyPi
+Download the latest release from [PyPi](https://pypi.org/project/deepqt/).
 
 ```
 pip install deepqt
