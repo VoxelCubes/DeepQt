@@ -211,3 +211,26 @@ class Glossary:
         and it needs to have at least one term.
         """
         return self.hash != "" and len(self) > 0
+
+    def __str__(self):
+        """
+        Print the glossary with each term on it's own line, divided into the different groups.
+        """
+        return "\n".join(
+            f"{key}: {value}"
+            for d in (
+                {"exact terms": "--------------------"},
+                self.exact_terms,
+                {"regex terms": "--------------------"},
+                self.regex_terms,
+                {"honorific terms": "----------------"},
+                self.honorific_terms,
+                {"title terms": "--------------------"},
+                self.title_terms,
+                {"post terms": "---------------------"},
+                self.post_terms,
+                {"no suffix terms": "----------------"},
+                self.no_suffix_terms,
+            )
+            for key, value in d.items()
+        )

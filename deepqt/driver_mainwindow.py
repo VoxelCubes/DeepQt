@@ -411,7 +411,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         terms_found = len(glossary)
         self.statusbar.showMessage(f"Loaded {terms_found} {hp.f_plural(terms_found, 'term', 'terms')} from glossary.")
         logger.info(f"Glossary loaded, {terms_found} {hp.f_plural(terms_found, 'term', 'terms')} found.")
-        logger.debug(f"Glossary dump: {glossary}")
+        logger.debug(f"Glossary dump: \n{glossary}")
         self.text_params_changed.emit(self.glossary)
 
     def glossary_worker_error(self, error: wt.WorkerError):
