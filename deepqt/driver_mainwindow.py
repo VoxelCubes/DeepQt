@@ -364,7 +364,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         path = Path(self.config.glossary_path)
 
-        if not path.exists():
+        if not path.is_file():
             logger.warning(f"Glossary file not found: {path}")
             self.statusbar.showMessage(f"Glossary file not found.", 10_000)
             return
