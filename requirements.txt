@@ -1,7 +1,9 @@
-deepl==1.9.0
-logzero==1.7.0
-PySide6==6.3.1
+deepl
+logzero
+PySide6
 xdg
 pyexcel
-pyexcel-ods
+pyexcel-odsr
+pyexcel-xls
 pyexcel-xlsx
+pyexcel-htmlr
