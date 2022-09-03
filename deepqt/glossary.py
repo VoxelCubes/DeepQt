@@ -2,8 +2,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
-import pyexcel_odsr as ods
+import pyexcel
 from logzero import logger
 
 import deepqt.structures as st
@@ -43,41 +42,14 @@ def parse_glossary(path: Path) -> st.Glossary:
     glossary = st.Glossary()
     glossary.set_hash(path)
 
-    if path.suffix == ".ods":
-        logger.debug("Started ods parser.")
-        parse_ods(path, glossary)
-    elif path.suffix == ".xlsx":
-        logger.debug("Started xlsx parser.")
-        parse_xlsx(path, glossary)
+    logger.debug("Starting parser.")
+    parse_glossary_file(path, glossary)
 
     glossary.generate_patterns()
     return glossary
 
 
-def parse_xlsx(path: Path, glossary: st.Glossary):
-    """
-    Parse an excel file into a glossary.
-    Exceptions need to be handled by the caller.
-
-    :param path: The excel file to parse.
-    :param glossary: The glossary structure to write into.
-    """
-
-    workbook = pd.read_excel(path, sheet_name=None)
-
-    for sheet in workbook.values():
-        height, width = sheet.shape
-
-        for y in range(0, height):
-            for x in range(1, width):
-                # Start one from the left, since the keyed term will be the right one from among two.
-                # This way we cannot have an out-of-bounds error.
-                cell = sheet.iat[y, x]
-                prev_cell = sheet.iat[y, x - 1]
-                parse_cell(cell, prev_cell, glossary)
-
-
-def parse_ods(path: Path, glossary: st.Glossary):
+def parse_glossary_file(path: Path, glossary: st.Glossary):
     """
     Parse an ods file into a glossary.
     Exceptions need to be handled by the caller.
@@ -86,19 +58,21 @@ def parse_ods(path: Path, glossary: st.Glossary):
     :param glossary: The glossary structure to write into.
     """
 
-    workbook = ods.get_data(str(path))
-    # TODO, this ain't how it works
+    workbook = pyexcel.get_book_dict(file_name=str(path))
+
+    # Pyexcel inserts comment text into cells, which we need to remove using the comment pattern.
+    pattern = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*?\n")
 
     for sheet in workbook.values():
-        height, width = sheet.shape
 
-        for y in range(0, height):
-            for x in range(1, width):
+        for row in sheet:
+            for x in range(1, len(row)):
                 # Start one from the left, since the keyed term will be the right one from among two.
                 # This way we cannot have an out-of-bounds error.
-                cell = sheet.iat[y, x]
-                prev_cell = sheet.iat[y, x - 1]
-                parse_cell(cell, prev_cell, glossary)
+                cell = row[x]
+                prev_cell = row[x - 1]
+
+                parse_cell(cell, prev_cell, glossary, pattern)
 
 
 def parse_term(
@@ -117,13 +91,15 @@ def parse_term(
         target_dict[prefix + original_term] = replacement_term
 
 
-def parse_cell(cell: Any, prev_cell: Any, glossary: st.Glossary):
+def parse_cell(cell: Any, prev_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern):
     """
     Format agnostic parsing of a cell.
+    Pyexcel inserts comment text into cells, which we need to remove using the comment pattern.
 
     :param cell: The right cell with the key.
     :param prev_cell: The left cell with the input pattern.
     :param glossary: The glossary structure to write into.
+    :param comment_pattern: The pattern to remove comments.
     """
     if not isinstance(cell, str) or not isinstance(prev_cell, str):
         return
@@ -131,6 +107,12 @@ def parse_cell(cell: Any, prev_cell: Any, glossary: st.Glossary):
         return
     if "ignore" in cell or "ignore" in prev_cell:
         return
+
+    # Remove all inline comments.
+    if isinstance(cell, str):
+        cell = comment_pattern.sub("", cell)
+    if isinstance(prev_cell, str):
+        prev_cell = comment_pattern.sub("", prev_cell)
 
     # Allow padding to protect trailing whitespace.
     if cell.startswith("/") and cell.endswith("/"):

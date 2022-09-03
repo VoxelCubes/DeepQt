@@ -39,9 +39,6 @@ Or download a prepackaged format from the [releases](https://github.com/VoxelCub
 
 ## Roadmap
 
-- [ ] Support .ods files for glossaries.
-
-- [ ] Support .csv files for glossaries.
 
 - [ ] Support .epub files for translation.
 

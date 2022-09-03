@@ -266,17 +266,14 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     def browse_glossary_file(self):
         """
         Browse for a glossary file.
-        Accept ods and xlsx files.
+        Accepts whatever pyexcel can handle.
         """
-        file_path = Qw.QFileDialog.getOpenFileName(
-            self, "Select glossary file", self.config.glossary_path, "*.ods *.xlsx"
-        )
+        file_path = Qw.QFileDialog.getOpenFileName(self, "Select glossary file", self.config.glossary_path)
         if file_path:
             self.lineEdit_glossary_file.setText(file_path[0])
             self.config.glossary_path = file_path[0]
             self.config.save()
             self.load_glossary()
-            # self.text_params_changed.emit(self.glossary)
 
     def glossary_file_updated(self, save: bool, *_):
         """
@@ -292,7 +289,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         if save:
             self.config.save()
             self.load_glossary()
-            # self.text_params_changed.emit(self.glossary)
 
     def extra_quote_protection_toggled(self):
         """
@@ -371,13 +367,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         if not path.exists():
             logger.warning(f"Glossary file not found: {path}")
             self.statusbar.showMessage(f"Glossary file not found.", 10_000)
-            return
-
-        if path.suffix not in (".ods", ".xlsx"):
-            self.statusbar.showMessage(
-                "Glossary file has an invalid extension. Only .ods and .xlsx are supported.",
-                10_000,
-            )
             return
 
         # Check if we haven't loaded the file before.
