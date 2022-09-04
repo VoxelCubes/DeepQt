@@ -42,8 +42,4 @@ Or download a prepackaged format from the [releases](https://github.com/VoxelCub
 
 - [ ] Support .epub files for translation.
 
-- [ ] Glossary documentation.
-
-- [ ] API help documentation.
-
 - [ ] Build AppImage or Flatpak.
