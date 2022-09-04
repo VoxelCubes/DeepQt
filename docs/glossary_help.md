@@ -37,7 +37,7 @@ These substitutions only engage when preceded by the pattern `[a-z] ` (any lower
 | ------- | ------------- |
 | Master  | !Herr         |
 
-Similar to title suffixes. These substitutions only engage when followed by the pattern `&nbsp;[A-Z]` (a space,  followed by any upper-case letter).
+Similar to title suffixes. These substitutions only engage when followed by the pattern <code>&nbsp;[A-Z]</code> (a space,  followed by any upper-case letter).
 
 #### <a name="NoSuffix"></a>No Suffix
 
