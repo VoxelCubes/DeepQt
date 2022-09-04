@@ -41,9 +41,9 @@ Similar to title suffixes. These substitutions only engage when followed by the 
 
 #### <a name="NoSuffix"></a>No Suffix
 
-| pattern  | |substitution |
+| pattern  | <span>|</span>substitution |
 | -------- | ------------- |
-| Künstler | |artist       |
+| Künstler | <span>|</span> artist      |
 
 Like exact patterns, but do not insert a trailing space.
 
