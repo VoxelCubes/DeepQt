@@ -273,7 +273,7 @@ class FileTable(CTableWidget):
             Qc.QTimer.singleShot(500, partial(self.update_all_text_params, glossary))
             return
 
-        self.statusbar_message.emit("Processing...", -1)
+        self.statusbar_message.emit("Processing...", 5000)
 
         # Show a progress message for all files.
         for row in range(self.rowCount()):
