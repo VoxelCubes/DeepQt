@@ -398,8 +398,8 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         self.glossary = glossary
         terms_found = len(glossary)
-        self.statusbar.showMessage(f"Loaded {terms_found} {hp.f_plural(terms_found, 'term', 'terms')} from glossary.")
-        logger.info(f"Glossary loaded, {terms_found} {hp.f_plural(terms_found, 'term', 'terms')} found.")
+        self.statusbar.showMessage(f"Loaded {terms_found} {hp.f_plural(terms_found, 'term')} from glossary.")
+        logger.info(f"Glossary loaded, {terms_found} {hp.f_plural(terms_found, 'term')} found.")
         logger.debug(f"Glossary dump: \n{glossary}")
         self.text_params_changed.emit(self.glossary)
 
@@ -460,9 +460,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         remaining_chars = allowed_chars - total_chars
         warning_msg = (
             f"You are about to translate {hp.format_char_count(total_chars)} "
-            f"{hp.f_plural(total_chars, 'character', 'characters')},\n"
+            f"{hp.f_plural(total_chars, 'character')},\n"
             f"leaving you with {hp.format_char_count(remaining_chars)} "
-            f"{hp.f_plural(remaining_chars, 'character', 'characters')}."
+            f"{hp.f_plural(remaining_chars, 'character')}."
             f"\nProceed?"
         )
         if api_usage.character.limit_reached:
@@ -470,7 +470,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         elif total_chars > allowed_chars:
             warning_msg = (
                 f"You are about to translate {hp.format_char_count(total_chars)} "
-                f"{hp.f_plural(total_chars, 'character', 'characters')}, "
+                f"{hp.f_plural(total_chars, 'character')}, "
                 f"which exceeds your character limit of {hp.format_char_count(allowed_chars)}.\nProceed anyway?"
             )
         # Ask the user if he wants to proceed, just in case.
@@ -723,7 +723,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             return
 
         time_total = ceil(self.config.avg_time_per_mille * char_total / 1000)
-        char_text = hp.format_char_count(char_total) + hp.f_plural(char_total, " character", " characters")
+        char_text = hp.format_char_count(char_total) + hp.f_plural(char_total, " character")
         time_text = f"Approx. {hp.f_time(time_total)}"
         self.label_stats.setText(char_text + "   " + time_text)
 
@@ -737,7 +737,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         char_text = hp.format_char_count(processed_chars) + " / " + hp.format_char_count(char_total)
         time_total = ceil(self.config.avg_time_per_mille * (char_total - processed_chars) / 1000)
         self.label_progress.setText(
-            f"Translated {char_text} {hp.f_plural(char_total, 'character', 'characters')}\n"
+            f"Translated {char_text} {hp.f_plural(char_total, 'character')}\n"
             f"Approximately {hp.f_time(time_total)} remaining"
         )
         self.progressBar.setValue(processed_chars / char_total * 100)

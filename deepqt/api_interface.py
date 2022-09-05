@@ -169,7 +169,7 @@ class DeeplWorker(QRunnable):
                 chunk_count = len(input_file.text_chunks)
                 logger.info(f"Split {input_file.path.name} into {chunk_count} chunks.")
                 self.signals.progress.emit(
-                    key, f"Split into {chunk_count} {hp.f_plural(chunk_count, 'chunk', 'chunks')}", None, None
+                    key, f"Split into {chunk_count} {hp.f_plural(chunk_count, 'chunk')}", None, None
                 )
             else:
                 raise NotImplementedError("Epub support not implemented yet.")
@@ -213,7 +213,7 @@ class DeeplWorker(QRunnable):
                 self.signals.progress.emit(
                     key,
                     f"Translated {len(input_file.text_chunks)} / {len(input_file.text_chunks)} "
-                    f"{hp.f_plural(len(input_file.text_chunks), 'chunk', 'chunks')}",
+                    f"{hp.f_plural(len(input_file.text_chunks), 'chunk')}",
                     self.processed_chars,
                     self.total_chars,
                 )

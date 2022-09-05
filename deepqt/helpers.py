@@ -62,10 +62,17 @@ def format_char_count(count: int) -> str:
             return f"{rounded:n}M"
 
 
-def f_plural(value, singular: str, plural: str):
+def f_plural(value, singular: str, plural: str = "") -> str:
     """
     Selects which form to use based on the value.
+
+    :param value: Value to check.
+    :param singular: Singular form.
+    :param plural: (Optional) Plural form. If not given, the singular form is used with an 's' appended.
+    :return: The appropriate form.
     """
+    if not plural:
+        plural = singular + "s"
     return singular if value == 1 else plural
 
 
@@ -78,17 +85,17 @@ def f_time(seconds: int) -> str:
     4 hours 5 minutes
     """
     if seconds < 60:
-        return f"{seconds} {f_plural(seconds, 'second', 'seconds')}"
+        return f"{seconds} {f_plural(seconds, 'second')}"
     elif seconds < 60 * 60:
         minutes = seconds // 60
         seconds = seconds % 60
-        return f"{minutes} {f_plural(minutes, 'minute', 'minutes')} {seconds} {f_plural(seconds, 'second', 'seconds')}"
+        return f"{minutes} {f_plural(minutes, 'minute')} {seconds} {f_plural(seconds, 'second')}"
     else:
         hours = seconds // (60 * 60)
         minutes = (seconds % (60 * 60)) // 60
         return (
-            f"{hours} {f_plural(hours, 'hour', 'hours')} "
-            f"{minutes} {f_plural(minutes, 'minute', 'minutes')}"
+            f"{hours} {f_plural(hours, 'hour')} "
+            f"{minutes} {f_plural(minutes, 'minute')}"
             f"   [You're batshit insane!]"
         )
 
