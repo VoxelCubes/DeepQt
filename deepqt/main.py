@@ -26,8 +26,9 @@ def main():
     #   --debug-api: Show DeepL API debug messages.
     #   --quieter-logs: Don't log debug messages.
     #   --icon-theme: Use the specified icon theme. Included are "Breeze" and "BreezeDark". Default to system theme.
+    #   -v --version: Show version.
 
-    parser = argparse.ArgumentParser(description=__description__)
+    parser = argparse.ArgumentParser(description=__description__, prog=__program__)
     parser.add_argument("--mock", action="store_true", help="Use the deepl mock server on localhost:3000.")
     parser.add_argument("--debug-api", action="store_true", help="Show DeepL API debug messages.")
     parser.add_argument("--quieter-logs", action="store_true", help="Don't log debug messages.")
@@ -37,6 +38,8 @@ def main():
         default=None,
         help='Use the specified icon theme. Included are "Breeze" and "BreezeDark". Default to system theme.',
     )
+    parser.add_argument("-v", "--version", action="version", version=f"{__program__} {__version__}")
+
     args = parser.parse_args()
 
     # Set up logging.
