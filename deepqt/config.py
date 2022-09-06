@@ -101,19 +101,39 @@ def config_path() -> Path:
         raise NotImplementedError("Your OS is currently not supported.")
 
 
+def cache_path() -> Path:
+    """
+    Get the path to the cache directory.
+    """
+    if platform.system() == "Linux":
+        from xdg import XDG_CACHE_HOME
+
+        return Path(XDG_CACHE_HOME, __program__.lower())
+    elif platform.system() == "Windows":
+        return Path(os.getenv("APPDATA"), __program__.lower())
+    else:  # ???
+        raise NotImplementedError("Your OS is currently not supported.")
+
+
+def epub_cache_path(epub_path: None | Path = None) -> Path:
+    """
+    Get the path to the epub cache directory for this epub.
+    Each epub gets its own cache directory, to keep them separate.
+
+    :param epub_path: (Optional) Path to the epub file. If None, return the cache directory.
+    :return: Path to the cache directory.
+    """
+    if epub_path is None:
+        return cache_path() / "epubs"
+    return cache_path() / "epubs" / epub_path.name
+
+
 def log_path() -> Path:
     """
     Get the path to the log file.
     Use the cache directory for this.
     """
-    if platform.system() == "Linux":
-        from xdg import XDG_CACHE_HOME
-
-        return Path(XDG_CACHE_HOME, __program__.lower(), f"{__program__.lower()}.log")
-    elif platform.system() == "Windows":
-        return Path(os.getenv("APPDATA"), __program__.lower(), f"{__program__.lower()}.log")
-    else:  # ???
-        raise NotImplementedError("Your OS is currently not supported.")
+    return cache_path() / f"{__program__.lower()}.log"
 
 
 def default_config() -> Config:

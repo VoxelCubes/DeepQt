@@ -4,8 +4,15 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from functools import partial
 from pathlib import Path
+import zipfile
+from logzero import logger
+
+# import ebooklib
+# from ebooklib.epub import EpubBook
+
 
 from deepqt import trie
+from deepqt import html_cleaner
 
 
 class ProcessLevel(IntEnum):
@@ -35,8 +42,12 @@ class InputFile:
         pass
 
     @property
-    def char_count(self):
-        return None
+    def char_count(self) -> int:
+        raise NotImplementedError
+
+    @property
+    def is_translated(self) -> bool:
+        raise NotImplementedError
 
 
 @dataclass(slots=True)
@@ -81,6 +92,10 @@ class TextFile(InputFile):
     def translation_incomplete(self):
         return self.translation_chunks and not self.translation
 
+    @property
+    def is_translated(self) -> bool:
+        return bool(self.translation)
+
 
 def incomplete_translation_banner() -> str:
     return """
@@ -94,10 +109,67 @@ def incomplete_translation_banner() -> str:
 
 
 @dataclass(slots=True)
-class XMLFile(TextFile):
+class XMLFile:
     """
     XML files don't support quote protection.
     """
+
+    path: Path
+    text: str = ""
+    text_glossary: str = ""
+    process_level: ProcessLevel = ProcessLevel.RAW
+    translation: str = ""
+
+    def __post_init__(self):
+        with self.path.open("r", encoding="utf8") as f:
+            self.text = f.read()
+        # Apply heuristic improvements to html files.
+        len_before = len(self.text)
+        if self.path.suffix in (".xhtml", ".html", ".htm"):
+            self.text = html_cleaner.bust_ruby_tags(self.text)
+            self.text = html_cleaner.strip_kobo_spans(self.text)
+            self.text = html_cleaner.bust_empty_spans(self.text)
+            # self.text = html_cleaner.crush_html(self.text)
+            self.text = html_cleaner.flatten_indents(self.text)
+
+        # logger.debug(self.text)
+        logger.debug(f"Cleaned {self.path.name}, {len_before} -> {len(self.text)}, diff: {len_before - len(self.text)}")
+
+    def current_text(self):
+        match self.process_level:
+            case ProcessLevel.RAW:
+                return self.text
+            case ProcessLevel.GLOSSARY:
+                return self.text_glossary
+
+    @property
+    def char_count(self):
+        return len(self.current_text())
+
+    def get_translated_text(self) -> str | None:
+        if self.translation:
+            return self.translation
+        else:
+            return None
+
+    @property
+    def is_translated(self) -> bool:
+        return bool(self.translation)
+
+
+@dataclass(slots=True)
+class TocNCXFile(XMLFile):
+    """
+    The NCX file is a special XML file that contains the table of contents.
+    It isn't a standard HTML file, so it needs to be handled separately.
+    Its text is contained within <text> tags.
+    """
+
+    def get_texts(self) -> list[str]:
+        raise NotImplementedError
+
+    def set_texts(self, texts: list[str]):
+        raise NotImplementedError
 
 
 @dataclass(slots=True)
@@ -107,15 +179,64 @@ class EpubFile(InputFile):
     processing the html and toc files like text files.
     """
 
-    cache_dir: Path = field(default_factory=Path)
+    cache_dir: Path | None = None
     xml_files: list[XMLFile] = field(default_factory=list)
+    # epub: EpubBook | None = None
 
     def __post_init__(self):
-        raise NotImplementedError("Epub files are not yet supported.")
+        InputFile.__post_init__(self)
+        self.cache_dir = Path(self.cache_dir) / self.path.stem
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        # self.epub = ebooklib.epub.read_epub(self.path)
+        self.xml_files = extract_epub(self.path, self.cache_dir)
 
     @property
     def char_count(self):
         return sum(f.char_count for f in self.xml_files)
+
+    @property
+    def process_level(self):
+        if all(f.process_level == ProcessLevel.GLOSSARY for f in self.xml_files):
+            return ProcessLevel.GLOSSARY
+        else:
+            return ProcessLevel.RAW
+
+    @process_level.setter
+    def process_level(self, value):
+        for f in self.xml_files:
+            f.process_level = value
+
+    def translation_incomplete(self):
+        return any(f.get_translated_text() is None for f in self.xml_files)
+
+    @property
+    def is_translated(self) -> bool:
+        return all(f.is_translated for f in self.xml_files)
+
+
+def extract_epub(epub_path: Path, cache_dir: Path) -> list[XMLFile]:
+    """
+    Extract the epub file to the cache directory and return a list of XMLFile
+    objects representing the html files.
+    """
+    logger.debug(f"Extracting {epub_path} to {cache_dir}")
+
+    with zipfile.ZipFile(epub_path, "r") as epub_zip:
+        epub_zip.extractall(cache_dir)
+
+    html_files = []
+    # Find .html and .toc files in all subfolders.
+    for html_path in cache_dir.glob("**/*"):
+        if html_path.suffix in (".html", ".xhtml", ".ncx"):
+            html_files.append(XMLFile(html_path))
+
+    # Ignore files that contain no actual text (tags aside).
+    logger.debug(f"Found {len(html_files)} html files in {epub_path}")
+    html_files = [file for file in html_files if html_cleaner.html_contains_text(file.text)]
+    logger.debug(f"Found {len(html_files)} html files with text in {epub_path}")
+
+    logger.debug(f"Extracted {len(html_files)} html and toc files.")
+    return html_files
 
 
 @dataclass(slots=True)

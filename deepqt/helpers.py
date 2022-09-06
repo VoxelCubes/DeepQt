@@ -136,3 +136,15 @@ def weighted_average(old_value: float, new_value: float, weight: float = 0.25) -
     When chained several times, it's an exponential moving average.
     """
     return old_value * (1 - weight) + new_value * weight
+
+
+def nuke_folder_contents(folder_path: Path):
+    """
+    Delete all files and folders in the given folder.
+    """
+    for child in folder_path.iterdir():
+        if child.is_dir():
+            nuke_folder_contents(child)
+            child.rmdir()
+        else:
+            child.unlink()

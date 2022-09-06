@@ -11,6 +11,7 @@ from logzero import logger
 
 import deepqt.config as cfg
 import deepqt.driver_text_preview as dtp
+import deepqt.driver_epub_preview as dep
 import deepqt.glossary as gls
 import deepqt.helpers as hp
 import deepqt.quote_protection as qp
@@ -98,7 +99,7 @@ class FileTable(CTableWidget):
         """
         logger.debug(f"Initializing file {path}")
         if path.suffix.lower() == ".epub":
-            return st.EpubFile(path=path)
+            return st.EpubFile(path=path, cache_dir=cfg.epub_cache_path())
         else:
             return st.TextFile(path=path)
 
@@ -124,7 +125,7 @@ class FileTable(CTableWidget):
     Text Processing
     """
 
-    def update_text_params(self, row: int, glossary: st.Glossary):
+    def update_file_params(self, row: int, glossary: st.Glossary):
         """
         Update the text file parameters for the given row.
         This means processing the glossary and quote protection, if so configured.
@@ -134,26 +135,26 @@ class FileTable(CTableWidget):
         """
         logger.debug(f"Updating text parameters for {row}")
         file_id = self.item(row, Column.ID).text()
-        text_file = self.files[file_id]
+        file = self.files[file_id]
 
         # If no processing, check if the label should be updated to say that changes were reverted.
         if not self.config.use_glossary and not self.config.use_quote_protection:
-            if text_file.process_level != st.ProcessLevel.RAW:
-                text_file.process_level = st.ProcessLevel.RAW
+            if file.process_level != st.ProcessLevel.RAW:
+                file.process_level = st.ProcessLevel.RAW
                 self.item(row, Column.STATUS).setText("Reset to original")
                 self.recalculate_char_count(file_id)
                 return
 
-        if self.config.use_glossary and glossary.is_valid() and glossary.hash != text_file.glossary_hash:
+        if self.config.use_glossary and glossary.is_valid() and glossary.hash != file.glossary_hash:
             glossary_to_pass = glossary
         else:
             glossary_to_pass = None
 
         # Test and set lock.
-        if text_file.locked:
-            logger.warning(f"File {text_file.path} is locked, access denied.")
+        if file.locked:
+            logger.warning(f"File {file.path} is locked, access denied.")
             return
-        text_file.locked = True
+        file.locked = True
 
         file_id = self.item(row, Column.ID).text()
         # Crunch time begins for the worker. Bless his soul.
@@ -161,7 +162,7 @@ class FileTable(CTableWidget):
         worker = wt.Worker(
             self.text_process_work,
             file_id=file_id,
-            text_file=text_file,
+            text_file=file,
             glossary=glossary_to_pass,
             apply_glossary=self.config.use_glossary,
             apply_protection=self.config.use_quote_protection,
@@ -171,11 +172,11 @@ class FileTable(CTableWidget):
         worker.signals.error.connect(self.text_process_worker_error)
         worker.signals.finished.connect(self.text_process_worker_finished)
         logger.debug(
-            f"Worker Thread processing text file {text_file.path}: "
+            f"Worker Thread processing text file {file.path}: "
             f"Glossary: {glossary_to_pass is not None} | Protection: {self.config.use_quote_protection}"
         )
         # Execute.
-        logger.info(f"Executing worker thread {text_file.path}")
+        logger.info(f"Executing worker thread {file.path}")
         self.threadpool.start(worker)
 
     @staticmethod
@@ -283,7 +284,7 @@ class FileTable(CTableWidget):
 
         logger.debug("Updating all text params")
         for row in range(self.rowCount()):
-            self.update_text_params(row, glossary)
+            self.update_file_params(row, glossary)
 
     """
     Misc.
@@ -335,7 +336,10 @@ class FileTable(CTableWidget):
         selected_row = self.selectedItems()[0].row()
         file_id = self.item(selected_row, Column.ID).text()
         file = self.files[file_id]
-        dtp.TextPreview(self, file, self.config).exec()
+        if isinstance(file, st.TextFile):
+            dtp.TextPreview(self, file, self.config).exec()
+        else:
+            dep.EpubPreview(self, file, self.config).exec()
 
     def remove_selected_file(self):
         """

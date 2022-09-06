@@ -1,6 +1,7 @@
 from functools import partial
 from pathlib import Path
 from math import ceil
+import shutil
 
 import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
@@ -42,6 +43,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.setWindowIcon(Qg.QIcon(":/icons/logo.png"))
         self.translating = False  # If true, the translation is in progress.
         self.glossary = st.Glossary()  # Create a dummy glossary
+        nuke_epub_cache()
 
         self.initialize_ui()
 
@@ -127,6 +129,8 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.abort_translation_worker.emit()
         if self.threadpool.activeThreadCount():
             self.threadpool.waitForDone()
+
+        nuke_epub_cache()
         event.accept()
 
     def connect_combobox_slots(self):
@@ -769,3 +773,23 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
                     </body>
                 </html>""",
         )
+
+
+def nuke_epub_cache():
+    """
+    Perform a sanity check first. The folder must exist and be named "epub".
+    """
+    epub_cache_path = cfg.epub_cache_path()
+    if not epub_cache_path.is_dir():
+        logger.info("Epub cache folder does not exist. Nothing to do.")
+        return
+
+    if epub_cache_path.name != "epubs":
+        logger.error(f"Epub cache folder is not named 'epubs', instead {epub_cache_path}. Aborting.")
+        return
+
+    try:
+        shutil.rmtree(epub_cache_path)
+    except OSError as e:
+        logger.error("Failed to delete epub cache folder.", exc_info=e)
+        return
