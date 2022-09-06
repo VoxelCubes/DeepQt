@@ -1,6 +1,9 @@
 # Glossary Format
 
-These glossaries do not take advantage of DeepL's integrated glossaries, however, they are more powerful in other ways.  
+These glossaries do not take advantage of DeepL's integrated glossaries, however, they are more powerful in other ways.
+You can preview the changes the glossary made and even save that preview to a file. This way, you can also use DeepQt
+as a powerful replacement engine for text files and epubs alike.
+
 A glossary is a collection of terms, each of which consists of a pattern to look for in the left cell, and the pattern to substitute it with in the right cell. The substitution patterns require a prefix symbol which dictates what type of term it is. DeepQt glossaries support 6 different types of terms, processed in the following order:
 
 #### Exact match
