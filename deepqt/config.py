@@ -9,7 +9,7 @@ from logzero import logger
 from deepqt import __program__, helpers as hp
 
 
-@dataclass(slots=True)
+@dataclass
 class Config:
     lang_from: str
     lang_to: str
@@ -30,6 +30,10 @@ class Config:
     tl_preserve_formatting: bool
     tl_mock: bool
     dump_on_abort: bool
+    epub_nuke_kobo: bool
+    epub_nuke_ruby: bool
+    epub_nuke_indents: bool
+    epub_crush: bool
     # Timing history.
     avg_time_per_mille: float
 
@@ -57,7 +61,11 @@ class Config:
 
         try:
             with open(conf_path, "r") as f:
-                return cls(**json.load(f))
+                # Load the default config, then update it with the values from the config file.
+                # This way, missing values will be filled in with the default values.
+                conf = cls(**asdict(default_config()))
+                conf.__dict__.update(json.load(f))
+                return conf
         except OSError as e:
             error_message = f'Failed to read config file "{conf_path}"\n\n{e}'
         except (KeyError, TypeError, json.decoder.JSONDecodeError) as e:
@@ -155,6 +163,10 @@ def default_config() -> Config:
         tl_preserve_formatting=True,
         tl_mock=False,
         dump_on_abort=False,
+        epub_nuke_kobo=True,
+        epub_nuke_ruby=True,
+        epub_nuke_indents=True,
+        epub_crush=False,  # This could confuse deepl and subsequent epub readers too much.
         avg_time_per_mille=0.33,  # This was measured experimentally. Depends on local internet connection.
     )
 
