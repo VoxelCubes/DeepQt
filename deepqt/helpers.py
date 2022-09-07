@@ -1,6 +1,7 @@
 import platform
 import subprocess
 from pathlib import Path
+import zipfile as zf
 
 import PySide6.QtWidgets as Qw
 from logzero import logger
@@ -148,3 +149,49 @@ def nuke_folder_contents(folder_path: Path):
             child.rmdir()
         else:
             child.unlink()
+
+
+def zip_folder_to_epub(folder_unzipped: Path, destination: Path) -> bool:
+    """
+    Zip a folder to an epub file.
+
+    :param folder_unzipped: Path to the folder to zip.
+    :param destination: Path to the destination file.
+    :return: True if successful, False otherwise.
+    """
+    seen = set()
+
+    def add_to_zip(zip_file: zf.ZipFile, path: Path):
+        """
+        Add a file or folder to the zip file.
+        """
+        if path in seen:
+            return
+        seen.add(path)
+        if path.is_dir():
+            for child in path.iterdir():
+                add_to_zip(zip_file, child)
+        # Add everything else that isn't junk.
+        elif not path.name.endswith("Thumbs.db") and not path.name.endswith("debug.log"):
+            zip_file.write(path, path.relative_to(folder_unzipped))
+
+    # Check that this was probably an epub file.
+    if (folder_unzipped / "mimetype").is_file() and (folder_unzipped / "META-INF").is_dir():
+
+        # Start the epub file with the mimetype file.
+        with zf.ZipFile(destination, "w", compression=zf.ZIP_DEFLATED) as myzip:
+            add_to_zip(myzip, folder_unzipped / "mimetype")
+
+        # Append the META-INF folder.
+        with zf.ZipFile(destination, "a", compression=zf.ZIP_DEFLATED) as myzip:
+            add_to_zip(myzip, folder_unzipped / "META-INF")
+
+        # Append the rest of the files.
+        with zf.ZipFile(destination, "a", compression=zf.ZIP_DEFLATED) as myzip:
+            for file in folder_unzipped.iterdir():
+                add_to_zip(myzip, file)
+
+        return True
+    else:
+        logger.error(f"Folder {folder_unzipped} is missing mimetype and/or META-INF folder.")
+        return False

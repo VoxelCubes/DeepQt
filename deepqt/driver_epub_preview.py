@@ -1,9 +1,10 @@
 import PySide6.QtWidgets as Qw
-from functools import partial
+from logzero import logger
 
 import deepqt.config as cfg
 import deepqt.structures as st
 from deepqt.ui_generated_files.ui_epub_preview import Ui_EpubPreview
+import deepqt.helpers as hp
 
 
 class EpubPreview(Qw.QDialog, Ui_EpubPreview):
@@ -23,13 +24,17 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
         self.config = config
         self.epub_file = epub_file
 
+        # Show process level of all files
+        for xml_file in self.epub_file.xml_files:
+            logger.debug(f"{xml_file.path.name} - {xml_file.process_level}")
+
         self.preview_epub()
 
         self.pushButton_save.clicked.connect(self.save_preview)
 
-        self.radioButton_original.toggled.connect(partial(self.stackedWidget.setCurrentIndex, 0))
-        self.radioButton_glossary.toggled.connect(partial(self.stackedWidget.setCurrentIndex, 1))
-        self.radioButton_translation.toggled.connect(partial(self.stackedWidget.setCurrentIndex, 2))
+        self.radioButton_original.toggled.connect(lambda: self.stackedWidget.setCurrentIndex(0))
+        self.radioButton_glossary.toggled.connect(lambda: self.stackedWidget.setCurrentIndex(1))
+        self.radioButton_translation.toggled.connect(lambda: self.stackedWidget.setCurrentIndex(2))
 
         if epub_file.process_level == st.ProcessLevel.RAW:
             self.radioButton_original.hide()
@@ -43,14 +48,17 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
         """
         Determine how many previews to generate and show each in a tab.
         """
+        logger.debug("Loading original previews.")
         for xml_file in self.epub_file.xml_files:
             self.add_preview(self.tabWidget_original, xml_file.path.name, xml_file.text)
 
         if self.epub_file.process_level == st.ProcessLevel.GLOSSARY:
+            logger.debug("Loading glossary previews.")
             for xml_file in self.epub_file.xml_files:
                 self.add_preview(self.tabWidget_glossary, xml_file.path.name, xml_file.text_glossary)
 
         if self.epub_file.is_translated:
+            logger.debug("Loading translation previews.")
             for xml_file in self.epub_file.xml_files:
                 self.add_preview(self.tabWidget_translation, xml_file.path.name, xml_file.translation)
 
@@ -78,4 +86,27 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
         """
         Save the current state of the epub.
         """
-        raise NotImplementedError
+        # hp.zip_folder_to_epub(self.epub_file.cache_dir, self.epub_file.cache_dir.parent / self.epub_file.path.name)
+        if self.radioButton_original.isChecked():
+            process_level = st.ProcessLevel.RAW
+            name_suffix = "original"
+        elif self.radioButton_glossary.isChecked():
+            process_level = st.ProcessLevel.GLOSSARY
+            name_suffix = "glossary"
+        else:
+            process_level = st.ProcessLevel.TRANSLATED
+            name_suffix = "translated"
+
+        save_path = self.epub_file.path.with_stem(self.epub_file.path.stem + "_" + name_suffix)
+        file_path = Qw.QFileDialog.getSaveFileName(
+            self,
+            "Save Preview",
+            str(save_path),
+            "EPUB Files (*.epub)",
+        )[0]
+        if file_path:
+
+            try:
+                self.epub_file.write(process_level=process_level, output_path=file_path)
+            except OSError as e:
+                Qw.QMessageBox.critical(self, "Error", f"Could not save preview to {file_path}\n\n{e}")

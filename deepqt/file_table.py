@@ -89,8 +89,7 @@ class FileTable(CTableWidget):
         self.item(self.rowCount() - 1, Column.CHARS).setTextAlignment(Qg.Qt.AlignRight | Qg.Qt.AlignVCenter)
         self.resizeColumnToContents(Column.OUTPUT)
 
-    @staticmethod
-    def initialize_file(path: Path) -> st.TextFile | st.EpubFile:
+    def initialize_file(self, path: Path) -> st.TextFile | st.EpubFile:
         """
         Read and populate the basic information of the file.
         Text files (utf8) and epub files are supported.
@@ -99,7 +98,14 @@ class FileTable(CTableWidget):
         """
         logger.debug(f"Initializing file {path}")
         if path.suffix.lower() == ".epub":
-            return st.EpubFile(path=path, cache_dir=cfg.epub_cache_path())
+            epub_file = st.EpubFile(path=path, cache_dir=cfg.epub_cache_path())
+            epub_file.prepare_text(
+                nuke_ruby=self.config.epub_nuke_ruby,
+                nuke_kobo=self.config.epub_nuke_kobo,
+                nuke_indents=self.config.epub_nuke_indents,
+                crush_html=self.config.epub_crush,
+            )
+            return epub_file
         else:
             return st.TextFile(path=path)
 
@@ -125,6 +131,35 @@ class FileTable(CTableWidget):
     Text Processing
     """
 
+    @Slot(st.Glossary)
+    def update_all_text_params(self, glossary: st.Glossary):
+        """
+        Update all text file parameters.
+        This means processing the glossary and quote protection, if so configured.
+        Also apply the glossary to epub files.
+        """
+        # Abort if no text files.
+        if self.rowCount() == 0:
+            return
+
+        # Try again in 0.5 seconds if the threadpool is busy.
+        if self.threadpool.activeThreadCount() > 0:
+            self.statusbar_message.emit("Waiting for previous threads to finish...", 1000)
+            Qc.QTimer.singleShot(500, partial(self.update_all_text_params, glossary))
+            return
+
+        self.statusbar_message.emit("Processing...", 5000)
+
+        # Show a progress message for all files.
+        for row in range(self.rowCount()):
+            # If the file is locked, skip it.
+            if not self.files[self.item(row, Column.ID).text()].locked:
+                self.item(row, Column.STATUS).setText("Processing...")
+
+        logger.debug("Updating all text params")
+        for row in range(self.rowCount()):
+            self.update_file_params(row, glossary)
+
     def update_file_params(self, row: int, glossary: st.Glossary):
         """
         Update the text file parameters for the given row.
@@ -136,9 +171,10 @@ class FileTable(CTableWidget):
         logger.debug(f"Updating text parameters for {row}")
         file_id = self.item(row, Column.ID).text()
         file = self.files[file_id]
+        file_is_epub = isinstance(file, st.EpubFile)
 
-        # If no processing, check if the label should be updated to say that changes were reverted.
-        if not self.config.use_glossary and not self.config.use_quote_protection:
+        # If not processing, check if the label should be updated to say that changes were reverted.
+        if not self.config.use_glossary and (not self.config.use_quote_protection or file_is_epub):
             if file.process_level != st.ProcessLevel.RAW:
                 file.process_level = st.ProcessLevel.RAW
                 self.item(row, Column.STATUS).setText("Reset to original")
@@ -156,28 +192,46 @@ class FileTable(CTableWidget):
             return
         file.locked = True
 
-        file_id = self.item(row, Column.ID).text()
         # Crunch time begins for the worker. Bless his soul.
         # (Move this to another thread because it's CPU intensive.)
-        worker = wt.Worker(
-            self.text_process_work,
-            file_id=file_id,
-            text_file=file,
-            glossary=glossary_to_pass,
-            apply_glossary=self.config.use_glossary,
-            apply_protection=self.config.use_quote_protection,
-        )
-        worker.signals.result.connect(self.text_process_worker_result)
-        worker.signals.progress.connect(self.text_process_worker_progress)
-        worker.signals.error.connect(self.text_process_worker_error)
-        worker.signals.finished.connect(self.text_process_worker_finished)
-        logger.debug(
-            f"Worker Thread processing text file {file.path}: "
-            f"Glossary: {glossary_to_pass is not None} | Protection: {self.config.use_quote_protection}"
-        )
+        if not file_is_epub:
+            # Start the text file worker.
+            worker = wt.Worker(
+                self.text_process_work,
+                file_id=file_id,
+                text_file=file,
+                glossary=glossary_to_pass,
+                apply_glossary=self.config.use_glossary,
+                apply_protection=self.config.use_quote_protection,
+            )
+            logger.debug(
+                f"Worker Thread processing text file {file.path}: "
+                f"Glossary: {glossary_to_pass is not None} | Protection: {self.config.use_quote_protection}"
+            )
+        else:
+            # Start the epub file worker.
+            worker = wt.Worker(
+                self.epub_process_work,
+                file_id=file_id,
+                epub_file=file,
+                glossary=glossary_to_pass,
+                apply_glossary=self.config.use_glossary,
+            )
+            logger.debug(
+                f"Worker Thread processing epub file {file.path}: " f"Glossary: {glossary_to_pass is not None}"
+            )
+
+        worker.signals.result.connect(self.file_process_worker_result)
+        worker.signals.progress.connect(self.file_process_worker_progress)
+        worker.signals.error.connect(self.file_process_worker_error)
+        worker.signals.finished.connect(self.file_process_worker_finished)
         # Execute.
         logger.info(f"Executing worker thread {file.path}")
         self.threadpool.start(worker)
+
+    """
+    Workers
+    """
 
     @staticmethod
     def text_process_work(
@@ -204,6 +258,7 @@ class FileTable(CTableWidget):
             if glossary is not None:  # In this case, the glossary was already applied and still cached.
                 text_file.text_glossary = gls.process_text(text_file.text, glossary)
                 text_file.glossary_hash = glossary.hash
+            # Set it either way, so that the file knows it's been processed.
             text_file.process_level = st.ProcessLevel.GLOSSARY
 
             if apply_protection:
@@ -217,17 +272,52 @@ class FileTable(CTableWidget):
 
         progress_callback.emit((file_id, "Ready"))
 
-        # Return the row to update the table.
+        # Return the file id to update the table.
         logger.info(f"Text file {text_file.path} processed.")
         return file_id
 
-    def text_process_worker_result(self, file_id: str):
+    @staticmethod
+    def epub_process_work(
+        file_id: str,
+        epub_file: st.EpubFile,
+        glossary: st.Glossary,
+        apply_glossary: bool,
+        progress_callback: Qc.Signal,
+    ):
+        """
+        Apply the glossary to the given epub file.
+
+        :param file_id: The ID of the file to process.
+        :param epub_file: The epub file to apply the glossary to.
+        :param glossary: The glossary to apply. None if no glossary is to be applied.
+        :param apply_glossary: True if the glossary is to be applied.
+        :param progress_callback: A callback to call with the progress of the processing.
+        """
+
+        if apply_glossary:
+            progress_callback.emit((file_id, "Applying glossary..."))
+            if glossary is not None:  # In this case, the glossary was already applied and still cached.
+                gls.process_epub_file(epub_file, glossary)
+            # Set it either way, so that the file knows it's been processed.
+            epub_file.process_level = st.ProcessLevel.GLOSSARY
+
+        progress_callback.emit((file_id, "Ready"))
+
+        # Return the file id to update the table.
+        logger.info(f"Epub file {epub_file.path} processed.")
+        return file_id
+
+    """
+    Worker Callbacks
+    """
+
+    def file_process_worker_result(self, file_id: str):
         """
         Update the table with the result of the glossary processing.
         """
         self.recalculate_char_count(file_id)
 
-    def text_process_worker_progress(self, progress: tuple[str, str]):
+    def file_process_worker_progress(self, progress: tuple[str, str]):
         """
         Update the progress bar in the table.
         Unwrap the tuple. This is just because worker signals only transmit 1 object.
@@ -237,16 +327,17 @@ class FileTable(CTableWidget):
         file_id, message = progress
         self.show_file_progress(file_id, message)
 
-    def text_process_worker_error(self, error: wt.WorkerError):
+    def file_process_worker_error(self, error: wt.WorkerError):
         """
         Display an error message in the table.
         """
         # Extract the row from the WorkerError's kwargs.
-        row = error.kwargs["row"]
-        logger.error(f"Failed to process {self.item(row, Column.FILENAME).text()}\n{error}")
-        self.item(row, Column.STATUS).setText(f"Failed to process.")
+        file_id = error.kwargs["file_id"]
+        file = self.files[file_id]
+        logger.error(f"Failed to process {file.path.name}\n{error}")
+        self.update_table_cell(file_id, Column.STATUS, "Failed to process.")
 
-    def text_process_worker_finished(self, initial_args: tuple[list, dict]):
+    def file_process_worker_finished(self, initial_args: tuple[list, dict]):
         """
         Unlock the file after processing is finished.
         """
@@ -258,43 +349,21 @@ class FileTable(CTableWidget):
         if self.all_files_ready():
             self.ready_for_translation.emit()
 
-    @Slot(st.Glossary)
-    def update_all_text_params(self, glossary: st.Glossary):
-        """
-        Update all text file parameters.
-        This means processing the glossary and quote protection, if so configured.
-        """
-        # Abort if no text files.
-        if self.rowCount() == 0:
-            return
-
-        # Try again in 1 second if the threadpool is busy.
-        if self.threadpool.activeThreadCount() > 0:
-            self.statusbar_message.emit("Waiting for previous threads to finish...", 1000)
-            Qc.QTimer.singleShot(500, partial(self.update_all_text_params, glossary))
-            return
-
-        self.statusbar_message.emit("Processing...", 5000)
-
-        # Show a progress message for all files.
-        for row in range(self.rowCount()):
-            # If the file is locked, skip it.
-            if not self.files[self.item(row, Column.ID).text()].locked:
-                self.item(row, Column.STATUS).setText("Processing...")
-
-        logger.debug("Updating all text params")
-        for row in range(self.rowCount()):
-            self.update_file_params(row, glossary)
-
     """
     Misc.
     """
+
+    def update_table_cell(self, file_id: str, column: int, message: str):
+        """
+        Show the translation progress in the table.
+        """
+        self.item(self.findItems(file_id, Qc.Qt.MatchExactly)[0].row(), column).setText(message)
 
     def show_file_progress(self, file_id: str, message: str):
         """
         Show the translation progress in the table.
         """
-        self.item(self.findItems(file_id, Qc.Qt.MatchExactly)[0].row(), Column.STATUS).setText(message)
+        self.update_table_cell(file_id, Column.STATUS, message)
 
     def all_files_ready(self) -> bool:
         """
@@ -373,9 +442,7 @@ class FileTable(CTableWidget):
         :param file_id: The ID of the file to update.
         """
         text_file = self.files[file_id]
-        self.item(self.findItems(file_id, Qc.Qt.MatchExactly)[0].row(), Column.CHARS).setText(
-            hp.format_char_count(text_file.char_count)
-        )
+        self.update_table_cell(file_id, Column.CHARS, hp.format_char_count(text_file.char_count))
         self.recalculate_char_total.emit()
 
 

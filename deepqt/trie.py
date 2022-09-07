@@ -67,5 +67,5 @@ def trie_regex_from_words(words, prefix="", suffix=""):
     trie = Trie()
     for word in words:
         trie.add(word)
-    # print(trie.pattern()) 30 min claim
-    return re.compile(prefix + trie.pattern() + suffix, re.IGNORECASE)
+    # Is there a case for case insensitivity?
+    return re.compile(prefix + trie.pattern() + suffix)  # , re.IGNORECASE)

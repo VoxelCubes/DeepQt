@@ -7,12 +7,10 @@ from pathlib import Path
 import zipfile
 from logzero import logger
 
-# import ebooklib
-# from ebooklib.epub import EpubBook
-
 
 from deepqt import trie
 from deepqt import html_cleaner
+import deepqt.helpers as hp
 
 
 class ProcessLevel(IntEnum):
@@ -22,6 +20,7 @@ class ProcessLevel(IntEnum):
     GLOSSARY = 1
     PROTECTED = 2
     GLOSSARY_PROTECTED = 3
+    TRANSLATED = 4  # Only used for dumping.
 
 
 @dataclass(slots=True)
@@ -123,17 +122,19 @@ class XMLFile:
     def __post_init__(self):
         with self.path.open("r", encoding="utf8") as f:
             self.text = f.read()
-        # Apply heuristic improvements to html files.
-        len_before = len(self.text)
-        if self.path.suffix in (".xhtml", ".html", ".htm"):
-            self.text = html_cleaner.bust_ruby_tags(self.text)
-            self.text = html_cleaner.strip_kobo_spans(self.text)
-            self.text = html_cleaner.bust_empty_spans(self.text)
-            # self.text = html_cleaner.crush_html(self.text)
-            self.text = html_cleaner.flatten_indents(self.text)
 
-        # logger.debug(self.text)
-        logger.debug(f"Cleaned {self.path.name}, {len_before} -> {len(self.text)}, diff: {len_before - len(self.text)}")
+    def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool):
+        # Apply heuristic improvements to html files.
+        if self.path.suffix in (".xhtml", ".html", ".htm"):
+            len_before = len(self.text)
+
+            self.text = html_cleaner.prepare_xml_text(self.text, nuke_ruby, nuke_indents, nuke_kobo, crush_html)
+
+            logger.debug(
+                f"Cleaned {self.path.name}, {len_before} -> {len(self.text)}, diff: {len_before - len(self.text)}"
+            )
+        else:
+            logger.debug(f"Skipped cleaning {self.path.name}")
 
     def current_text(self):
         match self.process_level:
@@ -190,6 +191,13 @@ class EpubFile(InputFile):
         # self.epub = ebooklib.epub.read_epub(self.path)
         self.xml_files = extract_epub(self.path, self.cache_dir)
 
+    def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool):
+        """
+        Apply heuristic improvements to html files.
+        """
+        for xml_file in self.xml_files:
+            xml_file.prepare_text(nuke_ruby, nuke_indents, nuke_kobo, crush_html)
+
     @property
     def char_count(self):
         return sum(f.char_count for f in self.xml_files)
@@ -207,11 +215,38 @@ class EpubFile(InputFile):
             f.process_level = value
 
     def translation_incomplete(self):
-        return any(f.get_translated_text() is None for f in self.xml_files)
+        # Return true, if some, but not all, are translated.
+        all_translated = all(f.is_translated for f in self.xml_files)
+        any_translated = any(f.is_translated for f in self.xml_files)
+        return any_translated and not all_translated
 
     @property
     def is_translated(self) -> bool:
         return all(f.is_translated for f in self.xml_files)
+
+    def write_to_cache(self, process_level: ProcessLevel):
+        """
+        Write the current text of the given process level to the cache folder.
+        """
+        for xml_file in self.xml_files:
+            if process_level == ProcessLevel.RAW:
+                text = xml_file.text
+            elif process_level == ProcessLevel.GLOSSARY:
+                text = xml_file.text_glossary
+            elif process_level == ProcessLevel.TRANSLATED:
+                text = xml_file.translation
+            else:
+                raise ValueError(f"Invalid process level: {process_level}")
+
+            xml_file.path.write_text(text, encoding="utf8")
+
+    def write(self, process_level: ProcessLevel, output_path: Path):
+        """
+        Write the current text of the given process level to the output file.
+        """
+        self.write_to_cache(process_level)
+        # Rebuild the epub file.
+        hp.zip_folder_to_epub(self.cache_dir, output_path)
 
 
 def extract_epub(epub_path: Path, cache_dir: Path) -> list[XMLFile]:
@@ -284,6 +319,7 @@ class Glossary:
 
         if self.exact_terms:
             self.exact_pattern = trie.trie_regex_from_words(self.exact_terms.keys())
+
         if self.honorific_terms:
             self.honorific_pattern = trie.trie_regex_from_words(
                 self.honorific_terms.keys(), prefix=r"([a-z]) (", suffix=")"

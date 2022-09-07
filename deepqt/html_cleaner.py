@@ -1,11 +1,43 @@
 import re
-from bs4 import BeautifulSoup
 import minify_html
+from bs4 import BeautifulSoup
 
 from logzero import logger
 
 
-def strip_kobo_spans(raw_html: str) -> str:
+def prepare_xml_text(text: str, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html_text: bool) -> str:
+    """
+    Prepares the raw XML text.
+    Apply heuristics to shrink the size.
+    """
+
+    # Perform raw text manipulations.
+    if nuke_ruby:
+        text = bust_ruby_tags(text)
+    if nuke_indents:
+        text = flatten_indents(text)
+
+    # TODO undo text rotation.
+
+    # Perform parsed element manipulations.
+    soup = BeautifulSoup(text, "lxml")
+    if nuke_kobo:
+        soup = strip_kobo_spans(soup)
+
+    # Perform this one either way.
+    soup = bust_empty_spans(soup)
+
+    # Convert back to text.
+    text = str(soup)
+
+    # Minify the html last.
+    if crush_html_text:
+        text = crush_html(text)
+
+    return text
+
+
+def strip_kobo_spans(soup: BeautifulSoup) -> BeautifulSoup:
     """
     Strip spans that Kobo adds to the html.
     These have the class "koboSpan".
@@ -14,26 +46,22 @@ def strip_kobo_spans(raw_html: str) -> str:
     """
     logger.debug("Neutering Kobo spans")
 
-    soup = BeautifulSoup(raw_html, "lxml")
-
     for span in soup.find_all("span", class_="koboSpan"):
         span.attrs.clear()
 
-    return str(soup)
+    return soup
 
 
-def bust_empty_spans(text: str) -> str:
+def bust_empty_spans(soup: BeautifulSoup) -> BeautifulSoup:
     """
     Remove empty spans from the text.
     """
-
-    soup = BeautifulSoup(text, "lxml")
 
     for span in soup.find_all("span"):
         if not span.attrs:
             span.replace_with_children()
 
-    return str(soup)
+    return soup
 
 
 def flatten_indents(text: str) -> str:

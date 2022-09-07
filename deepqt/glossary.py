@@ -24,6 +24,21 @@ def process_text(text: str, glossary: st.Glossary) -> str:
     return "\n".join(lines_out)
 
 
+def process_epub_file(epub: st.EpubFile, glossary: st.Glossary):
+    """
+    Process an epub file with the glossary.
+
+    :param epub: The epub file to process.
+    :param glossary: The glossary to use.
+    """
+
+    for xml_file in epub.xml_files:
+        xml_file.text_glossary = process_text(xml_file.text, glossary)
+
+    epub.glossary_hash = glossary.hash
+    epub.process_level = st.ProcessLevel.GLOSSARY
+
+
 """
 Internal functions
 """
