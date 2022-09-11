@@ -13,6 +13,7 @@ Harness the power of the DeepL API with this friendly user interface.
 - Batch processing.
 
 - Higher-level glossaries. [How do they work?](https://github.com/VoxelCubes/DeepQt/blob/master/docs/glossary_help.md)
+  Apply replacements even without translating any of the text.
 
 - Support for text files (epub coming eventually)
 

@@ -4,6 +4,11 @@ These glossaries do not take advantage of DeepL's integrated glossaries, however
 You can preview the changes the glossary made and even save that preview to a file. This way, you can also use DeepQt
 as a powerful replacement engine for text files and epubs alike.
 
+To see what the glossary does to your text, click the "Preview" button. This will show you the text with the 
+glossary applied.
+And if you like what you see, you can save the preview to a file.
+This works for plain text and whole epub files alike.
+
 A glossary is a collection of terms, each of which consists of a pattern to look for in the left cell, and the pattern to substitute it with in the right cell. The substitution patterns require a prefix symbol which dictates what type of term it is. DeepQt glossaries support 6 different types of terms, processed in the following order:
 
 #### Exact match
