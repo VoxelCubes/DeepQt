@@ -124,7 +124,7 @@
            <item row="0" column="0">
             <widget class="QPushButton" name="pushButton_file_add">
              <property name="text">
-              <string>Add text file</string>
+              <string>Add file</string>
              </property>
              <property name="icon">
               <iconset theme="list-add">

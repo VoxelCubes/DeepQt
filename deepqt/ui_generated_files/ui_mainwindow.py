@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.3.1
+## Created by: Qt User Interface Compiler version 6.2.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -457,7 +457,7 @@ class Ui_MainWindow(object):
         self.groupBox_files.setTitle(QCoreApplication.translate("MainWindow", u"Input Files", None))
         self.pushButton_file_remove.setText(QCoreApplication.translate("MainWindow", u"Remove file", None))
         self.pushButton_file_remove_all.setText(QCoreApplication.translate("MainWindow", u"Clear all", None))
-        self.pushButton_file_add.setText(QCoreApplication.translate("MainWindow", u"Add text file", None))
+        self.pushButton_file_add.setText(QCoreApplication.translate("MainWindow", u"Add file", None))
         self.pushButton_file_preview.setText(QCoreApplication.translate("MainWindow", u"Preview", None))
         self.checkBox_file_fixed_dir.setText(QCoreApplication.translate("MainWindow", u"Use fixed output directory:", None))
 #if QT_CONFIG(tooltip)

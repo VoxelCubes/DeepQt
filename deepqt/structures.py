@@ -9,7 +9,7 @@ from logzero import logger
 
 
 from deepqt import trie
-from deepqt import html_cleaner
+from deepqt import xml_parser
 import deepqt.helpers as hp
 
 
@@ -46,6 +46,9 @@ class InputFile:
 
     @property
     def is_translated(self) -> bool:
+        raise NotImplementedError
+
+    def clear_translations(self):
         raise NotImplementedError
 
 
@@ -95,6 +98,10 @@ class TextFile(InputFile):
     def is_translated(self) -> bool:
         return bool(self.translation)
 
+    def clear_translations(self):
+        self.translation = ""
+        self.translation_chunks = []
+
 
 def incomplete_translation_banner() -> str:
     return """
@@ -105,6 +112,16 @@ def incomplete_translation_banner() -> str:
 #==============================#
 
 """
+
+
+@dataclass(slots=True)
+class CSSFile:
+    path: Path
+    text: str = ""
+
+    def __post_init__(self):
+        with self.path.open("r", encoding="utf8") as f:
+            self.text = f.read()
 
 
 @dataclass(slots=True)
@@ -123,18 +140,8 @@ class XMLFile:
         with self.path.open("r", encoding="utf8") as f:
             self.text = f.read()
 
-    def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool):
-        # Apply heuristic improvements to html files.
-        if self.path.suffix in (".xhtml", ".html", ".htm"):
-            len_before = len(self.text)
-
-            self.text = html_cleaner.prepare_xml_text(self.text, nuke_ruby, nuke_indents, nuke_kobo, crush_html)
-
-            logger.debug(
-                f"Cleaned {self.path.name}, {len_before} -> {len(self.text)}, diff: {len_before - len(self.text)}"
-            )
-        else:
-            logger.debug(f"Skipped cleaning {self.path.name}")
+    def prepare_text(self, *args, **kwargs):
+        pass
 
     def current_text(self):
         match self.process_level:
@@ -145,7 +152,8 @@ class XMLFile:
 
     @property
     def char_count(self):
-        return len(self.current_text())
+        return xml_parser.get_char_count(self.current_text())
+        # return len(self.current_text())
 
     def get_translated_text(self) -> str | None:
         if self.translation:
@@ -157,6 +165,20 @@ class XMLFile:
     def is_translated(self) -> bool:
         return bool(self.translation)
 
+    def clear_translations(self):
+        self.translation = ""
+
+
+@dataclass(slots=True)
+class HTMLFile(XMLFile):
+    def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool):
+        # Apply heuristic improvements to html files.
+        len_before = len(self.text)
+
+        self.text = xml_parser.prepare_html_text(self.text, nuke_ruby, nuke_indents, nuke_kobo, crush_html)
+
+        logger.debug(f"Cleaned {self.path.name}, {len_before} -> {len(self.text)}, diff: {len_before - len(self.text)}")
+
 
 @dataclass(slots=True)
 class TocNCXFile(XMLFile):
@@ -166,11 +188,19 @@ class TocNCXFile(XMLFile):
     Its text is contained within <text> tags.
     """
 
-    def get_texts(self) -> list[str]:
-        raise NotImplementedError
+    @staticmethod
+    def get_texts(xml: str) -> list[str]:
+        # Find the contents of the <text> tags.
+        return [match.group(1) for match in re.finditer(r"<text>\s*(.*?)\s*</text>", xml, re.DOTALL)]
 
-    def set_texts(self, texts: list[str]):
-        raise NotImplementedError
+    @staticmethod
+    def set_texts(xml: str, texts: list[str]) -> str:
+        # Replace the contents of the <text> tags in order.
+        return re.sub(r"<text>.*?</text>", lambda m: f"<text>{texts.pop(0)}</text>", xml, re.DOTALL)
+
+    @property
+    def char_count(self):
+        return sum(len(text) for text in self.get_texts(self.text))
 
 
 @dataclass(slots=True)
@@ -181,54 +211,70 @@ class EpubFile(InputFile):
     """
 
     cache_dir: Path | None = None
-    xml_files: list[XMLFile] = field(default_factory=list)
-    # epub: EpubBook | None = None
+    html_files: list[HTMLFile] = field(default_factory=list)
+    css_files: list[CSSFile] = field(default_factory=list)
+    toc_file: TocNCXFile | None = None
 
     def __post_init__(self):
         InputFile.__post_init__(self)
         self.cache_dir = Path(self.cache_dir) / self.path.stem
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         # self.epub = ebooklib.epub.read_epub(self.path)
-        self.xml_files = extract_epub(self.path, self.cache_dir)
+        self.html_files, self.css_files, self.toc_file = extract_epub(self.path, self.cache_dir)
+        # Sort the html files by file name.
+        self.html_files.sort(key=lambda f: f.path.name)
 
-    def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool):
+    def prepare_text(
+        self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool, make_text_horizontal: bool
+    ):
         """
         Apply heuristic improvements to html files.
         """
-        for xml_file in self.xml_files:
-            xml_file.prepare_text(nuke_ruby, nuke_indents, nuke_kobo, crush_html)
+        for html_file in self.html_files:
+            html_file.prepare_text(nuke_ruby, nuke_indents, nuke_kobo, crush_html)
+
+        if make_text_horizontal:
+            for css_file in self.css_files:
+                css_file.text = css_file.text.replace("writing-mode: vertical-rl;", "writing-mode: horizontal-tb;")
 
     @property
     def char_count(self):
-        return sum(f.char_count for f in self.xml_files)
+        return sum(f.char_count for f in self.html_files)
 
     @property
     def process_level(self):
-        if all(f.process_level == ProcessLevel.GLOSSARY for f in self.xml_files):
+        if all(f.process_level == ProcessLevel.GLOSSARY for f in self.html_files):
             return ProcessLevel.GLOSSARY
         else:
             return ProcessLevel.RAW
 
     @process_level.setter
     def process_level(self, value):
-        for f in self.xml_files:
+        for f in self.html_files:
             f.process_level = value
 
     def translation_incomplete(self):
         # Return true, if some, but not all, are translated.
-        all_translated = all(f.is_translated for f in self.xml_files)
-        any_translated = any(f.is_translated for f in self.xml_files)
+        all_translated = all(f.is_translated for f in self.html_files)
+        any_translated = any(f.is_translated for f in self.html_files)
         return any_translated and not all_translated
 
-    @property
     def is_translated(self) -> bool:
-        return all(f.is_translated for f in self.xml_files)
+        return all(f.is_translated for f in self.html_files)
+
+    @property
+    def file_count(self):
+        return len(self.html_files) + 1  # +1 for the toc file.
 
     def write_to_cache(self, process_level: ProcessLevel):
         """
         Write the current text of the given process level to the cache folder.
         """
-        for xml_file in self.xml_files:
+        self.html_files: list[XMLFile]
+        self.toc_file: XMLFile
+
+        xml_files: list[XMLFile] = [self.toc_file] + self.html_files
+        for xml_file in xml_files:
             if process_level == ProcessLevel.RAW:
                 text = xml_file.text
             elif process_level == ProcessLevel.GLOSSARY:
@@ -240,16 +286,27 @@ class EpubFile(InputFile):
 
             xml_file.path.write_text(text, encoding="utf8")
 
+        for css_file in self.css_files:
+            css_file.path.write_text(css_file.text, encoding="utf8")
+
     def write(self, process_level: ProcessLevel, output_path: Path):
         """
         Write the current text of the given process level to the output file.
+
+        :param process_level: The process level to write. Options are RAW, GLOSSARY, and TRANSLATED.
+        :param output_path: The path to write the file to.
         """
         self.write_to_cache(process_level)
         # Rebuild the epub file.
         hp.zip_folder_to_epub(self.cache_dir, output_path)
 
+    def clear_translations(self):
+        for f in self.html_files:
+            f.clear_translations()
+        self.toc_file.clear_translations()
 
-def extract_epub(epub_path: Path, cache_dir: Path) -> list[XMLFile]:
+
+def extract_epub(epub_path: Path, cache_dir: Path) -> tuple[list[HTMLFile], list[CSSFile], TocNCXFile]:
     """
     Extract the epub file to the cache directory and return a list of XMLFile
     objects representing the html files.
@@ -260,18 +317,27 @@ def extract_epub(epub_path: Path, cache_dir: Path) -> list[XMLFile]:
         epub_zip.extractall(cache_dir)
 
     html_files = []
+    css_files = []
+    toc_file = None
     # Find .html and .toc files in all subfolders.
-    for html_path in cache_dir.glob("**/*"):
-        if html_path.suffix in (".html", ".xhtml", ".ncx"):
-            html_files.append(XMLFile(html_path))
+    for xml_path in cache_dir.glob("**/*"):
+        if xml_path.suffix in (".html", ".xhtml"):
+            html_files.append(HTMLFile(xml_path))
+        elif xml_path.suffix == ".css":
+            css_files.append(CSSFile(xml_path))
+        elif xml_path.suffix == ".ncx":
+            toc_file = TocNCXFile(xml_path)
+
+    if not toc_file:
+        raise ValueError(f"No table of contents toc.ncx file found in {epub_path}. This isn't a valid epub file.")
 
     # Ignore files that contain no actual text (tags aside).
     logger.debug(f"Found {len(html_files)} html files in {epub_path}")
-    html_files = [file for file in html_files if html_cleaner.html_contains_text(file.text)]
+    html_files = [file for file in html_files if xml_parser.html_contains_text(file.text)]
     logger.debug(f"Found {len(html_files)} html files with text in {epub_path}")
 
     logger.debug(f"Extracted {len(html_files)} html and toc files.")
-    return html_files
+    return html_files, css_files, toc_file
 
 
 @dataclass(slots=True)

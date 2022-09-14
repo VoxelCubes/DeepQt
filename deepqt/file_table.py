@@ -71,7 +71,8 @@ class FileTable(CTableWidget):
 
         try:
             self.files[file_id] = self.initialize_file(path=path)
-        except OSError as e:
+        except (OSError, ValueError) as e:
+            # The ValueError is raised when the epub file isn't valid.
             logger.error(f"Failed to add file {path}")
             logger.error(e)
             hp.show_warning(None, "Failed to add file", f"Failed to add file {path}\n\n{e}")
@@ -104,6 +105,7 @@ class FileTable(CTableWidget):
                 nuke_kobo=self.config.epub_nuke_kobo,
                 nuke_indents=self.config.epub_nuke_indents,
                 crush_html=self.config.epub_crush,
+                make_text_horizontal=self.config.epub_make_text_horizontal,
             )
             return epub_file
         else:
@@ -369,23 +371,33 @@ class FileTable(CTableWidget):
         """
         Check if all files' process level matches the expected value and are not locked.
         If no files exist, return False.
+        Note: Epub files don't use quote protection, so ignore that option.
 
         :return: True if all files are ready.
         """
-        expected_process_level = st.ProcessLevel.RAW
+        expected_process_level_text = st.ProcessLevel.RAW
+        expected_process_level_epub = st.ProcessLevel.RAW
         if self.config.use_glossary:
-            expected_process_level |= st.ProcessLevel.GLOSSARY
+            expected_process_level_text |= st.ProcessLevel.GLOSSARY
+            expected_process_level_epub |= st.ProcessLevel.GLOSSARY
         if self.config.use_quote_protection:
-            expected_process_level |= st.ProcessLevel.PROTECTED
+            expected_process_level_text |= st.ProcessLevel.PROTECTED
 
         if self.rowCount() == 0:
             return False
 
         for row in range(self.rowCount()):
-            if self.files[self.item(row, Column.ID).text()].locked:
+            file = self.files[self.item(row, Column.ID).text()]
+
+            if file.locked:
                 return False
-            if self.files[self.item(row, Column.ID).text()].process_level != expected_process_level:
-                return False
+
+            if isinstance(file, st.TextFile):
+                if self.files[self.item(row, Column.ID).text()].process_level != expected_process_level:
+                    return False
+            else:
+                if self.files[self.item(row, Column.ID).text()].process_level != expected_process_level_epub:
+                    return False
         return True
 
     def browse_add_file(self):
@@ -393,7 +405,7 @@ class FileTable(CTableWidget):
         Browse for a file and add it to the table.
         Supported file types: txt and epub.
         """
-        path = Qw.QFileDialog.getOpenFileName(self, "Select file", "", "Text files (*.txt);;Epub files (*.epub)")[0]
+        path = Qw.QFileDialog.getOpenFileName(self, "Select file", "", "Text files (*.txt);Epub files (*.epub)")[0]
         if path:
             self.add_file(Path(path))
             self.request_text_param_update.emit()

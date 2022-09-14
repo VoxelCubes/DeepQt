@@ -22,7 +22,11 @@ def main():
     # Use argparse to gather the input and output paths.
     parser = argparse.ArgumentParser(description="Swap left and right terms in a glossary. Export simplified format.")
     parser.add_argument("glossary", type=Path, help="The glossary file to read.")
-    parser.add_argument("output", type=Path, help="The glossary file to write.")
+    parser.add_argument(
+        "output",
+        type=Path,
+        help="The glossary file to write. Whatever file extension is used, it will try to generate that file type.",
+    )
     args = parser.parse_args()
 
     glossary = st.Glossary()

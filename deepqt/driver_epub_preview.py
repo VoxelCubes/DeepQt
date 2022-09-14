@@ -4,7 +4,6 @@ from logzero import logger
 import deepqt.config as cfg
 import deepqt.structures as st
 from deepqt.ui_generated_files.ui_epub_preview import Ui_EpubPreview
-import deepqt.helpers as hp
 
 
 class EpubPreview(Qw.QDialog, Ui_EpubPreview):
@@ -25,7 +24,7 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
         self.epub_file = epub_file
 
         # Show process level of all files
-        for xml_file in self.epub_file.xml_files:
+        for xml_file in self.epub_file.html_files:
             logger.debug(f"{xml_file.path.name} - {xml_file.process_level}")
 
         self.preview_epub()
@@ -41,26 +40,32 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
             self.radioButton_glossary.hide()
             self.radioButton_translation.hide()
 
-        if not epub_file.finished:
+        if not epub_file.is_translated():
             self.radioButton_translation.hide()
 
     def preview_epub(self):
         """
         Determine how many previews to generate and show each in a tab.
+        Show the html files and the toc file.
         """
         logger.debug("Loading original previews.")
-        for xml_file in self.epub_file.xml_files:
-            self.add_preview(self.tabWidget_original, xml_file.path.name, xml_file.text)
+        toc_file = self.epub_file.toc_file
+
+        self.add_preview(self.tabWidget_original, toc_file.path.name, toc_file.text)
+        for html_file in self.epub_file.html_files:
+            self.add_preview(self.tabWidget_original, html_file.path.name, html_file.text)
 
         if self.epub_file.process_level == st.ProcessLevel.GLOSSARY:
             logger.debug("Loading glossary previews.")
-            for xml_file in self.epub_file.xml_files:
-                self.add_preview(self.tabWidget_glossary, xml_file.path.name, xml_file.text_glossary)
+            self.add_preview(self.tabWidget_glossary, toc_file.path.name, toc_file.text_glossary)
+            for html_file in self.epub_file.html_files:
+                self.add_preview(self.tabWidget_glossary, html_file.path.name, html_file.text_glossary)
 
-        if self.epub_file.is_translated:
+        if self.epub_file.is_translated():
             logger.debug("Loading translation previews.")
-            for xml_file in self.epub_file.xml_files:
-                self.add_preview(self.tabWidget_translation, xml_file.path.name, xml_file.translation)
+            self.add_preview(self.tabWidget_translation, toc_file.path.name, toc_file.translation)
+            for html_file in self.epub_file.html_files:
+                self.add_preview(self.tabWidget_translation, html_file.path.name, html_file.translation)
 
     @staticmethod
     def add_preview(stack_page: Qw.QTabWidget, title: str, text: str):

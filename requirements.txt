@@ -7,3 +7,7 @@ pyexcel-odsr
 pyexcel-xls
 pyexcel-xlsx
 pyexcel-htmlr
+
+beautifulsoup4
+minify_html
+setuptools

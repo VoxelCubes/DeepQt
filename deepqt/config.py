@@ -24,7 +24,7 @@ class Config:
     api_key: str
     is_pro_version: bool
 
-    # Hidden options.
+    # Advanced options.
     tl_max_chunks: int
     tl_min_chunk_size: int
     tl_preserve_formatting: bool
@@ -34,6 +34,7 @@ class Config:
     epub_nuke_ruby: bool
     epub_nuke_indents: bool
     epub_crush: bool
+    epub_make_text_horizontal: bool
     # Timing history.
     avg_time_per_mille: float
 
@@ -166,6 +167,7 @@ def default_config() -> Config:
         epub_nuke_kobo=True,
         epub_nuke_ruby=True,
         epub_nuke_indents=True,
+        epub_make_text_horizontal=True,
         epub_crush=False,  # This could confuse deepl and subsequent epub readers too much.
         avg_time_per_mille=0.33,  # This was measured experimentally. Depends on local internet connection.
     )

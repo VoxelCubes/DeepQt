@@ -1,11 +1,15 @@
 import re
 import minify_html
 from bs4 import BeautifulSoup
+import warnings
 
 from logzero import logger
 
+# It throws this erroneous warning when encountering xhtml, which may be found in epubs.
+warnings.filterwarnings("ignore", category=UserWarning, module="bs4")
 
-def prepare_xml_text(text: str, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html_text: bool) -> str:
+
+def prepare_html_text(text: str, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html_text: bool) -> str:
     """
     Prepares the raw XML text.
     Apply heuristics to shrink the size.
@@ -56,6 +60,7 @@ def bust_empty_spans(soup: BeautifulSoup) -> BeautifulSoup:
     """
     Remove empty spans from the text.
     """
+    logger.debug("Busting attribute-less spans")
 
     for span in soup.find_all("span"):
         if not span.attrs:
@@ -106,6 +111,14 @@ def html_contains_text(html: str) -> bool:
     # Exclude the title.
     text = soup.find("body").text.strip()
     return bool(text)
+
+
+def get_char_count(html: str) -> int:
+    """
+    Get the number of characters in the html.
+    """
+    soup = BeautifulSoup(html, "lxml")
+    return len(soup.text)
 
 
 def deruby(line: str) -> str:

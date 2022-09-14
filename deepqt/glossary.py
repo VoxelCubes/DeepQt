@@ -32,8 +32,14 @@ def process_epub_file(epub: st.EpubFile, glossary: st.Glossary):
     :param glossary: The glossary to use.
     """
 
-    for xml_file in epub.xml_files:
-        xml_file.text_glossary = process_text(xml_file.text, glossary)
+    # Process the html files.
+    for html_file in epub.html_files:
+        html_file.text_glossary = process_text(html_file.text, glossary)
+
+    # Process toc.
+    glossary_snippets = [process_text(snippet, glossary) for snippet in epub.toc_file.get_texts(epub.toc_file.text)]
+    epub.toc_file.text_glossary = epub.toc_file.set_texts(epub.toc_file.text, glossary_snippets)
+    epub.toc_file.process_level = st.ProcessLevel.GLOSSARY
 
     epub.glossary_hash = glossary.hash
     epub.process_level = st.ProcessLevel.GLOSSARY

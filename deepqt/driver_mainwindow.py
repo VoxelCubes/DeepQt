@@ -551,6 +551,22 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
     def write_output_file(self, file_id: str):
         """
+        Write the output file to disk.
+        Check the type of the file (text or epub) and run the appropriate function.
+
+        :param file_id: InputFile ID.
+        """
+
+        file = self.file_table.files[file_id]
+        if isinstance(file, st.TextFile):
+            self.write_output_text_file(file_id)
+        elif isinstance(file, st.EpubFile):
+            self.write_output_epub_file(file_id)
+        else:
+            raise TypeError(f"Unknown file type: {file}")
+
+    def write_output_text_file(self, file_id: str):
+        """
         Write the translation of a file to the assigned output path.
 
         Check the status of the file. We decide 3 cases:
@@ -587,6 +603,31 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
                 logger.error(f"Failed to write translation to {path_out}.\n{e}")
                 show_warning(self, "Output Error", f"Failed to write translation to {path_out}.")
                 self.file_table.show_file_progress(file_id, "Could not write output!")
+
+    def write_output_epub_file(self, file_id: str):
+        """
+        Write the translation of a file to the assigned output path.
+
+        Check the status of the file. We decide 3 cases:
+        1. File is not translated.
+           - Skip this file.
+        2. File is translated.
+           - Write the translation to the output path.
+        3. File is partially translated.
+           - Dump the translation to the output path, if so configured.
+
+        :param file_id: InputFile ID.
+        """
+        file: st.EpubFile = self.file_table.files[file_id]
+        path_out = make_output_filename(file, self.config)
+
+        if not file.translation_incomplete() and not file.is_translated():
+            # Skip this because we have nothing to dump.
+            logger.info(f"Skipping file {file_id} because nothing has been translated.")
+            self.file_table.show_file_progress(file_id, "Not translated.")
+            return
+
+        file.write(st.ProcessLevel.TRANSLATED, path_out)
 
     """
     Log file

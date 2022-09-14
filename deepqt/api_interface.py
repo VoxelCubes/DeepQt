@@ -147,8 +147,7 @@ class DeeplWorker(QRunnable):
         """
         logger.info("Clearing previous translations.")
         for input_file in self.input_files.values():
-            input_file.translation = ""
-            input_file.translation_chunks = []
+            input_file.clear_translations()
 
     def partition_input_files(self):
         """
@@ -162,6 +161,7 @@ class DeeplWorker(QRunnable):
             self.signals.progress.emit(key, "Partitioning file...", None, None)
 
             if isinstance(input_file, st.TextFile):
+                input_file: st.TextFile  # Reinterpret type.
                 input_file.text_chunks = partition_text(
                     input_file.current_text(), self.config.tl_max_chunks, self.config.tl_min_chunk_size
                 )
@@ -172,7 +172,13 @@ class DeeplWorker(QRunnable):
                     key, f"Split into {chunk_count} {hp.f_plural(chunk_count, 'chunk')}", None, None
                 )
             else:
-                raise NotImplementedError("Epub support not implemented yet.")
+                # Epub files are processed as file uploads, to avoid breaking the html formatting.
+                # The chunks in this case are merely the number of files to handle.
+                # Just share this information with the user.
+                input_file: st.EpubFile  # Reinterpret type.
+                self.signals.progress.emit(
+                    key, f"Split into {input_file.file_count} {hp.f_plural(input_file.file_count, 'file')}", None, None
+                )
 
     def translate_input_files(self):
         logger.info("Translating text_chunks.")
@@ -180,11 +186,13 @@ class DeeplWorker(QRunnable):
             self.check_aborted()
             self.current_file_id = key
 
+            # ------------------------------------------------------------ Text files.
             if isinstance(input_file, st.TextFile):
+                input_file: st.TextFile  # Reinterpret type.
                 for i, chunk in enumerate(input_file.text_chunks):
                     self.check_aborted()
                     if not chunk:
-                        logger.warning(f"Empty chunk {i} in {input_file.path.name}.")
+                        logger.warning(f"Empty chunk {i + 1} in {input_file.path.name}.")
                         continue
                     self.signals.progress.emit(
                         key,
@@ -193,11 +201,7 @@ class DeeplWorker(QRunnable):
                         self.total_chars,
                     )
                     if self.config.tl_mock:
-                        logger.info("Mocking translation.")
-                        translation = self.translator.translate_text("Proton Beam", source_lang="EN", target_lang="DE")
-                        # Pretend that we make progress.
-                        self.processed_chars += len(chunk)
-                        time.sleep(1)
+                        translation = self.mock_translate_text(chunk)
                     else:
                         translation = self.try_translate(chunk, key)
 
@@ -218,13 +222,63 @@ class DeeplWorker(QRunnable):
                     self.total_chars,
                 )
 
-    def try_translate(self, chunk: str, key: str) -> deepl.TextResult:
+            # ------------------------------------------------------------ Epub files.
+            else:
+                input_file: st.EpubFile  # Reinterpret type.
+                # Epub files are processed as html_file uploads, to avoid breaking the html formatting.
+                # Translate the toc.ncx html_file.
+                self.signals.progress.emit(
+                    key,
+                    f"Translating file 1 / {input_file.file_count}",
+                    self.processed_chars,
+                    self.total_chars,
+                )
+                texts = input_file.toc_file.get_texts(input_file.toc_file.current_text())
+                if self.config.tl_mock:
+                    translations = self.mock_translate_text(texts)
+                else:
+                    translations = self.try_translate(texts, key)
+
+                # Unwrap the translations and apply them.
+                translations = [translation.text for translation in translations]
+                input_file.toc_file.translation = input_file.toc_file.set_texts(
+                    input_file.toc_file.current_text(), translations
+                )
+
+                # Translate the files.
+                for i, html_file in enumerate(input_file.html_files):
+                    self.check_aborted()
+                    self.signals.progress.emit(
+                        key,
+                        f"Translating file {i + 2} / {input_file.file_count}",  # +2 because of toc.ncx and 0-indexing.
+                        self.processed_chars,
+                        self.total_chars,
+                    )
+                    if self.config.tl_mock:
+                        translation = self.mock_translate_text(html_file.current_text())
+                    else:
+                        translation = self.try_translate(html_file.current_text(), key, is_html=True)
+
+                    html_file.translation = translation.text
+                    # logger.debug(f"Translation: {translation.text}")
+                self.signals.progress.emit(
+                    key,
+                    f"Translated file {input_file.file_count} / {input_file.file_count} ",
+                    self.processed_chars,
+                    self.total_chars,
+                )
+
+    def try_translate(
+        self, chunk: str | list[str], key: str, is_html: bool = False
+    ) -> deepl.TextResult | list[deepl.TextResult]:
         """
         Try to translate the text.
 
         :param chunk: The text to translate.
         :param key: The key of the input file. Used for error reporting.
+        :param is_html: Whether the text is html or not.
         """
+        tag_handling = "html" if is_html else None
         tries = 1
         while True:
             try:
@@ -234,14 +288,16 @@ class DeeplWorker(QRunnable):
                     source_lang=self.config.lang_from,
                     target_lang=self.config.lang_to,
                     preserve_formatting=self.config.tl_preserve_formatting,
+                    tag_handling=tag_handling,
                 )
-                if translation is None:
+                if not translation:
                     raise deepl.DeepLException()
                 # Claim the chunk as translated.
-                self.processed_chars += len(chunk)
+                length_processed = len(chunk) if isinstance(chunk, str) else sum(len(c) for c in chunk)
+                self.processed_chars += length_processed
                 d_time = time.time() - t_start
                 # Calculate how long it took per 1000 chars. Update the average.
-                time_per_mille = d_time / (len(chunk) / 1000)
+                time_per_mille = d_time / (length_processed / 1000)
                 self.config.avg_time_per_mille = hp.weighted_average(self.config.avg_time_per_mille, time_per_mille)
                 logger.info(f"Translation took {d_time:.2f} seconds, {time_per_mille:.3f} seconds per 1000 chars.")
                 return translation
@@ -270,6 +326,22 @@ class DeeplWorker(QRunnable):
                 self.signals.progress.emit(key, "Translation Failed!", None, None)
                 self.state = State.ERROR
                 raise Abort
+
+    def mock_translate_text(self, chunk: str | list[str]) -> deepl.TextResult | list[deepl.TextResult]:
+        """
+        Mock translation.
+
+        :param chunk: The text to translate.
+        """
+        logger.info("Mocking translation.")
+        time.sleep(1)
+        if isinstance(chunk, list):
+            return [deepl.TextResult(text="Translated " + text, detected_source_lang="EN") for text in chunk]
+        else:
+            translation = deepl.TextResult(text="Translated" + chunk, detected_source_lang="EN")
+        # Pretend that we make progress.
+        self.processed_chars += len(chunk)
+        return translation
 
     @Slot()
     def abort(self):
