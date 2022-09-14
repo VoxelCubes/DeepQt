@@ -255,6 +255,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.config.fixed_output_path = self.lineEdit_file_out_dir.text()
         if save:
             self.config.save()
+        self.text_output_changed.emit()
 
     def use_glossary_toggled(self):
         """

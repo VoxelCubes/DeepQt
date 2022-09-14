@@ -4,6 +4,7 @@ from logzero import logger
 import deepqt.config as cfg
 import deepqt.structures as st
 from deepqt.ui_generated_files.ui_epub_preview import Ui_EpubPreview
+import deepqt.helpers as hp
 
 
 class EpubPreview(Qw.QDialog, Ui_EpubPreview):
@@ -22,6 +23,11 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
 
         self.config = config
         self.epub_file = epub_file
+
+        # Abort if the epub file was not initialized.
+        if not self.epub_file.initialized:
+            hp.show_warning(self, "Warning", "Please wait for the Epub to finish loading.")
+            self.close()
 
         # Show process level of all files
         for xml_file in self.epub_file.html_files:

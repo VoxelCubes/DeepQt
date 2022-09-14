@@ -80,19 +80,28 @@ class FileTable(CTableWidget):
             logger.error(e)
             hp.show_warning(None, "Failed to add file", f"Failed to add file {path}\n\n{e}")
             return
+
         # Add the new file to the table.
+        file = self.files[file_id]
         self.appendRow(
             file_id,
             path.name,
             "File added",
-            hp.format_char_count(self.files[file_id].char_count),
-            str(make_output_filename(self.files[file_id], self.config)),
+            hp.format_char_count(file.char_count),
+            str(make_output_filename(file, self.config)),
             select_new=True,
         )
+        # Add icon to the filename column.
+        logger.debug(f"Adding icon to {file_id}")
+        if isinstance(file, st.TextFile):
+            self.item(self.rowCount() - 1, Column.FILENAME).setIcon(Qg.QIcon.fromTheme("text-x-generic"))
+        else:
+            self.item(self.rowCount() - 1, Column.FILENAME).setIcon(Qg.QIcon.fromTheme("application-epub+zip"))
         # Align Char count to the right.
         self.item(self.rowCount() - 1, Column.CHARS).setTextAlignment(Qg.Qt.AlignRight | Qg.Qt.AlignVCenter)
 
-    def initialize_file(self, path: Path) -> st.TextFile | st.EpubFile:
+    @staticmethod
+    def initialize_file(path: Path) -> st.TextFile | st.EpubFile:
         """
         Read and populate the basic information of the file.
         Text files (utf8) and epub files are supported.
@@ -101,6 +110,7 @@ class FileTable(CTableWidget):
         """
         logger.debug(f"Initializing file {path}")
         if path.suffix.lower() == ".epub":
+            return st.EpubFile(path=path, cache_dir=cfg.epub_cache_path())
         else:
             return st.TextFile(path=path)
 
@@ -166,7 +176,7 @@ class FileTable(CTableWidget):
         file_id = self.item(row, Column.ID).text()
         file = self.files[file_id]
         file_is_epub = isinstance(file, st.EpubFile)
-        file_needs_preprocessing = file_is_epub and not file.pre_processed
+        file_needs_preprocessing = file_is_epub and not file.initialized
 
         # If not processing, check if the label should be updated to say that changes were reverted.
         if (
@@ -294,8 +304,11 @@ class FileTable(CTableWidget):
         """
 
         # Pre-process the epub file.
-        progress_callback.emit((file_id, "Pre-processing..."))
-        self.epub_preprocess(epub_file)
+        progress_callback.emit((file_id, "Loading epub..."))
+        epub_file.initialize_files(
+            nuke_ruby=self.config.epub_nuke_ruby,
+            nuke_kobo=self.config.epub_nuke_kobo,
+            nuke_indents=self.config.epub_nuke_indents,
             crush_html=self.config.epub_crush,
             make_text_horizontal=self.config.epub_make_text_horizontal,
         )
@@ -321,10 +334,24 @@ class FileTable(CTableWidget):
         """
         Update the table with the result of the glossary processing.
         """
+        # Ignore if the file no longer exists.
         if file_id not in self.files:
             logger.info(f"File {file_id} no longer exists, ignoring result.")
             return
+
         self.recalculate_char_count(file_id)
+        # Try to add the cover as the icon, if this was an epub.
+        file = self.files[file_id]
+        if isinstance(file, st.EpubFile) and file.cover_image is not None:
+            absolute_path = file.cache_dir / file.cover_image
+            try:
+                row = self.findItems(file_id, Qc.Qt.MatchExactly)[0].row()
+                self.item(row, Column.FILENAME).setIcon(Qg.QIcon(str(absolute_path)))
+                logger.info(f"Set cover image for {file_id} to {absolute_path}")
+                file.cover_image = None  # Clear the cover image so it's not loaded again.
+            except OSError as e:
+                logger.error(f"Could not load cover image {absolute_path}")
+                logger.exception(e)
 
     def file_process_worker_progress(self, progress: tuple[str, str]):
         """
@@ -334,6 +361,7 @@ class FileTable(CTableWidget):
         :param progress: The progress tuple: (file_id, message)
         """
         file_id, message = progress
+        # If the file_id no longer exists, ignore.
         if file_id not in self.files:
             logger.info(f"Worker progress for file {file_id} ignored, as it no longer exists.")
             return
@@ -355,25 +383,19 @@ class FileTable(CTableWidget):
         """
         args, kwargs = initial_args
         file_id = kwargs["file_id"]
-        text_file = self.files[file_id]
+        try:
+            text_file = self.files[file_id]
+        except KeyError:
+            # The file was removed from the table before processing finished.
+            logger.info(
+                f"File {file_id} was removed from the table before processing finished. Ignoring worker results."
+            )
+            return
+
         text_file.locked = False
         logger.debug(f"Worker thread {text_file.path} finished.")
         if self.all_files_ready():
             self.ready_for_translation.emit()
-
-    """
-    Epub pre-processing
-    """
-
-    def epub_preprocess(self, epub_file: st.EpubFile):
-
-        epub_file.prepare_text(
-            nuke_ruby=self.config.epub_nuke_ruby,
-            nuke_kobo=self.config.epub_nuke_kobo,
-            nuke_indents=self.config.epub_nuke_indents,
-            crush_html=self.config.epub_crush,
-            make_text_horizontal=self.config.epub_make_text_horizontal,
-        )
 
     """
     Misc.

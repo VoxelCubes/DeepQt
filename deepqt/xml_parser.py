@@ -1,9 +1,14 @@
 import re
+import warnings
+import zipfile
+from pathlib import Path
+from functools import cache
+
 import minify_html
 from bs4 import BeautifulSoup
-import warnings
-
 from logzero import logger
+from lxml import etree
+
 
 # It throws this erroneous warning when encountering xhtml, which may be found in epubs.
 warnings.filterwarnings("ignore", category=UserWarning, module="bs4")
@@ -113,6 +118,10 @@ def html_contains_text(html: str) -> bool:
     return bool(text)
 
 
+# This is an expensive pure function, taking around 300ms to run for an entire epub.
+# When loading multiple epubs, each one triggers a recount when updating parameters.
+# So cache results for a massive speed up: 300ms -> 0.02ms: 15,000x speed up.
+@cache
 def get_char_count(html: str) -> int:
     """
     Get the number of characters in the html.
@@ -181,3 +190,138 @@ def deruby(line: str) -> str:
                     tag += char
 
         return out
+
+
+####################################################################################################
+#
+#  Code below taken and modified from Alamot
+#  https://alamot.github.io/epub_cover/
+#  License: Unlicense
+#
+####################################################################################################
+
+
+def get_epub_cover(epub_path: str | Path) -> Path | None:
+    """
+    Return the cover image file from an epub archive.
+
+    :param epub_path: The path to the epub file.
+    :return: The path to the cover image file, if one was found.
+    """
+
+    # Let's define the required XML namespaces
+    namespaces = {
+        "calibre": "http://calibre.kovidgoyal.net/2009/metadata",
+        "dc": "http://purl.org/dc/elements/1.1/",
+        "dcterms": "http://purl.org/dc/terms/",
+        "opf": "http://www.idpf.org/2007/opf",
+        "u": "urn:oasis:names:tc:opendocument:xmlns:container",
+        "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+        "xhtml": "http://www.w3.org/1999/xhtml",
+    }
+
+    # We open the epub archive using zipfile.ZipFile():
+    with zipfile.ZipFile(epub_path) as z:
+
+        # We load "META-INF/container.xml" using lxml.etree.fromString():
+        t = etree.fromstring(z.read("META-INF/container.xml"))
+        # We use xpath() to find the attribute "full-path":
+        """
+        <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+          <rootfiles>
+            <rootfile full-path="OEBPS/content.opf" ... />
+          </rootfiles>
+        </container>
+        """
+        rootfile_path = t.xpath("/u:container/u:rootfiles/u:rootfile", namespaces=namespaces)[0].get("full-path")
+        logger.debug("Path of root file found: " + rootfile_path)
+
+        # We load the "root" file, indicated by the "full_path" attribute of "META-INF/container.xml", using lxml.etree.fromString():
+        t = etree.fromstring(z.read(rootfile_path))
+
+        cover_href = None
+        try:
+            # For EPUB 2.0, we use xpath() to find a <meta>
+            # named "cover" and get the attribute "content":
+            """
+            <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+              ...
+              <meta content="my-cover-image" name="cover"/>
+              ...
+            </metadata>"""
+
+            cover_id = t.xpath("//opf:metadata/opf:meta[@name='cover']", namespaces=namespaces)[0].get("content")
+            logger.debug("ID of cover image found: " + cover_id)
+            # Next, we use xpath() to find the <item> (in <manifest>) with this id
+            # and get the attribute "href":
+            """
+            <manifest>
+                ...
+                <item id="my-cover-image" href="images/978.jpg" ... />
+                ... 
+            </manifest>
+            """
+            cover_href = t.xpath("//opf:manifest/opf:item[@id='" + cover_id + "']", namespaces=namespaces)[0].get(
+                "href"
+            )
+        except IndexError:
+            pass
+
+        if not cover_href:
+            # For EPUB 3.0, We use xpath to find the <item> (in <manifest>) that
+            # has properties='cover-image' and get the attribute "href":
+            """
+            <manifest>
+              ...
+              <item href="images/cover.png" id="cover-img" media-type="image/png" properties="cover-image"/>
+              ...
+            </manifest>
+            """
+            try:
+                cover_href = t.xpath("//opf:manifest/opf:item[@properties='cover-image']", namespaces=namespaces)[
+                    0
+                ].get("href")
+            except IndexError:
+                pass
+
+        if not cover_href:
+            # Some EPUB files do not declare explicitly a cover image.
+            # Instead, they use an "<img src=''>" inside the first xhmtl file.
+            try:
+                # The <spine> is a list that defines the linear reading order
+                # of the content documents of the book. The first item in the
+                # list is the first item in the book.
+                """
+                <spine toc="ncx">
+                  <itemref idref="cover"/>
+                  <itemref idref="nav"/>
+                  <itemref idref="s04"/>
+                </spine>
+                """
+                cover_page_id = t.xpath("//opf:spine/opf:itemref", namespaces=namespaces)[0].get("idref")
+                # Next, we use xpath() to find the item (in manifest) with this id
+                # and get the attribute "href":
+                cover_page_href = t.xpath(
+                    "//opf:manifest/opf:item[@id='" + cover_page_id + "']", namespaces=namespaces
+                )[0].get("href")
+                # In order to get the full path for the cover page,
+                # we have to join rootfile_path and cover_page_href:
+                cover_page_path = Path(rootfile_path).parent / cover_page_href
+                logger.debug(f"Path of cover page found: {cover_page_path}")
+                # We try to find the <img> and get the "src" attribute:
+                t = etree.fromstring(z.read(cover_page_path))
+                cover_href = t.xpath("//xhtml:img", namespaces=namespaces)[0].get("src")
+            except IndexError:
+                pass
+
+        if not cover_href:
+            logger.warning("Cover image not found.")
+            return None
+
+        # In order to get the full path for the cover image,
+        # we have to join rootfile_path and cover_href:
+        cover_path = Path(rootfile_path).parent / cover_href
+        logger.debug(f"Path of cover image found: {cover_path}")
+
+        # We return the image path
+        return Path(cover_path)

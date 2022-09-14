@@ -13,7 +13,6 @@ import deepqt.config as cfg
 from deepqt.driver_mainwindow import MainWindow
 from deepqt import __program__, __version__, __description__
 
-# TODO epub files
 # TODO Testing
 
 import deepqt.rc_generated_files.fallback_icons_rc

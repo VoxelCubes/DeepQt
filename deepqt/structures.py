@@ -2,7 +2,7 @@ import hashlib
 import re
 from dataclasses import dataclass, field
 from enum import IntEnum
-from functools import partial
+from functools import partial, cache
 from pathlib import Path
 import zipfile
 from logzero import logger
@@ -81,7 +81,8 @@ class TextFile(InputFile):
 
     @property
     def char_count(self):
-        return len(self.current_text())
+        # Use caching to speed up the process, since the text doesn't change often, but can be very long.
+        return text_length(self.current_text())
 
     def get_translated_text(self) -> str | None:
         if self.translation:
@@ -101,6 +102,14 @@ class TextFile(InputFile):
     def clear_translations(self):
         self.translation = ""
         self.translation_chunks = []
+
+
+@cache
+def text_length(text: str) -> int:
+    """
+    Simple wrapper to take advantage of caching.
+    """
+    return len(text)
 
 
 def incomplete_translation_banner() -> str:
@@ -153,7 +162,6 @@ class XMLFile:
     @property
     def char_count(self):
         return xml_parser.get_char_count(self.current_text())
-        # return len(self.current_text())
 
     def get_translated_text(self) -> str | None:
         if self.translation:
@@ -214,29 +222,29 @@ class EpubFile(InputFile):
     html_files: list[HTMLFile] = field(default_factory=list)
     css_files: list[CSSFile] = field(default_factory=list)
     toc_file: TocNCXFile | None = None
-    pre_processed: bool = False
+    initialized: bool = False
+    cover_image: Path | None = None
 
     def __post_init__(self):
         InputFile.__post_init__(self)
         self.cache_dir = Path(self.cache_dir) / self.path.stem
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        # self.epub = ebooklib.epub.read_epub(self.path)
-        # TODO perform this in the preprocess step to not block the UI
-        self.html_files, self.css_files, self.toc_file = extract_epub(self.path, self.cache_dir)
-        # Sort the html files by file name.
-        self.html_files.sort(key=lambda f: f.path.name)
 
-    def prepare_text(
+    def initialize_files(
         self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool, make_text_horizontal: bool
     ):
         """
         Apply heuristic improvements to html files.
         """
 
-        if self.pre_processed:
+        if self.initialized:
             return
 
-        logger.debug(f"Pre-processing {self.path.name}...")
+        logger.debug(f"Initializing {self.path.name}...")
+
+        self.html_files, self.css_files, self.toc_file, self.cover_image = extract_epub(self.path, self.cache_dir)
+        # Sort the html files by file name.
+        self.html_files.sort(key=lambda f: f.path.name)
 
         for html_file in self.html_files:
             html_file.prepare_text(nuke_ruby, nuke_indents, nuke_kobo, crush_html)
@@ -246,7 +254,7 @@ class EpubFile(InputFile):
             for css_file in self.css_files:
                 css_file.text = re.sub(r"writing-mode:\s*vertical-rl;", "writing-mode: horizontal-tb;", css_file.text)
 
-        self.pre_processed = True
+        self.initialized = True
 
     @property
     def char_count(self):
@@ -317,7 +325,7 @@ class EpubFile(InputFile):
         self.toc_file.clear_translations()
 
 
-def extract_epub(epub_path: Path, cache_dir: Path) -> tuple[list[HTMLFile], list[CSSFile], TocNCXFile]:
+def extract_epub(epub_path: Path, cache_dir: Path) -> tuple[list[HTMLFile], list[CSSFile], TocNCXFile, Path | None]:
     """
     Extract the epub file to the cache directory and return a list of XMLFile
     objects representing the html files.
@@ -347,8 +355,12 @@ def extract_epub(epub_path: Path, cache_dir: Path) -> tuple[list[HTMLFile], list
     html_files = [file for file in html_files if xml_parser.html_contains_text(file.text)]
     logger.debug(f"Found {len(html_files)} html files with text in {epub_path}")
 
+    # Find cover of the epub using the metadata.
+    cover_image = xml_parser.get_epub_cover(epub_path)
+    logger.debug(f"Found cover image {cover_image} in {epub_path}")
+
     logger.debug(f"Extracted {len(html_files)} html and toc files.")
-    return html_files, css_files, toc_file
+    return html_files, css_files, toc_file, cover_image
 
 
 @dataclass(slots=True)
