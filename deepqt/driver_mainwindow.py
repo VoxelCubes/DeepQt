@@ -1,7 +1,7 @@
-from functools import partial
-from pathlib import Path
-from math import ceil
 import shutil
+from functools import partial
+from math import ceil
+from pathlib import Path
 
 import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
@@ -19,8 +19,8 @@ from deepqt import __program__, __version__
 from deepqt import helpers as hp
 from deepqt.driver_api_config import ConfigureAccount
 from deepqt.file_table import Column, make_output_filename
-from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 from deepqt.helpers import show_warning, show_info, show_question
+from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 
 
 # noinspection PyUnresolvedReferences

@@ -2,9 +2,9 @@ import PySide6.QtWidgets as Qw
 from logzero import logger
 
 import deepqt.config as cfg
+import deepqt.helpers as hp
 import deepqt.structures as st
 from deepqt.ui_generated_files.ui_epub_preview import Ui_EpubPreview
-import deepqt.helpers as hp
 
 
 class EpubPreview(Qw.QDialog, Ui_EpubPreview):

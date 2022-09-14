@@ -1,10 +1,11 @@
 import platform
 import subprocess
-from pathlib import Path
 import zipfile as zf
+from pathlib import Path
 
 import PySide6.QtWidgets as Qw
 from logzero import logger
+
 
 # For all show functions, pad the dialog message, so that the dialog is not too narrow for the window title.
 MIN_MSG_LENGTH = 50

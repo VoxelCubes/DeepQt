@@ -1,8 +1,8 @@
 import re
 import warnings
 import zipfile
-from pathlib import Path
 from functools import cache
+from pathlib import Path
 
 import minify_html
 from bs4 import BeautifulSoup
@@ -25,8 +25,6 @@ def prepare_html_text(text: str, nuke_ruby: bool, nuke_indents: bool, nuke_kobo:
         text = bust_ruby_tags(text)
     if nuke_indents:
         text = flatten_indents(text)
-
-    # TODO undo text rotation.
 
     # Perform parsed element manipulations.
     soup = BeautifulSoup(text, "lxml")

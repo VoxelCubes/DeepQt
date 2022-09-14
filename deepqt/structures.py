@@ -1,16 +1,16 @@
 import hashlib
 import re
+import zipfile
 from dataclasses import dataclass, field
 from enum import IntEnum
 from functools import partial, cache
 from pathlib import Path
-import zipfile
+
 from logzero import logger
 
-
+import deepqt.helpers as hp
 from deepqt import trie
 from deepqt import xml_parser
-import deepqt.helpers as hp
 
 
 class ProcessLevel(IntEnum):

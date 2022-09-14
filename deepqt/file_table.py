@@ -10,8 +10,8 @@ from PySide6.QtCore import Slot
 from logzero import logger
 
 import deepqt.config as cfg
-import deepqt.driver_text_preview as dtp
 import deepqt.driver_epub_preview as dep
+import deepqt.driver_text_preview as dtp
 import deepqt.glossary as gls
 import deepqt.helpers as hp
 import deepqt.quote_protection as qp
