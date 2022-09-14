@@ -101,8 +101,6 @@ class FileTable(CTableWidget):
         """
         logger.debug(f"Initializing file {path}")
         if path.suffix.lower() == ".epub":
-            epub_file = st.EpubFile(path=path, cache_dir=cfg.epub_cache_path())
-            return epub_file
         else:
             return st.TextFile(path=path)
 
@@ -298,6 +296,9 @@ class FileTable(CTableWidget):
         # Pre-process the epub file.
         progress_callback.emit((file_id, "Pre-processing..."))
         self.epub_preprocess(epub_file)
+            crush_html=self.config.epub_crush,
+            make_text_horizontal=self.config.epub_make_text_horizontal,
+        )
 
         if apply_glossary:
             progress_callback.emit((file_id, "Applying glossary..."))
@@ -320,6 +321,9 @@ class FileTable(CTableWidget):
         """
         Update the table with the result of the glossary processing.
         """
+        if file_id not in self.files:
+            logger.info(f"File {file_id} no longer exists, ignoring result.")
+            return
         self.recalculate_char_count(file_id)
 
     def file_process_worker_progress(self, progress: tuple[str, str]):
@@ -330,6 +334,9 @@ class FileTable(CTableWidget):
         :param progress: The progress tuple: (file_id, message)
         """
         file_id, message = progress
+        if file_id not in self.files:
+            logger.info(f"Worker progress for file {file_id} ignored, as it no longer exists.")
+            return
         self.show_file_progress(file_id, message)
 
     def file_process_worker_error(self, error: wt.WorkerError):

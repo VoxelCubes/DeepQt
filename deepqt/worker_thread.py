@@ -1,7 +1,8 @@
 ##############################################################################################
 #
-#  Worker Threads loosely based on QRunnable
+#  Worker Threads loosely based on QRunnable by Martin Fitzpatrick
 #  https://www.pythonguis.com/tutorials/multithreading-pyside6-applications-qthreadpool/
+#  License: MIT
 #
 ##############################################################################################
 
