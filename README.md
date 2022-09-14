@@ -15,7 +15,7 @@ Harness the power of the DeepL API with this friendly user interface.
 - Higher-level glossaries. [How do they work?](https://github.com/VoxelCubes/DeepQt/blob/master/docs/glossary_help.md)
   Apply replacements even without translating any of the text.
 
-- Support for text files (epub coming eventually)
+- Support for plain text and epub files.
 
 ## Requires
 
@@ -39,8 +39,5 @@ Or download a prepackaged format from the [releases](https://github.com/VoxelCub
 - .exe (Windows)
 
 ## Roadmap
-
-
-- [ ] Support .epub files for translation.
 
 - [ ] Build AppImage or Flatpak.
