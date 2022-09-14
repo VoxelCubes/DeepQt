@@ -234,8 +234,10 @@ class EpubFile(InputFile):
             html_file.prepare_text(nuke_ruby, nuke_indents, nuke_kobo, crush_html)
 
         if make_text_horizontal:
+            logger.debug(f"Making text horizontal in {self.path.name}...")
             for css_file in self.css_files:
-                css_file.text = css_file.text.replace("writing-mode: vertical-rl;", "writing-mode: horizontal-tb;")
+                css_file.text = re.sub(r"writing-mode:\s*vertical-rl;", "writing-mode: horizontal-tb;", css_file.text)
+
 
     @property
     def char_count(self):
