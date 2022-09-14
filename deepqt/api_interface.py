@@ -13,6 +13,7 @@ import deepqt.helpers as hp
 import deepqt.quote_protection as qp
 import deepqt.structures as st
 import deepqt.worker_thread as wt
+import deepqt.xml_parser as xp
 
 
 class Abort(Exception):
@@ -255,7 +256,7 @@ class DeeplWorker(QRunnable):
                         self.total_chars,
                     )
                     if self.config.tl_mock:
-                        translation = self.mock_translate_text(html_file.current_text())
+                        translation = self.mock_translate_text(html_file.current_text(), is_html=True)
                     else:
                         translation = self.try_translate(html_file.current_text(), key, is_html=True)
 
@@ -292,8 +293,13 @@ class DeeplWorker(QRunnable):
                 )
                 if not translation:
                     raise deepl.DeepLException()
+
                 # Claim the chunk as translated.
-                length_processed = len(chunk) if isinstance(chunk, str) else sum(len(c) for c in chunk)
+                if is_html:
+                    length_processed = xp.get_char_count(chunk)
+                else:
+                    length_processed = len(chunk) if isinstance(chunk, str) else sum(len(c) for c in chunk)
+
                 self.processed_chars += length_processed
                 d_time = time.time() - t_start
                 # Calculate how long it took per 1000 chars. Update the average.
@@ -327,11 +333,14 @@ class DeeplWorker(QRunnable):
                 self.state = State.ERROR
                 raise Abort
 
-    def mock_translate_text(self, chunk: str | list[str]) -> deepl.TextResult | list[deepl.TextResult]:
+    def mock_translate_text(
+        self, chunk: str | list[str], is_html: bool = False
+    ) -> deepl.TextResult | list[deepl.TextResult]:
         """
         Mock translation.
 
         :param chunk: The text to translate.
+        :param is_html: Whether the text is html or not.
         """
         logger.info("Mocking translation.")
         time.sleep(1)
@@ -340,7 +349,11 @@ class DeeplWorker(QRunnable):
         else:
             translation = deepl.TextResult(text="Translated" + chunk, detected_source_lang="EN")
         # Pretend that we make progress.
-        self.processed_chars += len(chunk)
+        if is_html:
+            length_processed = xp.get_char_count(chunk)
+        else:
+            length_processed = len(chunk) if isinstance(chunk, str) else sum(len(c) for c in chunk)
+        self.processed_chars += length_processed
         return translation
 
     @Slot()

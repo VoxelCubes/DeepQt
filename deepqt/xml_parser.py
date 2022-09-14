@@ -118,7 +118,9 @@ def get_char_count(html: str) -> int:
     Get the number of characters in the html.
     """
     soup = BeautifulSoup(html, "lxml")
-    return len(soup.text)
+    return len(
+        soup.text,
+    )
 
 
 def deruby(line: str) -> str:

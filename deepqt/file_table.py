@@ -453,8 +453,10 @@ class FileTable(CTableWidget):
 
         :param file_id: The ID of the file to update.
         """
-        text_file = self.files[file_id]
-        self.update_table_cell(file_id, Column.CHARS, hp.format_char_count(text_file.char_count))
+        file = self.files[file_id]
+        char_count = file.char_count
+        logger.debug(f"Recalculating char count for {file.path.name} ({char_count} chars).")
+        self.update_table_cell(file_id, Column.CHARS, hp.format_char_count(char_count))
         self.recalculate_char_total.emit()
 
 
