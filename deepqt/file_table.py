@@ -100,13 +100,6 @@ class FileTable(CTableWidget):
         logger.debug(f"Initializing file {path}")
         if path.suffix.lower() == ".epub":
             epub_file = st.EpubFile(path=path, cache_dir=cfg.epub_cache_path())
-            epub_file.prepare_text(
-                nuke_ruby=self.config.epub_nuke_ruby,
-                nuke_kobo=self.config.epub_nuke_kobo,
-                nuke_indents=self.config.epub_nuke_indents,
-                crush_html=self.config.epub_crush,
-                make_text_horizontal=self.config.epub_make_text_horizontal,
-            )
             return epub_file
         else:
             return st.TextFile(path=path)
@@ -174,9 +167,14 @@ class FileTable(CTableWidget):
         file_id = self.item(row, Column.ID).text()
         file = self.files[file_id]
         file_is_epub = isinstance(file, st.EpubFile)
+        file_needs_preprocessing = file_is_epub and not file.pre_processed
 
         # If not processing, check if the label should be updated to say that changes were reverted.
-        if not self.config.use_glossary and (not self.config.use_quote_protection or file_is_epub):
+        if (
+            not file_needs_preprocessing
+            and not self.config.use_glossary
+            and (not self.config.use_quote_protection or file_is_epub)
+        ):
             if file.process_level != st.ProcessLevel.RAW:
                 file.process_level = st.ProcessLevel.RAW
                 self.item(row, Column.STATUS).setText("Reset to original")
@@ -278,8 +276,8 @@ class FileTable(CTableWidget):
         logger.info(f"Text file {text_file.path} processed.")
         return file_id
 
-    @staticmethod
     def epub_process_work(
+        self,
         file_id: str,
         epub_file: st.EpubFile,
         glossary: st.Glossary,
@@ -295,6 +293,10 @@ class FileTable(CTableWidget):
         :param apply_glossary: True if the glossary is to be applied.
         :param progress_callback: A callback to call with the progress of the processing.
         """
+
+        # Pre-process the epub file.
+        progress_callback.emit((file_id, "Pre-processing..."))
+        self.epub_preprocess(epub_file)
 
         if apply_glossary:
             progress_callback.emit((file_id, "Applying glossary..."))
@@ -352,6 +354,20 @@ class FileTable(CTableWidget):
             self.ready_for_translation.emit()
 
     """
+    Epub pre-processing
+    """
+
+    def epub_preprocess(self, epub_file: st.EpubFile):
+
+        epub_file.prepare_text(
+            nuke_ruby=self.config.epub_nuke_ruby,
+            nuke_kobo=self.config.epub_nuke_kobo,
+            nuke_indents=self.config.epub_nuke_indents,
+            crush_html=self.config.epub_crush,
+            make_text_horizontal=self.config.epub_make_text_horizontal,
+        )
+
+    """
     Misc.
     """
 
@@ -393,7 +409,7 @@ class FileTable(CTableWidget):
                 return False
 
             if isinstance(file, st.TextFile):
-                if self.files[self.item(row, Column.ID).text()].process_level != expected_process_level:
+                if self.files[self.item(row, Column.ID).text()].process_level != expected_process_level_text:
                     return False
             else:
                 if self.files[self.item(row, Column.ID).text()].process_level != expected_process_level_epub:

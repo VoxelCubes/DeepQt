@@ -214,12 +214,14 @@ class EpubFile(InputFile):
     html_files: list[HTMLFile] = field(default_factory=list)
     css_files: list[CSSFile] = field(default_factory=list)
     toc_file: TocNCXFile | None = None
+    pre_processed: bool = False
 
     def __post_init__(self):
         InputFile.__post_init__(self)
         self.cache_dir = Path(self.cache_dir) / self.path.stem
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         # self.epub = ebooklib.epub.read_epub(self.path)
+        # TODO perform this in the preprocess step to not block the UI
         self.html_files, self.css_files, self.toc_file = extract_epub(self.path, self.cache_dir)
         # Sort the html files by file name.
         self.html_files.sort(key=lambda f: f.path.name)
@@ -230,6 +232,12 @@ class EpubFile(InputFile):
         """
         Apply heuristic improvements to html files.
         """
+
+        if self.pre_processed:
+            return
+
+        logger.debug(f"Pre-processing {self.path.name}...")
+
         for html_file in self.html_files:
             html_file.prepare_text(nuke_ruby, nuke_indents, nuke_kobo, crush_html)
 
@@ -238,6 +246,7 @@ class EpubFile(InputFile):
             for css_file in self.css_files:
                 css_file.text = re.sub(r"writing-mode:\s*vertical-rl;", "writing-mode: horizontal-tb;", css_file.text)
 
+        self.pre_processed = True
 
     @property
     def char_count(self):
