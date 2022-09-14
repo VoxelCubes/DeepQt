@@ -419,6 +419,8 @@ class Ui_MainWindow(object):
         self.file_table.setCornerButtonEnabled(False)
         self.file_table.horizontalHeader().setDefaultSectionSize(100)
         self.file_table.horizontalHeader().setStretchLastSection(True)
+        self.file_table.verticalHeader().setMinimumSectionSize(40)
+        self.file_table.verticalHeader().setDefaultSectionSize(40)
 
         self.gridLayout.addWidget(self.file_table, 0, 1, 1, 1)
 

@@ -50,6 +50,9 @@ class FileTable(CTableWidget):
         self.threadpool = Qc.QThreadPool.globalInstance()
         self.finished_drop.connect(lambda: self.request_text_param_update.emit())
 
+        # Make icons larger so the epub covers are more visible.
+        self.setIconSize(Qc.QSize(32, 32))
+
     def set_config(self, config: cfg.Config):
         self.config = config
 
@@ -88,7 +91,6 @@ class FileTable(CTableWidget):
         )
         # Align Char count to the right.
         self.item(self.rowCount() - 1, Column.CHARS).setTextAlignment(Qg.Qt.AlignRight | Qg.Qt.AlignVCenter)
-        self.resizeColumnToContents(Column.OUTPUT)
 
     def initialize_file(self, path: Path) -> st.TextFile | st.EpubFile:
         """
@@ -120,7 +122,6 @@ class FileTable(CTableWidget):
             self.item(row, Column.OUTPUT).setText(str(new_output_filename))
 
         logger.debug("All output filenames updated.")
-        self.resizeColumnToContents(Column.OUTPUT)
 
     """
     Text Processing
@@ -447,6 +448,7 @@ class FileTable(CTableWidget):
         self.removeRow(selected_row)
         # This isn't automatically emitted when removing a row, but is necessary to update the buttons.
         self.itemSelectionChanged.emit()
+
         del self.files[file_id]
         if self.all_files_ready():
             self.ready_for_translation.emit()
