@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/">
+    <file>icons/Breeze/actions/16/document-save.svg</file>
+    <file>icons/BreezeDark/actions/16/document-save.svg</file>
     <file>icons/Breeze/actions/16/data-error.svg</file>
     <file>icons/Breeze/mimetypes/32/application-epub+zip.svg</file>
     <file>icons/Breeze/mimetypes/32/text-x-generic.svg</file>
