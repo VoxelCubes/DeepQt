@@ -2,6 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![PyPI version](https://img.shields.io/pypi/v/deepqt)](https://pypi.org/project/deepqt/)
+[![AUR version](https://img.shields.io/aur/version/deepqt)](https://aur.archlinux.org/packages/deepqt/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Harness the power of the DeepL API with this friendly user interface.
@@ -30,7 +31,14 @@ Download the latest release from [PyPI](https://pypi.org/project/deepqt/).
 ```
 pip install deepqt
 ```
-Run it with `deepqt` from the terminal.
+
+Or on Arch Linux (and derivatives) via the [AUR](https://aur.archlinux.org/packages/deepqt/).
+
+```
+yay -S deepqt
+```
+
+Run it with `deepqt` from the terminal if installed with pip, or like any other application if installed another way.
 
 Or download a prepackaged format from the [releases](https://github.com/VoxelCubes/DeepQt/releases/latest) page:
 
