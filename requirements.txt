@@ -10,4 +10,5 @@ pyexcel-htmlr
 
 beautifulsoup4
 minify_html
+lxml
 setuptools
