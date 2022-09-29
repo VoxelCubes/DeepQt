@@ -81,4 +81,4 @@ class TextPreview(Qw.QDialog, Ui_TextPreview):
                 with open(file_path, "w", encoding="utf8") as f:
                     f.write(preview_text.toPlainText())
             except OSError as e:
-                Qw.QMessageBox.critical(self, "Error", f"Could not save preview to {file_path}\n\n{e}")
+                Qw.QMessageBox.warning(self, "Error", f"Could not save preview to {file_path}\n\n{e}")

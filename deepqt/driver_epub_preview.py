@@ -120,4 +120,4 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
             try:
                 self.epub_file.write(process_level=process_level, output_path=file_path)
             except OSError as e:
-                Qw.QMessageBox.critical(self, "Error", f"Could not save preview to {file_path}\n\n{e}")
+                Qw.QMessageBox.warning(self, "Error", f"Could not save preview to {file_path}\n\n{e}")
