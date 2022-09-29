@@ -329,6 +329,10 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_10.addWidget(self.label_api_usage)
 
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_10.addItem(self.horizontalSpacer_3)
+
 
         self.formLayout_2.setLayout(1, QFormLayout.FieldRole, self.horizontalLayout_10)
 
