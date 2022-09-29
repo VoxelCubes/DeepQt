@@ -16,6 +16,11 @@ import deepqt.worker_thread as wt
 import deepqt.xml_parser as xp
 
 
+# The DeepL API requires a limit of 128kB per request.
+# Use 100kB to be safe.
+API_MAX_BYTES = 100_000
+
+
 class Abort(Exception):
     """
     Exception to abort the worker.
@@ -255,12 +260,19 @@ class DeeplWorker(QRunnable):
                         self.processed_chars,
                         self.total_chars,
                     )
-                    if self.config.tl_mock:
-                        translation = self.mock_translate_text(html_file.current_text(), is_html=True)
-                    else:
-                        translation = self.try_translate(html_file.current_text(), key, is_html=True)
+                    html_text = html_file.current_text()
+                    chunks = partition_text_max_bytes(html_text, API_MAX_BYTES)
+                    translations = []
+                    for chunk in chunks:
 
-                    html_file.translation = translation.text
+                        if self.config.tl_mock:
+                            translation = self.mock_translate_text(chunk, is_html=True)
+                        else:
+                            translation = self.try_translate(chunk, key, is_html=True)
+
+                        translations.append(translation.text)
+
+                    html_file.translation = "".join(translations)
                     # logger.debug(f"Translation: {translation.text}")
                 self.signals.progress.emit(
                     key,
@@ -283,6 +295,7 @@ class DeeplWorker(QRunnable):
         tries = 1
         while True:
             try:
+                logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes.")
                 t_start = time.time()
                 translation = self.translator.translate_text(
                     chunk,
@@ -308,30 +321,30 @@ class DeeplWorker(QRunnable):
                 logger.info(f"Translation took {d_time:.2f} seconds, {time_per_mille:.3f} seconds per 1000 chars.")
                 return translation
 
-            except deepl.TooManyRequestsException:
+            except deepl.TooManyRequestsException as e:
                 if tries >= 5:
-                    logger.error(f"Too many requests. Aborting.")
+                    logger.error(f"Too many requests. Aborting.\n\n{e}")
                     self.signals.progress.emit(key, "Too many requests. Aborting!", None, None)
                     self.state = State.ERROR
-                    raise Abort
+                    raise e
 
                 logger.warning(f"Too many requests. Sleeping for 5 seconds.")
                 self.signals.progress.emit(key, "Too many requests. Waiting...", None, None)
                 time.sleep(5)
                 tries += 1
                 continue
-            except deepl.QuotaExceededException:
-                logger.error("Quota exceeded. Aborting.")
+            except deepl.QuotaExceededException as e:
+                logger.error(f"Quota exceeded. Aborting.\n\n{e}")
                 # Don't immediately abort, at least finish the current chunk for a cleaner dump.
                 # Merely setting the flag will raise the Abort signal when the next chunk starts.
                 self.state = State.QUOTA_EXCEEDED
                 self.signals.progress.emit(key, "API Quota Exceeded!", None, None)
                 return quota_exceeded_banner()
-            except deepl.DeepLException:
-                logger.error("Translation failed. Aborting.")
+            except deepl.DeepLException as e:
+                logger.error(f"Translation failed. Aborting: {e}")
                 self.signals.progress.emit(key, "Translation Failed!", None, None)
                 self.state = State.ERROR
-                raise Abort
+                raise e
 
     def mock_translate_text(
         self, chunk: str | list[str], is_html: bool = False
@@ -343,6 +356,7 @@ class DeeplWorker(QRunnable):
         :param is_html: Whether the text is html or not.
         """
         logger.info("Mocking translation.")
+        logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes.")
         time.sleep(1)
         if isinstance(chunk, list):
             return [deepl.TextResult(text="Translated " + text, detected_source_lang="EN") for text in chunk]
@@ -394,6 +408,44 @@ def partition_text(text: str, max_chunks: int, min_chunk_size: int) -> list[str]
         while lines and (current_len < approx_chunk_size or i == bucket_count - 1):
             temp_chunk.append(lines.pop(0))
             current_len += len(temp_chunk[-1])
+        # Smelt the temp chunk into a real chunk.
+        chunks.append("".join(temp_chunk))
+
+    # Split any chunks that exceed the API limit.
+    final_chunks = []
+    for chunk in chunks:
+        final_chunks += partition_text_max_bytes(chunk, API_MAX_BYTES)
+
+    # Sanity check.
+    if text_length(chunks) != len(text):
+        logger.error(f"Text length mismatch. Expected {len(text)}, got {text_length(final_chunks)}.")
+        raise ValueError("Text length mismatch.")
+
+    return final_chunks
+
+
+def partition_text_max_bytes(text: str, max_size: int) -> list[str]:
+    """
+    Partition the input files into text_chunks.
+    The text size may not exceed the maximum number of bytes required by the API.
+    The text length here is for the UTF-8 encoded text.
+
+    :param text: The text to partition.
+    :param max_size: The maximum size of each temp_chunk in bytes.
+
+    :return: A list of text chunks.
+    """
+    # Split the text into chunks of at most max_size.
+    # Split only at whole lines.
+    chunks = []
+    lines = text.splitlines(keepends=True)
+    while lines:
+        temp_chunk = []
+        current_len = 0
+        while lines and current_len < max_size:
+            temp_chunk.append(lines.pop(0))
+            # Measure the length of the string as the number of UTF-8 bytes.
+            current_len += len(temp_chunk[-1].encode("utf-8"))
         # Smelt the temp chunk into a real chunk.
         chunks.append("".join(temp_chunk))
 
