@@ -128,6 +128,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         logger.info("Closing window.")
         self.abort_translation_worker.emit()
         if self.threadpool.activeThreadCount():
+            self.statusbar.showMessage("Waiting for threads to finish...")
+            # Process Qt events so that the message shows up.
+            Qc.QCoreApplication.processEvents()
             self.threadpool.waitForDone()
 
         nuke_epub_cache()
@@ -559,12 +562,27 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
 
         file = self.file_table.files[file_id]
-        if isinstance(file, st.TextFile):
-            self.write_output_text_file(file_id)
-        elif isinstance(file, st.EpubFile):
-            self.write_output_epub_file(file_id)
-        else:
-            raise TypeError(f"Unknown file type: {file}")
+        try:
+            if isinstance(file, st.TextFile):
+                self.write_output_text_file(file_id)
+            elif isinstance(file, st.EpubFile):
+                self.write_output_epub_file(file_id)
+            else:
+                raise TypeError(f"Unknown file type: {file}")
+
+        except OSError as e:
+            path_out = make_output_filename(file, self.config)
+            logger.error(f"Failed to write translation to {path_out}.\n{e}\n\n")
+            show_warning(
+                self,
+                "Output Error",
+                f"Failed to write translation to {path_out}.\n\n{e}\n\n"
+                f"Please make sure you have write permissions to the output directory.\n"
+                f"To save the translation in another location without needing to re-translate, "
+                f'select your file, then click the "preview" button.\n'
+                f'There, select the translated version and press the "Save Preview to File" button.',
+            )
+            self.file_table.show_file_progress(file_id, "Could not write output!")
 
     def write_output_text_file(self, file_id: str):
         """
@@ -589,21 +607,16 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.file_table.show_file_progress(file_id, "Not translated.")
             return
         else:
-            try:
-                # Ensure the output directory exists.
-                path_out.parent.mkdir(parents=True, exist_ok=True)
+            # Ensure the output directory exists.
+            path_out.parent.mkdir(parents=True, exist_ok=True)
 
-                with open(path_out, "w", encoding="utf-8") as f:
-                    f.write(text_out)
-                    logger.info(f"Wrote translation to {path_out}")
-                    if file.translation_incomplete():
-                        self.file_table.show_file_progress(file_id, "Incomplete output written.")
-                    else:
-                        self.file_table.show_file_progress(file_id, "Translation written.")
-            except OSError as e:
-                logger.error(f"Failed to write translation to {path_out}.\n{e}")
-                show_warning(self, "Output Error", f"Failed to write translation to {path_out}.")
-                self.file_table.show_file_progress(file_id, "Could not write output!")
+            with open(path_out, "w", encoding="utf-8") as f:
+                f.write(text_out)
+                logger.info(f"Wrote translation to {path_out}")
+                if file.translation_incomplete():
+                    self.file_table.show_file_progress(file_id, "Incomplete output written.")
+                else:
+                    self.file_table.show_file_progress(file_id, "Translation written.")
 
     def write_output_epub_file(self, file_id: str):
         """

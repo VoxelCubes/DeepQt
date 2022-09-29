@@ -517,7 +517,10 @@ def make_output_filename(input_file: st.InputFile, config: cfg.Config) -> Path:
         path = path.with_suffix(".DUMP")
 
     if config.use_fixed_output_path:
-        path = Path(config.fixed_output_path) / path.name
+        # Make the fixed output path absolute, meaning it isn't relative to the
+        # current working directory.
+        path = Path("/") / config.fixed_output_path / path.name
+        path = path.resolve()
 
     path = hp.ensure_unique_file_path(path)
 
