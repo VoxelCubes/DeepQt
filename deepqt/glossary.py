@@ -208,7 +208,8 @@ def process_lines(
         # Run unoptimized regex to prevent individual regex from interfering with each other.
         if glossary.regex_terms:
             for term, pattern in glossary.regex_terms.items():
-                line = re.sub(term, glossary.regex_terms[term], line)
+                # Perform operation in gmx mode.
+                line = re.sub(term, glossary.regex_terms[term], line, flags=re.MULTILINE)
 
         if glossary.post_terms:
             line = glossary.post_pattern.sub(lambda match: glossary.post_terms[match.group()], line)
