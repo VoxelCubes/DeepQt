@@ -479,7 +479,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             warning_msg = (
                 f"You are about to translate {hp.format_char_count(total_chars)} "
                 f"{hp.f_plural(total_chars, 'character')}, "
-                f"which exceeds your character limit of {hp.format_char_count(allowed_chars)}.\nProceed anyway?"
+                f"which exceeds your remaining character limit of {hp.format_char_count(allowed_chars)}.\nProceed anyway?"
             )
         # Ask the user if he wants to proceed, just in case.
         logger.info(f"Character limit warning: {warning_msg}")
@@ -497,7 +497,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         :param exit_code: The exit code of the translation.
         """
 
-        logger.info("Translation finished.")
+        logger.info(f"Translation finished with exit code {exit_code}")
         self.text_output_changed.emit()
 
         if exit_code == ai.State.DONE:
@@ -512,6 +512,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             if self.config.dump_on_abort:
                 for file_id in self.file_table.files:
                     self.write_output_file(file_id)
+        # TODO
+        elif exit_code == ai.State.QUOTA_EXCEEDED:
+            self.statusbar.showMessage("API quota exceeded.")
+            show_warning(self, "API Quota Exceeded", "The DeepL API quota has been exceeded.\nDumping output files.")
+            for file_id in self.file_table.files:
+                self.write_output_file(file_id)
 
         self.translation_worker_finished()
 
@@ -791,7 +797,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         Update the translation status label.
         """
         if char_total == 0:
-            logger.error("Total character count is 0. Nothing to do.")
+            logger.info("Total character count is 0. Nothing to do.")
             return
         char_text = hp.format_char_count(processed_chars) + " / " + hp.format_char_count(char_total)
         time_total = ceil(self.config.avg_time_per_mille * (char_total - processed_chars) / 1000)
