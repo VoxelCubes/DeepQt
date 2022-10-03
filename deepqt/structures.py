@@ -231,7 +231,13 @@ class EpubFile(InputFile):
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
     def initialize_files(
-        self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool, make_text_horizontal: bool
+        self,
+        nuke_ruby: bool,
+        nuke_indents: bool,
+        nuke_kobo: bool,
+        crush_html: bool,
+        make_text_horizontal: bool,
+        ignore_empty: bool,
     ):
         """
         Apply heuristic improvements to html files.
@@ -243,6 +249,14 @@ class EpubFile(InputFile):
         logger.debug(f"Initializing {self.path.name}...")
 
         self.html_files, self.css_files, self.toc_file, self.cover_image = extract_epub(self.path, self.cache_dir)
+
+        # Ignore files that contain no actual text (tags aside).
+        logger.debug(f"Found {len(self.html_files)} html files in {self.path}")
+
+        if ignore_empty:
+            self.html_files = [file for file in self.html_files if xml_parser.html_contains_text(file.text)]
+            logger.debug(f"Found {len(self.html_files)} html files with text in {self.path}")
+
         # Sort the html files by file name.
         self.html_files.sort(key=lambda f: f.path.name)
 
@@ -349,11 +363,6 @@ def extract_epub(epub_path: Path, cache_dir: Path) -> tuple[list[HTMLFile], list
 
     if not toc_file:
         raise ValueError(f"No table of contents toc.ncx file found in {epub_path}. This isn't a valid epub file.")
-
-    # Ignore files that contain no actual text (tags aside).
-    logger.debug(f"Found {len(html_files)} html files in {epub_path}")
-    html_files = [file for file in html_files if xml_parser.html_contains_text(file.text)]
-    logger.debug(f"Found {len(html_files)} html files with text in {epub_path}")
 
     # Find cover of the epub using the metadata.
     cover_image = xml_parser.get_epub_cover(epub_path)

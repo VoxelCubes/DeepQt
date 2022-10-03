@@ -35,6 +35,7 @@ class Config:
     epub_nuke_indents: bool
     epub_crush: bool
     epub_make_text_horizontal: bool
+    epub_ignore_empty_html: bool
     # Timing history.
     avg_time_per_mille: float
 
@@ -169,6 +170,7 @@ def default_config() -> Config:
         epub_nuke_indents=True,
         epub_make_text_horizontal=True,
         epub_crush=False,  # This could confuse deepl and subsequent epub readers too much.
+        epub_ignore_empty_html=True,
         avg_time_per_mille=0.33,  # This was measured experimentally. Depends on local internet connection.
     )
 

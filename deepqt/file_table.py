@@ -311,6 +311,7 @@ class FileTable(CTableWidget):
             nuke_indents=self.config.epub_nuke_indents,
             crush_html=self.config.epub_crush,
             make_text_horizontal=self.config.epub_make_text_horizontal,
+            ignore_empty=self.config.epub_ignore_empty_html,
         )
 
         if apply_glossary:
