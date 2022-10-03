@@ -164,7 +164,7 @@ def default_config() -> Config:
         tl_min_chunk_size=10_000,
         tl_preserve_formatting=True,
         tl_mock=False,
-        dump_on_abort=False,
+        dump_on_abort=True,
         epub_nuke_kobo=True,
         epub_nuke_ruby=True,
         epub_nuke_indents=True,
