@@ -335,6 +335,7 @@ class FileTable(CTableWidget):
         """
         Update the table with the result of the glossary processing.
         """
+        logger.debug(f"Worker thread {file_id} finished.")
         # Ignore if the file no longer exists.
         if file_id not in self.files:
             logger.info(f"File {file_id} no longer exists, ignoring result.")
