@@ -13,7 +13,6 @@ import deepqt.config as cfg
 from deepqt.driver_mainwindow import MainWindow
 from deepqt import __program__, __version__, __description__
 
-# TODO Allow not-skipping text-less html in secret config
 # TODO Testing
 
 import deepqt.rc_generated_files.fallback_icons_rc
@@ -22,7 +21,7 @@ import deepqt.rc_generated_files.fallback_icons_rc
 def main():
     # Parse command line arguments
     # args:
-    #   --mock: Use the deepl mock server on localhost:3000.
+    #   --mock: Pretend to translate but don't actually use the API.
     #   --debug-api: Show DeepL API debug messages.
     #   --quieter-logs: Don't log debug messages.
     #   --icon-theme: Use the specified icon theme. Included are "Breeze" and "BreezeDark". Default to system theme.
@@ -60,13 +59,6 @@ def main():
         logger.info("Enabled debugging network requests.")
         logging.basicConfig()
         logging.getLogger("deepl").setLevel(logging.DEBUG)
-
-    if args.mock:
-        logger.info("Mock server enabled.")
-        os.environ["DEEPL_MOCK_SERVER_PORT"] = "3000"
-        os.environ["DEEPL_MOCK_PROXY_SERVER_PORT"] = "3001"
-        os.environ["DEEPL_SERVER_URL"] = "http://localhost:3000"
-        os.environ["DEEPL_PROXY_URL"] = "http://localhost:3001"
 
     Qw.QApplication.setAttribute(Qc.Qt.AA_EnableHighDpiScaling, True)
 
