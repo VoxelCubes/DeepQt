@@ -20,8 +20,6 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
 
         self.buttonBox.helpRequested.connect(self.show_api_help)
 
-        self.comboBox_api_type.setCurrentIndex(1 if config.is_pro_version else 0)
-
     def show_api_help(self):
         """
         Show the deepl api documentation in a web browser.
