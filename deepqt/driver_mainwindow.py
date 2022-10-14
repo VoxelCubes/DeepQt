@@ -512,7 +512,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             if self.config.dump_on_abort:
                 for file_id in self.file_table.files:
                     self.write_output_file(file_id)
-        # TODO
+
         elif exit_code == ai.State.QUOTA_EXCEEDED:
             self.statusbar.showMessage("API quota exceeded.")
             show_warning(self, "API Quota Exceeded", "The DeepL API quota has been exceeded.\nDumping output files.")
@@ -656,17 +656,23 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     def set_up_statusbar(self):
         """
         Add a label to show the current char total and time estimate.
+        Add a flat button to the statusbar to offer opening the config file.
         Add a flat button to the statusbar to offer opening the log file.
         """
         self.statusbar.setSizeGripEnabled(False)
+        self.statusbar.setContentsMargins(0, 0, 6, 0)
 
         self.label_stats = Qw.QLabel("")
         self.statusbar.addPermanentWidget(self.label_stats)
 
+        button_config = Qw.QPushButton("Open Config")
+        button_config.clicked.connect(partial(hp.open_file, cfg.config_path()))
+        button_config.setFlat(True)
+        self.statusbar.addPermanentWidget(button_config)
+
         button_log = Qw.QPushButton("Open Log")
         button_log.clicked.connect(partial(hp.open_file, cfg.log_path()))
         button_log.setFlat(True)
-        self.statusbar.setContentsMargins(0, 0, 6, 0)
         self.statusbar.addPermanentWidget(button_log)
 
     """
