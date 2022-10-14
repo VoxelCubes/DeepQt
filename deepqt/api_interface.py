@@ -295,7 +295,8 @@ class DeeplWorker(QRunnable):
         tries = 1
         while True:
             try:
-                logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes.")
+                if isinstance(chunk, str):
+                    logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes.")
                 t_start = time.time()
                 translation = self.translator.translate_text(
                     chunk,
