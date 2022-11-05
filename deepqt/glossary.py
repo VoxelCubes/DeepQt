@@ -3,9 +3,25 @@ from pathlib import Path
 from typing import Any
 
 import pyexcel
+import pyexcel_io
+import pyexcel_odsr
+import pyexcel_xls
+import pyexcel_xlsx
+import pyexcel_htmlr
 from logzero import logger
 
 import deepqt.structures as st
+
+
+def make_imports_used_so_they_dont_get_auto_removed():
+    # Never call this function.
+    # It purely serves to distract the linter from removing the imports,
+    # so that they get included in pyinstaller builds.
+    pyexcel_io.io.get_data()
+    pyexcel_odsr.get_data()
+    pyexcel_xls.get_data()
+    pyexcel_xlsx.get_data()
+    pyexcel_htmlr.get_data()
 
 
 def process_text(text: str, glossary: st.Glossary) -> str:

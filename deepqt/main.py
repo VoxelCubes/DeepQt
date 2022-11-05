@@ -14,6 +14,8 @@ from deepqt.driver_mainwindow import MainWindow
 from deepqt import __program__, __version__, __description__
 
 # TODO Testing
+# TODO file chooser borked
+# TODO open logs borked on windows
 
 import deepqt.rc_generated_files.fallback_icons_rc
 
