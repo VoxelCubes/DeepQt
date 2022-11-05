@@ -453,7 +453,7 @@ class FileTable(CTableWidget):
         Browse for a file and add it to the table.
         Supported file types: txt and epub.
         """
-        path = Qw.QFileDialog.getOpenFileName(self, "Select file", "", "Text files (*.txt);Epub files (*.epub)")[0]
+        path = Qw.QFileDialog.getOpenFileName(self, "Select file", filter="Text or Epub (*.txt *.epub)")[0]
         if path:
             self.add_file(Path(path))
             self.request_text_param_update.emit()
