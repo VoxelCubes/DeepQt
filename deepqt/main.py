@@ -1,11 +1,9 @@
-import os
 import sys
 import argparse
 import platform
 
 import PySide6.QtWidgets as Qw
 import PySide6.QtGui as Qg
-import PySide6.QtCore as Qc
 import logzero
 from logzero import logger
 
@@ -61,8 +59,6 @@ def main():
         logger.info("Enabled debugging network requests.")
         logging.basicConfig()
         logging.getLogger("deepl").setLevel(logging.DEBUG)
-
-    Qw.QApplication.setAttribute(Qc.Qt.AA_EnableHighDpiScaling, True)
 
     # Set up icon theme.
     if args.icon_theme:
