@@ -51,6 +51,7 @@ def main():
     # Log up to 200KB to the log file.
     logzero.logfile(str(cfg.log_path()), maxBytes=200 * 2**10, backupCount=1, loglevel=logzero.DEBUG)
     logger.info("---- Starting up ----")
+    logger.info(f"Program: {__program__} {__version__}")
     logger.info(f"Log file is {cfg.log_path()}")
 
     if args.debug_api:
