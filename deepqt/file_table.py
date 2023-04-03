@@ -181,7 +181,7 @@ class FileTable(CTableWidget):
         # If not processing, check if the label should be updated to say that changes were reverted.
         if (
             not file_needs_preprocessing
-            and not self.config.use_glossary
+            and not (self.config.use_glossary and glossary.is_valid())
             and (not self.config.use_quote_protection or file_is_epub)
         ):
             if file.process_level != st.ProcessLevel.RAW:
@@ -210,7 +210,7 @@ class FileTable(CTableWidget):
                 file_id=file_id,
                 text_file=file,
                 glossary=glossary_to_pass,
-                apply_glossary=self.config.use_glossary,
+                apply_glossary=self.config.use_glossary and glossary.is_valid(),
                 apply_protection=self.config.use_quote_protection,
             )
             logger.debug(
@@ -224,7 +224,7 @@ class FileTable(CTableWidget):
                 file_id=file_id,
                 epub_file=file,
                 glossary=glossary_to_pass,
-                apply_glossary=self.config.use_glossary,
+                apply_glossary=self.config.use_glossary and glossary.is_valid(),
             )
             logger.debug(
                 f"Worker Thread processing epub file {file.path}: " f"Glossary: {glossary_to_pass is not None}"

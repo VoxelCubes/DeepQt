@@ -109,7 +109,9 @@ def text_length(text: str) -> int:
     """
     Simple wrapper to take advantage of caching.
     """
-    return len(text)
+    length = len(text)
+    logger.debug(f"Text length: {length}")
+    return length
 
 
 def incomplete_translation_banner() -> str:
