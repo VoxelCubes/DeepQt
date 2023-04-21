@@ -106,6 +106,8 @@ def config_path() -> Path:
         return Path(XDG_CONFIG_HOME, __program__.lower() + "rc")
     elif platform.system() == "Windows":
         return Path(os.getenv("APPDATA"), __program__.lower(), "config.ini")
+    elif platform.system() == "Darwin":
+        return Path(os.getenv("HOME"), "Library", "Preferences", __program__.lower() + "rc")
     else:  # ???
         raise NotImplementedError("Your OS is currently not supported.")
 
@@ -120,6 +122,8 @@ def cache_path() -> Path:
         return Path(XDG_CACHE_HOME, __program__.lower())
     elif platform.system() == "Windows":
         return Path(os.getenv("APPDATA"), __program__.lower())
+    elif platform.system() == "Darwin":
+        return Path(os.getenv("HOME"), "Library", "Caches", __program__.lower())
     else:  # ???
         raise NotImplementedError("Your OS is currently not supported.")
 

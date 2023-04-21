@@ -71,7 +71,7 @@ def main():
             Qg.QIcon.setThemeName("BreezeDark")
         else:
             raise ValueError(f"Unknown icon theme: {args.icon_theme}")
-    elif platform.system() == "Windows":
+    elif platform.system() == "Windows" or platform.system() == "Darwin":
         # Default to Breeze on Windows.
         logger.info("Using Breeze icon theme.")
         Qg.QIcon.setThemeName("Breeze")
