@@ -22,6 +22,7 @@ class Config:
     use_quote_protection: bool
 
     api_key: str
+    is_pro_version: bool
 
     # Advanced options.
     tl_max_chunks: int
@@ -162,6 +163,7 @@ def default_config() -> Config:
         use_glossary=True,
         use_quote_protection=True,
         api_key="",
+        is_pro_version=False,
         tl_max_chunks=20,
         tl_min_chunk_size=10_000,
         tl_preserve_formatting=True,
