@@ -17,8 +17,9 @@ import deepqt.xml_parser as xp
 
 
 # The DeepL API requires a limit of 128kB per request.
-# Use 100kB to be safe.
-API_MAX_BYTES = 100_000
+# Use 40kB to be safe. 70kB was apparently too much in some instances, despite the limit being set to 100kB.
+# API_MAX_BYTES = 100_000
+API_MAX_BYTES = 25_000
 
 
 class Abort(Exception):
@@ -271,6 +272,14 @@ class DeeplWorker(QRunnable):
                             translation = self.try_translate(chunk, key, is_html=True)
 
                         translations.append(translation.text)
+                        
+                        self.check_aborted()
+                        self.signals.progress.emit(
+                            key,
+                            f"Translating file {i + 2} / {input_file.file_count}",  # +2 because of toc.ncx and 0-indexing.
+                            self.processed_chars,
+                            self.total_chars,
+                        )
 
                     html_file.translation = "".join(translations)
                     # logger.debug(f"Translation: {translation.text}")
@@ -296,7 +305,12 @@ class DeeplWorker(QRunnable):
         while True:
             try:
                 if isinstance(chunk, str):
-                    logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes.")
+                    logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes, {len(chunk):n} chars.")
+                else:
+                    logger.debug(
+                        f"Requesting translation of {sum(len(c.encode('utf-8')) for c in chunk):n} bytes, "
+                        f"{sum(len(c) for c in chunk):n} chars, split into {len(chunk)} chunks."
+                    )
                 t_start = time.time()
                 translation = self.translator.translate_text(
                     chunk,
@@ -357,7 +371,13 @@ class DeeplWorker(QRunnable):
         :param is_html: Whether the text is html or not.
         """
         logger.info("Mocking translation.")
-        logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes.")
+        if isinstance(chunk, str):
+            logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes, {len(chunk):n} chars.")
+        else:
+            logger.debug(
+                f"Requesting translation of {sum(len(c.encode('utf-8')) for c in chunk):n} bytes, "
+                f"{sum(len(c) for c in chunk):n} chars, split into {len(chunk)} chunks."
+            )
         time.sleep(1)
         if isinstance(chunk, list):
             return [deepl.TextResult(text="Translated " + text, detected_source_lang="EN") for text in chunk]

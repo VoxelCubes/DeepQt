@@ -165,7 +165,7 @@ def default_config() -> Config:
         api_key="",
         is_pro_version=False,
         tl_max_chunks=20,
-        tl_min_chunk_size=10_000,
+        tl_min_chunk_size=5_000,
         tl_preserve_formatting=True,
         tl_mock=False,
         dump_on_abort=True,
