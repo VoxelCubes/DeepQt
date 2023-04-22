@@ -1,3 +1,4 @@
+import re
 import PySide6.QtWidgets as Qw
 
 import deepqt.config as cfg
@@ -22,6 +23,17 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
 
         self.comboBox_api_type.setCurrentIndex(1 if config.is_pro_version else 0)
 
+    def get_key(self):
+        """
+        If the api is supposed to be PRO, remove :fx from the key and vice versa.
+        """
+        key = self.lineEdit_api_key.text().strip()
+        if self.comboBox_api_type.currentIndex() == 1:
+            key = re.sub(":fx$", "", key)
+        else:
+            key = re.sub("^(.*?)(:fx)?$", r"\1:fx", key)
+        return key
+    
     def show_api_help(self):
         """
         Show the deepl api documentation in a web browser.

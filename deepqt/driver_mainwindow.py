@@ -318,7 +318,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         response = api_conf_dialog.exec()
         if response == Qw.QDialog.Accepted:
             # Adopt changes from the dialog.
-            self.config.api_key = api_conf_dialog.lineEdit_api_key.text()
+            self.config.api_key = api_conf_dialog.get_key()
             self.config.is_pro_version = api_conf_dialog.comboBox_api_type.currentIndex() == 1
             self.config.save()
             self.load_config_to_ui()
