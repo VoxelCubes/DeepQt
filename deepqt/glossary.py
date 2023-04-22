@@ -13,6 +13,13 @@ from logzero import logger
 import deepqt.structures as st
 
 
+class UnsupportedFileType(Exception):
+    """
+    Exception raised when an unsupported file type is encountered.
+    """
+
+    pass
+
 def make_imports_used_so_they_dont_get_auto_removed():
     # Never call this function.
     # It purely serves to distract the linter from removing the imports,
@@ -95,7 +102,12 @@ def parse_glossary_file(path: Path, glossary: st.Glossary):
     :param glossary: The glossary structure to write into.
     """
 
-    workbook = pyexcel.get_book_dict(file_name=str(path))
+    try:
+        workbook = pyexcel.get_book_dict(file_name=str(path))
+    except pyexcel.exceptions.FileTypeNotSupported:
+        logger.error(f"File type not supported for: {path}")
+        raise UnsupportedFileType(f"File type '{path.suffix}' not supported for: {path}\n\n"
+                                  f"Glossaries are expected to be spreadsheets in .ods, .xlsx, .csv etc. format.")
 
     # Pyexcel inserts comment text into cells, which we need to remove using the comment pattern.
     pattern = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*?\n")
