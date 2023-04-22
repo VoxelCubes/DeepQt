@@ -4,6 +4,8 @@ These glossaries do not take advantage of DeepL's integrated glossaries, however
 You can preview the changes the glossary made and even save that preview to a file. This way, you can also use DeepQt
 as a powerful replacement engine for text files and epubs alike.
 
+Check out some handy [templates to get you started](https://github.com/VoxelCubes/DeepQt/tree/master/Glossary%20Templates).
+
 To see what the glossary does to your text, click the "Preview" button. This will show you the text with the 
 glossary applied.
 And if you like what you see, you can save the preview to a file.
