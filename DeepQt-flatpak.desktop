@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=DeepQt
+Comment= Harness the power of the DeepL API.
+GenericName=Computer Aided Translation
+Icon=deepqt
+Exec=flatpak run com.voxel.deepqt
+Terminal=false
+Categories=Utility
