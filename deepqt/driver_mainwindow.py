@@ -22,6 +22,8 @@ from deepqt.file_table import Column, make_output_filename
 from deepqt.helpers import show_warning, show_info, show_question
 from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 
+DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
+
 
 # noinspection PyUnresolvedReferences
 class MainWindow(Qw.QMainWindow, Ui_MainWindow):
@@ -352,7 +354,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
                 translator.get_source_languages()
                 return translator
         except Exception as e:
-            show_warning(self, "API Error", f"Failed connect to DeepL API\n\n{e}")
+            show_warning(self, "API Error", f"Failed to connect to DeepL API\n\n{e}")
             return None
 
     def update_file_table_params(self):
@@ -745,8 +747,11 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         count_str = hp.format_char_count(count)
         limit_str = hp.format_char_count(limit)
-
-        self.label_api_usage.setText(f"{percentage:.2f}%  {count_str} / {limit_str} characters")
+        
+        if limit == DEEPL_USAGE_UNLIMITED:
+            self.label_api_usage.setText(f"{count_str} characters / Unlimited")
+        else:
+            self.label_api_usage.setText(f"{percentage:.2f}%  {count_str} / {limit_str} characters")
 
         if percentage < 90:
             self.label_api_usage_warn_icon.hide()
