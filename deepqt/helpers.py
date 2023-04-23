@@ -111,7 +111,7 @@ def open_file(path: Path):
         if platform.system() == "Linux":
             subprocess.run(["xdg-open", path])
         elif platform.system() == "Windows":
-            subprocess.run(["start", path])
+            subprocess.run(["start", path], shell=True)
         elif platform.system() == "Darwin":
             subprocess.run(["open", path])
     except Exception as e:
