@@ -13,7 +13,8 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
     """
 
     def __init__(self, parent, config: cfg.Config):
-        Qw.QDialog.__init__(self, parent=parent)
+        # Don't pass the parent due to a bug in PySide6.
+        Qw.QDialog.__init__(self)
         self.setupUi(self)
 
         self.lineEdit_api_key.setText(config.api_key)
