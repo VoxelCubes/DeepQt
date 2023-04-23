@@ -466,22 +466,29 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Check if the allotted character count won't exceed the quota.
         total_chars = sum(file.char_count for file in self.file_table.files.values())
         api_usage = translator.get_usage()
-        allowed_chars = api_usage.character.limit - api_usage.character.count
-        remaining_chars = allowed_chars - total_chars
-        warning_msg = (
-            f"You are about to translate {hp.format_char_count(total_chars)} "
-            f"{hp.f_plural(total_chars, 'character')},\n"
-            f"leaving you with {hp.format_char_count(remaining_chars)} "
-            f"{hp.f_plural(remaining_chars, 'character')}."
-            f"\nProceed?"
-        )
-        if api_usage.character.limit_reached:
-            warning_msg = "You have reached your character limit.\nProceed anyway?"
-        elif total_chars > allowed_chars:
+        if api_usage.character.limit != DEEPL_USAGE_UNLIMITED:
+            allowed_chars = api_usage.character.limit - api_usage.character.count
+            remaining_chars = allowed_chars - total_chars
             warning_msg = (
                 f"You are about to translate {hp.format_char_count(total_chars)} "
-                f"{hp.f_plural(total_chars, 'character')}, "
-                f"which exceeds your remaining character limit of {hp.format_char_count(allowed_chars)}.\nProceed anyway?"
+                f"{hp.f_plural(total_chars, 'character')},\n"
+                f"leaving you with {hp.format_char_count(remaining_chars)} "
+                f"{hp.f_plural(remaining_chars, 'character')}."
+                f"\nProceed?"
+            )
+            if api_usage.character.limit_reached:
+                warning_msg = "You have reached your character limit.\nProceed anyway?"
+            elif total_chars > allowed_chars:
+                warning_msg = (
+                    f"You are about to translate {hp.format_char_count(total_chars)} "
+                    f"{hp.f_plural(total_chars, 'character')}, "
+                    f"which exceeds your remaining character limit of {hp.format_char_count(allowed_chars)}.\nProceed anyway?"
+                )
+        else:
+            warning_msg = (
+                f"You are about to translate {hp.format_char_count(total_chars)} "
+                f"{hp.f_plural(total_chars, 'character')}."
+                f"\nProceed?"
             )
         # Ask the user if he wants to proceed, just in case.
         logger.info(f"Character limit warning: {warning_msg}")
