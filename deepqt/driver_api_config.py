@@ -29,6 +29,10 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
         If the api is supposed to be PRO, remove :fx from the key and vice versa.
         """
         key = self.lineEdit_api_key.text().strip()
+        # Don't try to fix an empty key.
+        if key == "":
+            return key
+        
         if self.comboBox_api_type.currentIndex() == 1:
             key = re.sub(":fx$", "", key)
         else:
