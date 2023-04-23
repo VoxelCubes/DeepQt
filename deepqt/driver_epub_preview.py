@@ -17,7 +17,8 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
     epub_file: st.EpubFile
 
     def __init__(self, parent, epub_file: st.EpubFile, config: cfg.Config):
-        Qw.QDialog.__init__(self, parent=parent)
+        # Don't pass the parent due to a bug in PySide6.
+        Qw.QDialog.__init__(self)
         self.setupUi(self)
         self.setWindowTitle(f"{epub_file.path.name} - Preview")
 

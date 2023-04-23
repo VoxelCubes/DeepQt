@@ -15,7 +15,8 @@ class TextPreview(Qw.QDialog, Ui_TextPreview):
     text_file: st.TextFile
 
     def __init__(self, parent, text_file: st.TextFile, config: cfg.Config):
-        Qw.QDialog.__init__(self, parent=parent)
+        # Don't pass the parent due to a bug in PySide6.
+        Qw.QDialog.__init__(self)
         self.setupUi(self)
         self.setWindowTitle(f"{text_file.path.name} - Preview")
 
