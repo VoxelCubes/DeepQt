@@ -1,11 +1,6 @@
 .env
 .directory
 
-# Flatpak
-.flatpak-builder/
-.flatpak/
-deepqt.flatpak
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
