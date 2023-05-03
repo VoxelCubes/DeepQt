@@ -32,6 +32,9 @@ Download the latest release from [PyPI](https://pypi.org/project/deepqt/).
 pip install deepqt
 ```
 
+Or on Linux you can comfortably install it from [Flathub](https://flathub.org/apps/io.github.voxelcubes.deepqt)
+allowing you to launch it without the terminal.
+
 Or on Arch Linux (and derivatives) via the [AUR](https://aur.archlinux.org/packages/deepqt/).
 
 ```
@@ -45,7 +48,3 @@ Or download a prepackaged format from the [releases](https://github.com/VoxelCub
 - .whl (Manual pip installation)
 - .elf (Linux)
 - .exe (Windows)
-
-## Roadmap
-
-- [ ] Build AppImage or Flatpak.
