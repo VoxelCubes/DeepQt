@@ -1,9 +1,9 @@
-import platform
-import subprocess
 import zipfile as zf
 from pathlib import Path
 
 import PySide6.QtWidgets as Qw
+import PySide6.QtGui as Qg
+import PySide6.QtCore as Qc
 from logzero import logger
 
 
@@ -102,18 +102,14 @@ def f_time(seconds: int) -> str:
         )
 
 
-def open_file(path: Path):
+def open_file(path: Path) -> None:
     """
     Open any given file with the default application.
     """
     logger.info(f"Opening file {path}")
     try:
-        if platform.system() == "Linux":
-            subprocess.run(["xdg-open", path])
-        elif platform.system() == "Windows":
-            subprocess.run(["start", path], shell=True)
-        elif platform.system() == "Darwin":
-            subprocess.run(["open", path])
+        # Use Qt to open the file, so that it works on all platforms.
+        Qg.QDesktopServices.openUrl(Qc.QUrl.fromLocalFile(str(path)))
     except Exception as e:
         logger.exception(e)
 
