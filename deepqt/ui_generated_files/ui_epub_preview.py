@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'epub_preview.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.3.1
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -91,7 +91,7 @@ class Ui_EpubPreview(object):
 
         self.pushButton_save = QPushButton(EpubPreview)
         self.pushButton_save.setObjectName(u"pushButton_save")
-        sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pushButton_save.sizePolicy().hasHeightForWidth())
@@ -102,7 +102,7 @@ class Ui_EpubPreview(object):
             icon = QIcon.fromTheme(iconThemeName)
         else:
             icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_save.setIcon(icon)
 
         self.verticalLayout.addWidget(self.pushButton_save, 0, Qt.AlignHCenter)

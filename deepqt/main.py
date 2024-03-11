@@ -15,7 +15,9 @@ from deepqt import __program__, __version__, __description__
 # TODO file chooser borked
 # TODO open logs borked on windows
 
-import deepqt.rc_generated_files.fallback_icons_rc
+import deepqt.rc_generated_files.rc_icons
+import deepqt.rc_generated_files.rc_themes
+import deepqt.rc_generated_files.rc_theme_icons
 
 
 def main():

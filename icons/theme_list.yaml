@@ -1,0 +1,35 @@
+Theme directories:
+  - /usr/share/icons/breeze
+  - /usr/share/icons/breeze-dark
+
+Files:
+  actions:
+    16:
+      - configure
+      - dialog-cancel
+      - dialog-ok-apply
+      - document-open
+      - document-open-folder
+      - document-preview
+      - document-save
+      - edit-clear
+      - edit-delete
+      - edit-delete-remove
+      - help-about
+      - list-add
+      - media-playback-start
+      - process-stop
+      - help-contents
+      - view-refresh
+  mimetypes:
+    32:
+      - application-epub+zip
+      - text-x-generic
+  status:
+    16:
+      - data-error
+      - data-warning
+      - state-error
+      - state-ok
+    64:
+      - dialog-error

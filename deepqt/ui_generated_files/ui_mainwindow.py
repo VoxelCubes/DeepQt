@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.0
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -42,7 +42,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setContentsMargins(-1, 6, -1, -1)
         self.groupBox_language = QGroupBox(self.centralwidget)
         self.groupBox_language.setObjectName(u"groupBox_language")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox_language.sizePolicy().hasHeightForWidth())
@@ -58,7 +58,7 @@ class Ui_MainWindow(object):
 
         self.comboBox_lang_from = CComboBox(self.groupBox_language)
         self.comboBox_lang_from.setObjectName(u"comboBox_lang_from")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.comboBox_lang_from.sizePolicy().hasHeightForWidth())
@@ -103,7 +103,7 @@ class Ui_MainWindow(object):
             icon = QIcon.fromTheme(iconThemeName)
         else:
             icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_file_remove.setIcon(icon)
 
         self.gridLayout_2.addWidget(self.pushButton_file_remove, 1, 0, 1, 1)
@@ -116,7 +116,7 @@ class Ui_MainWindow(object):
             icon1 = QIcon.fromTheme(iconThemeName)
         else:
             icon1.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_file_remove_all.setIcon(icon1)
 
         self.gridLayout_2.addWidget(self.pushButton_file_remove_all, 1, 1, 1, 1)
@@ -129,7 +129,7 @@ class Ui_MainWindow(object):
             icon2 = QIcon.fromTheme(iconThemeName)
         else:
             icon2.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_file_add.setIcon(icon2)
 
         self.gridLayout_2.addWidget(self.pushButton_file_add, 0, 0, 1, 1)
@@ -142,7 +142,7 @@ class Ui_MainWindow(object):
             icon3 = QIcon.fromTheme(iconThemeName)
         else:
             icon3.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_file_preview.setIcon(icon3)
 
         self.gridLayout_2.addWidget(self.pushButton_file_preview, 0, 1, 1, 1)
@@ -171,7 +171,7 @@ class Ui_MainWindow(object):
             icon4 = QIcon.fromTheme(iconThemeName)
         else:
             icon4.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_file_dir_browse.setIcon(icon4)
         self.pushButton_file_dir_browse.setFlat(True)
 
@@ -205,13 +205,13 @@ class Ui_MainWindow(object):
             icon5 = QIcon.fromTheme(iconThemeName)
         else:
             icon5.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_glossary_help.setIcon(icon5)
         self.pushButton_glossary_help.setFlat(True)
 
         self.horizontalLayout_8.addWidget(self.pushButton_glossary_help)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_8.addItem(self.horizontalSpacer)
 
@@ -234,7 +234,7 @@ class Ui_MainWindow(object):
             icon6 = QIcon.fromTheme(iconThemeName)
         else:
             icon6.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_glossary_file_browse.setIcon(icon6)
         self.pushButton_glossary_file_browse.setFlat(True)
 
@@ -285,7 +285,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.label_api_status_bad)
 
-        self.horizontalSpacer_2 = QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_2 = QSpacerItem(0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
 
@@ -298,7 +298,7 @@ class Ui_MainWindow(object):
             icon7 = QIcon.fromTheme(iconThemeName)
         else:
             icon7.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_refresh.setIcon(icon7)
         self.pushButton_refresh.setFlat(True)
 
@@ -329,7 +329,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_10.addWidget(self.label_api_usage)
 
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_10.addItem(self.horizontalSpacer_3)
 
@@ -347,7 +347,7 @@ class Ui_MainWindow(object):
             icon8 = QIcon.fromTheme(iconThemeName)
         else:
             icon8.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_api_config.setIcon(icon8)
 
         self.verticalLayout_3.addWidget(self.pushButton_api_config)
@@ -355,7 +355,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.groupBox_api)
 
-        self.verticalSpacer = QSpacerItem(350, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(350, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
@@ -373,7 +373,7 @@ class Ui_MainWindow(object):
             icon9 = QIcon.fromTheme(iconThemeName)
         else:
             icon9.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_start.setIcon(icon9)
 
         self.horizontalLayout_9.addWidget(self.pushButton_start)
@@ -387,7 +387,7 @@ class Ui_MainWindow(object):
             icon10 = QIcon.fromTheme(iconThemeName)
         else:
             icon10.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-        
+
         self.pushButton_abort.setIcon(icon10)
 
         self.horizontalLayout_9.addWidget(self.pushButton_abort)
@@ -430,7 +430,7 @@ class Ui_MainWindow(object):
 
         self.label_progress = QLabel(self.centralwidget)
         self.label_progress.setObjectName(u"label_progress")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.label_progress.sizePolicy().hasHeightForWidth())
