@@ -20,6 +20,7 @@ class UnsupportedFileType(Exception):
 
     pass
 
+
 def make_imports_used_so_they_dont_get_auto_removed():
     # Never call this function.
     # It purely serves to distract the linter from removing the imports,
@@ -106,14 +107,15 @@ def parse_glossary_file(path: Path, glossary: st.Glossary):
         workbook = pyexcel.get_book_dict(file_name=str(path))
     except pyexcel.exceptions.FileTypeNotSupported:
         logger.error(f"File type not supported for: {path}")
-        raise UnsupportedFileType(f"File type '{path.suffix}' not supported for: {path}\n\n"
-                                  f"Glossaries are expected to be spreadsheets in .ods, .xlsx, .csv etc. format.")
+        raise UnsupportedFileType(
+            f"File type '{path.suffix}' not supported for: {path}\n\n"
+            f"Glossaries are expected to be spreadsheets in .ods, .xlsx, .csv etc. format."
+        )
 
     # Pyexcel inserts comment text into cells, which we need to remove using the comment pattern.
     pattern = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*?\n")
 
     for sheet in workbook.values():
-
         for row in sheet:
             for x in range(1, len(row)):
                 # Start one from the left, since the keyed term will be the right one from among two.
@@ -227,7 +229,6 @@ def process_lines(
             )
 
         for instance in glossary.title_pattern.findall(line):  # only match if followed by A-Z
-
             line = line.replace(instance, glossary.title_terms[instance[:-1]] + instance[-1])
 
         if glossary.no_suffix_terms:

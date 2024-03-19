@@ -29,7 +29,9 @@ def main():
     )
 
     subparsers = parser.add_subparsers(
-        dest="command", required=False, help="Optionally launch the GUI with files or text on startup:"
+        dest="command",
+        required=False,
+        help="Optionally launch the GUI with files or text on startup:",
     )
 
     parser_files = subparsers.add_parser("files", help="Translate files. Usage: files file1.txt file2.txt [--options]")
@@ -47,7 +49,13 @@ def main():
     # Common arguments
     for p in [parser_files, parser_text, parser_clipboard, parser]:
         p.add_argument("--translate-now", "-n", action="store_true", help="Translate immediately at startup")
-        p.add_argument("--api", "-a", choices=supported_backends, default=None, help="The translation API to use")
+        p.add_argument(
+            "--api",
+            "-a",
+            choices=supported_backends,
+            default=None,
+            help="The translation API to use",
+        )
         p.add_argument("--debug-api", "-D", action="store_true", help="Enable debug messages for the APIs")
         p.add_argument("--debug", "-d", action="store_true", help="Enable debug mode")
         p.add_argument("--version", "-v", action="version", version=f"{__display_name__} {__version__}")

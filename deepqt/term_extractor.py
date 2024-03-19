@@ -49,7 +49,6 @@ def parse_glossary_file(path: Path, glossary: st.Glossary):
     pattern = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*?\n")
 
     for sheet in workbook.values():
-
         for row in sheet:
             for x in range(1, len(row)):
                 # Start one from the left, since the keyed term will be the right one from among two.

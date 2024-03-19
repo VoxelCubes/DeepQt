@@ -95,12 +95,12 @@ class Worker(QRunnable):
     aborted: SharableFlag
 
     def __init__(
-            self,
-            fn: Callable,
-            *args,
-            no_progress_callback: bool = False,
-            abort_signal: Signal | None = None,
-            **kwargs,
+        self,
+        fn: Callable,
+        *args,
+        no_progress_callback: bool = False,
+        abort_signal: Signal | None = None,
+        **kwargs,
     ):
         QRunnable.__init__(self)
 
@@ -148,9 +148,7 @@ class Worker(QRunnable):
                 # Use traceback.format_exc() to get the traceback as a string.
                 # Using the raw traceback instead and letting the logger format that instead though.
                 exception_type, value, traceback = sys.exc_info()
-                self.signals.error.emit(
-                    WorkerError(exception_type, value, traceback, self.args, self.kwargs)
-                )
+                self.signals.error.emit(WorkerError(exception_type, value, traceback, self.args, self.kwargs))
             else:
                 self.signals.result.emit(result)  # Return the result of the processing.
             finally:

@@ -18,7 +18,11 @@ p_thought_speech = (p_thought_speech_j_re, p_thought_speech_e_re, r"[TELNET]\n\1
 
 p_thought_internal_j_re = re.compile(r"^（(.*)）$")
 p_thought_internal_e_re = re.compile(r"^\((.*)\)$")
-p_thought_internal = (p_thought_internal_j_re, p_thought_internal_e_re, r"[THOUGHT]\n\1\n[ENDTHOUGHT]")
+p_thought_internal = (
+    p_thought_internal_j_re,
+    p_thought_internal_e_re,
+    r"[THOUGHT]\n\1\n[ENDTHOUGHT]",
+)
 
 p_raphael_j_re = re.compile(r"^《(.*)》$")
 p_raphael_e_re = re.compile(r"^<<(.*)>>$")

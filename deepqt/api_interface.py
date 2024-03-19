@@ -170,7 +170,9 @@ class DeeplWorker(QRunnable):
             if isinstance(input_file, st.TextFile):
                 input_file: st.TextFile  # Reinterpret type.
                 input_file.text_chunks = partition_text(
-                    input_file.current_text(), self.config.tl_max_chunks, self.config.tl_min_chunk_size
+                    input_file.current_text(),
+                    self.config.tl_max_chunks,
+                    self.config.tl_min_chunk_size,
                 )
                 # Share chunk statistics.
                 chunk_count = len(input_file.text_chunks)
@@ -184,7 +186,10 @@ class DeeplWorker(QRunnable):
                 # Just share this information with the user.
                 input_file: st.EpubFile  # Reinterpret type.
                 self.signals.progress.emit(
-                    key, f"Split into {input_file.file_count} {hp.f_plural(input_file.file_count, 'file')}", None, None
+                    key,
+                    f"Split into {input_file.file_count} {hp.f_plural(input_file.file_count, 'file')}",
+                    None,
+                    None,
                 )
 
     def translate_input_files(self):
@@ -265,14 +270,13 @@ class DeeplWorker(QRunnable):
                     chunks = partition_text_max_bytes(html_text, API_MAX_BYTES)
                     translations = []
                     for chunk in chunks:
-
                         if self.config.tl_mock:
                             translation = self.mock_translate_text(chunk, is_html=True)
                         else:
                             translation = self.try_translate(chunk, key, is_html=True)
 
                         translations.append(translation.text)
-                        
+
                         self.check_aborted()
                         self.signals.progress.emit(
                             key,
@@ -305,7 +309,9 @@ class DeeplWorker(QRunnable):
         while True:
             try:
                 if isinstance(chunk, str):
-                    logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes, {len(chunk):n} chars.")
+                    logger.debug(
+                        f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes, {len(chunk):n} chars."
+                    )
                 else:
                     logger.debug(
                         f"Requesting translation of {sum(len(c.encode('utf-8')) for c in chunk):n} bytes, "

@@ -146,7 +146,14 @@ def deruby(line: str) -> str:
     if "<ruby>" not in line:
         return line
     else:
-        states = {"ruby": "start", "/ruby": "end", "rb": "main", "/rb": "main", "rt": "ruby", "/rt": "main"}
+        states = {
+            "ruby": "start",
+            "/ruby": "end",
+            "rb": "main",
+            "/rb": "main",
+            "rt": "ruby",
+            "/rt": "main",
+        }
         tag = ""
         out = ""
         main = ""
@@ -220,7 +227,6 @@ def get_epub_cover(epub_path: str | Path) -> Path | None:
 
     # We open the epub archive using zipfile.ZipFile():
     with zipfile.ZipFile(epub_path) as z:
-
         # We load "META-INF/container.xml" using lxml.etree.fromString():
         t = etree.fromstring(z.read("META-INF/container.xml"))
         # We use xpath() to find the attribute "full-path":

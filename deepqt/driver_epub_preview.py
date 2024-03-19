@@ -117,7 +117,6 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
             "EPUB Files (*.epub)",
         )[0]
         if file_path:
-
             try:
                 self.epub_file.write(process_level=process_level, output_path=file_path)
             except OSError as e:

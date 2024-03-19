@@ -32,13 +32,13 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
         # Don't try to fix an empty key.
         if key == "":
             return key
-        
+
         if self.comboBox_api_type.currentIndex() == 1:
             key = re.sub(":fx$", "", key)
         else:
             key = re.sub("^(.*?)(:fx)?$", r"\1:fx", key)
         return key
-    
+
     def show_api_help(self):
         """
         Show the deepl api documentation in a web browser.
