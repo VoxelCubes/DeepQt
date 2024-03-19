@@ -9,7 +9,7 @@ from PySide6.QtCore import QRunnable, Slot, Signal, QObject
 from loguru import logger
 
 import deepqt.config as cfg
-import deepqt.helpers as hp
+import deepqt.utils as ut
 import deepqt.quote_protection as qp
 import deepqt.structures as st
 import deepqt.worker_thread as wt

@@ -13,7 +13,7 @@ import deepqt.config as cfg
 import deepqt.driver_epub_preview as dep
 import deepqt.driver_text_preview as dtp
 import deepqt.glossary as gls
-import deepqt.helpers as hp
+import deepqt.utils as ut
 import deepqt.quote_protection as qp
 import deepqt.structures as st
 import deepqt.worker_thread as wt

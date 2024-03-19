@@ -6,7 +6,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from deepqt import __program__, helpers as hp
+from deepqt import __program__, utils as ut
 
 
 @dataclass

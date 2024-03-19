@@ -6,9 +6,9 @@ from enum import IntEnum
 from functools import partial, cache
 from pathlib import Path
 
-from logzero import logger
+from loguru import logger
 
-import deepqt.helpers as hp
+import deepqt.utils as ut
 from deepqt import trie
 from deepqt import xml_parser
 

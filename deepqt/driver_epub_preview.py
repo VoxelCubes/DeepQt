@@ -2,7 +2,7 @@ import PySide6.QtWidgets as Qw
 from loguru import logger
 
 import deepqt.config as cfg
-import deepqt.helpers as hp
+import deepqt.utils as ut
 import deepqt.structures as st
 from deepqt.ui_generated_files.ui_epub_preview import Ui_EpubPreview
 

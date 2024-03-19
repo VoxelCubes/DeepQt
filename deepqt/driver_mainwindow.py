@@ -16,10 +16,10 @@ import deepqt.glossary as gl
 import deepqt.structures as st
 import deepqt.worker_thread as wt
 from deepqt import __program__, __version__
-from deepqt import helpers as hp
+from deepqt import utils as ut
 from deepqt.driver_api_config import ConfigureAccount
 from deepqt.file_table import Column, make_output_filename
-from deepqt.helpers import show_warning, show_info, show_question
+from deepqt.utils import show_warning, show_info, show_question
 from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 
 DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
