@@ -7,7 +7,7 @@
 ##############################################################################################
 
 import sys
-import traceback
+from types import TracebackType
 from dataclasses import dataclass
 from typing import Callable
 
@@ -16,14 +16,14 @@ from PySide6.QtCore import QRunnable, Slot, Signal, QObject
 
 @dataclass(frozen=True, slots=True)
 class WorkerError:
-    exctype: type
-    value: Exception
-    traceback: str
+    exception_type: type[BaseException]
+    value: BaseException
+    traceback: TracebackType
     args: tuple | None = None
     kwargs: dict | None = None
 
-    def __str__(self):
-        return f"{self.exctype}: {self.traceback}\n{self.value}"
+    def __str__(self) -> str:
+        return f"{self.exception_type}: {self.traceback}\n{self.value}"
 
 
 class WorkerSignals(QObject):
@@ -44,12 +44,35 @@ class WorkerSignals(QObject):
     progress
         anything to indicate the current state.
 
+    aborted
+        The initial parameters passed to the worker when it was started, args and kwargs.
+
     """
 
     finished = Signal(tuple)
     error = Signal(WorkerError)
     result = Signal(object)
     progress = Signal(object)
+    aborted = Signal(tuple)
+
+
+class SharableFlag:
+    def __init__(self, initial_value: bool = False) -> None:
+        self._flag = initial_value
+
+    def get(self) -> bool:
+        return self._flag
+
+    def set(self, value: bool) -> None:
+        self._flag = value
+
+
+class Abort(Exception):
+    """
+    Exception to abort the worker.
+    """
+
+    pass
 
 
 class Worker(QRunnable):
@@ -64,11 +87,21 @@ class Worker(QRunnable):
     :param callback: The function callback to run on this worker thread. Supplied args and
                      kwargs will be passed through to the runner.
     :param args: Arguments to pass to the callback function.
-    :param no_progress_callback: If present (true or false), don't send progress signals.
+    :param no_progress_callback: [Optional] If True, the progress_callback will not be added to the kwargs.
+    :param abort_signal: [Optional] A signal that will be emitted when the thread should abort.
     :param kwargs: Keywords to pass to the callback function.
     """
 
-    def __init__(self, fn: Callable, *args, **kwargs):
+    aborted: SharableFlag
+
+    def __init__(
+            self,
+            fn: Callable,
+            *args,
+            no_progress_callback: bool = False,
+            abort_signal: Signal | None = None,
+            **kwargs,
+    ):
         QRunnable.__init__(self)
 
         # Store constructor arguments (re-used for processing).
@@ -77,27 +110,56 @@ class Worker(QRunnable):
         self.kwargs = kwargs
         self.signals = WorkerSignals()
 
+        # If the abort signal is received, the abort flag is set to true.
+        # The worker process must abort itself when the flag is true.
+        self.aborted = SharableFlag(False)
+
         # Add the callback to our kwargs.
-        if "no_progress_callback" not in kwargs:
+        if not no_progress_callback:
             self.kwargs["progress_callback"] = self.signals.progress
-        else:
-            # Remove the no_progress_callback from kwargs.
-            del self.kwargs["no_progress_callback"]
+
+        # If an abort signal is provided, provide the sharable flag to the worker.
+        if abort_signal is not None:
+            self.kwargs["abort_flag"] = self.aborted
+            abort_signal.connect(self.abort)
 
     @Slot()
-    def run(self):
+    def run(self) -> None:
         """
         Initialise the runner function with passed args, kwargs.
         """
 
         # Retrieve args/kwargs here; and fire processing using them.
+        # The function should expect the keyword arguments:
+        # progress_callback and abort_flag unless disabled in the constructor.
+
+        # After running, we need to check if the signals still exist. They may have been deleted in
+        # the instance that the program was closed while the worker was running.
+        # Otherwise the Python runtime crashes, which is ok in this state, but it just isn't very nice.
         try:
-            result = self.fn(*self.args, **self.kwargs)
-        except:
-            traceback.print_exc()
-            exctype, value = sys.exc_info()[:2]
-            self.signals.error.emit(WorkerError(exctype, value, traceback.format_exc(), self.args, self.kwargs))
-        else:
-            self.signals.result.emit(result)  # Return the result of the processing
-        finally:
-            self.signals.finished.emit((self.args, self.kwargs))  # Done
+            try:
+                result = self.fn(*self.args, **self.kwargs)
+            except Abort:
+                self.signals.aborted.emit((self.args, self.kwargs))
+            except:
+                # traceback.print_exc()  # Disabled because we handle showing the error in whatever
+                # called the worker. This also prevents the runtime errors from getting printed, which
+                # are caught in an outer try block.
+                # Use traceback.format_exc() to get the traceback as a string.
+                # Using the raw traceback instead and letting the logger format that instead though.
+                exception_type, value, traceback = sys.exc_info()
+                self.signals.error.emit(
+                    WorkerError(exception_type, value, traceback, self.args, self.kwargs)
+                )
+            else:
+                self.signals.result.emit(result)  # Return the result of the processing.
+            finally:
+                self.signals.finished.emit((self.args, self.kwargs))  # Done
+        except RuntimeError:
+            # The signals were deleted, so we can't emit them.
+            # This is fine, we just don't need to emit anything.
+            pass
+
+    @Slot()
+    def abort(self) -> None:
+        self.aborted.set(True)

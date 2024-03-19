@@ -12,6 +12,8 @@ Files:
       - document-open-folder
       - document-preview
       - document-save
+      - document-multiple
+      - download
       - edit-clear
       - edit-delete
       - edit-delete-remove
@@ -21,6 +23,9 @@ Files:
       - process-stop
       - help-contents
       - view-refresh
+      - view-list-text
+    22:
+      - exchange-positions
   mimetypes:
     32:
       - application-epub+zip
