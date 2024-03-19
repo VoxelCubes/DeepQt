@@ -1,3 +1,4 @@
-__program__ = "DeepQt"
-__version__ = "1.1.7"
-__description__ = "DeepL API front-end using Qt."
+__program__ = "deepqt"
+__display_name__ = "DeepQt"
+__version__ = "1.9.0"
+__description__ = "Translation API front-end"
