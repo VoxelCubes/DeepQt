@@ -4,8 +4,7 @@ import platform
 
 import PySide6.QtWidgets as Qw
 import PySide6.QtGui as Qg
-import logzero
-from logzero import logger
+from loguru import logger
 
 import deepqt.config as cfg
 from deepqt.driver_mainwindow import MainWindow

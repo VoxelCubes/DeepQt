@@ -6,7 +6,7 @@ from math import ceil
 
 import deepl
 from PySide6.QtCore import QRunnable, Slot, Signal, QObject
-from logzero import logger
+from loguru import logger
 
 import deepqt.config as cfg
 import deepqt.helpers as hp

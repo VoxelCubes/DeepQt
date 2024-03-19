@@ -8,7 +8,7 @@ import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
 import deepl
 from PySide6.QtCore import Signal
-from logzero import logger
+from loguru import logger
 
 import deepqt.api_interface as ai
 import deepqt.config as cfg

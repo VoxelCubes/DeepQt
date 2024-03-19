@@ -1,5 +1,5 @@
 deepl
-logzero
+loguru
 PySide6
 xdg
 pyexcel

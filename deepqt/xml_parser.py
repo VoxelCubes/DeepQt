@@ -6,7 +6,7 @@ from pathlib import Path
 
 import minify_html
 from bs4 import BeautifulSoup
-from logzero import logger
+from loguru import logger
 from lxml import etree
 
 

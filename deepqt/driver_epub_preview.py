@@ -1,5 +1,5 @@
 import PySide6.QtWidgets as Qw
-from logzero import logger
+from loguru import logger
 
 import deepqt.config as cfg
 import deepqt.helpers as hp

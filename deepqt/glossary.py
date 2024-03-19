@@ -8,7 +8,7 @@ import pyexcel_odsr
 import pyexcel_xls
 import pyexcel_xlsx
 import pyexcel_htmlr
-from logzero import logger
+from loguru import logger
 
 import deepqt.structures as st
 
