@@ -28,6 +28,7 @@ class Ui_TextPreview(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, -1)
         self.tabWidget = QTabWidget(TextPreview)
         self.tabWidget.setObjectName(u"tabWidget")
+        self.tabWidget.setUsesScrollButtons(False)
 
         self.verticalLayout.addWidget(self.tabWidget)
 

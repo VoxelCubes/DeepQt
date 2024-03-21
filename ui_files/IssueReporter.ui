@@ -136,14 +136,14 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>LogViewer</class>
+   <extends>QPlainTextEdit</extends>
+   <header>deepqt.log_viewer</header>
+  </customwidget>
+  <customwidget>
    <class>CComboBox</class>
    <extends>QComboBox</extends>
    <header>deepqt.CustomQ.CComboBox</header>
-  </customwidget>
-  <customwidget>
-   <class>LogViewer</class>
-   <extends>QPlainTextEdit</extends>
-   <header>pcleaner.gui.log_viewer</header>
   </customwidget>
  </customwidgets>
  <resources/>

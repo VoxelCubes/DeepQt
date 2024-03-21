@@ -139,7 +139,7 @@
   <customwidget>
    <class>LogViewer</class>
    <extends>QPlainTextEdit</extends>
-   <header>pcleaner.gui.log_viewer</header>
+   <header>deepqt.log_viewer</header>
   </customwidget>
  </customwidgets>
  <resources/>
