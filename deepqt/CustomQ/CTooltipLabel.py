@@ -51,3 +51,10 @@ class CTooltipLabel(Qw.QLabel):
         """
         global_pos = self.mapToGlobal(pos)
         Qw.QToolTip.showText(global_pos, self.toolTip())
+
+    def mousePressEvent(self, event) -> None:
+        """
+        Show tooltip on mouse click.
+        """
+        box = Qw.QMessageBox(Qw.QMessageBox.Information, "Hint", self.toolTip(), Qw.QMessageBox.Ok)
+        box.exec()
