@@ -121,48 +121,6 @@ def get_lock_file_path() -> Path:
     return get_cache_path() / f"{__program__}.lock"
 
 
-def open_file_with_editor(path: Path, configured_opener: str | None) -> None:
-    """
-    Open the given file with the given editor.
-    If no editor is given, use the default editor for the current OS.
-
-    :param path: The path to the file to open.
-    :param configured_opener: The configured editor to use.
-    """
-    if platform.system() == "Linux":
-        opener = "xdg-open" if configured_opener is None else configured_opener
-        print(f"Opening {path} with {opener}.")
-        # Test if the configured editor exists. Even xdg-open may be missing, like in a docker container.
-        if shutil.which(opener) is None:
-            print(
-                f"Configured editor '{opener}' not found. "
-                f"Please open the file manually or configure another program."
-            )
-            return
-        # Run and detach the process, so this one can exit.
-        subprocess.Popen([opener, path], start_new_session=True)
-
-        print("If nothing happens, try setting the profile_editor option in the config.")
-
-    elif platform.system() == "Windows":
-        opener = "start" if configured_opener is None else configured_opener
-        print(f"Opening {path} with {opener}.")
-        os.system(f"{opener} {path}")
-
-        print("\nIf nothing happens, try setting the 'profile_editor' option in the config.")
-    elif platform.system() == "Darwin":
-        opener = "open" if configured_opener is None else configured_opener
-        print(f"Opening {path} with {opener}.")
-        os.system(f"{opener} {path}")
-
-        print("\nIf nothing happens, try setting the 'profile_editor' option in the config.")
-    else:
-        print(
-            f"Your OS ({platform.system()}) is not supported, but you can open the path manually:\n"
-            f"Profile path: {path}"
-        )
-
-
 def empty_cache_dir(cache_dir: Path) -> None:
     """
     Empty the cache directory.
@@ -189,37 +147,6 @@ def closest_match(word: str, choices: list[str]) -> str | None:
             return str(closest[0])
         else:
             return None
-
-
-# For all show functions, pad the dialog message, so that the dialog is not too narrow for the window title.
-MIN_MSG_LENGTH = 50
-
-
-def show_critical(parent, title: str, msg: str):
-    msg = msg.ljust(MIN_MSG_LENGTH)
-    return Qw.QMessageBox.critical(parent, title, msg, Qw.QMessageBox.Yes, Qw.QMessageBox.Abort)
-
-
-def show_warning(parent, title: str, msg: str):
-    msg = msg.ljust(MIN_MSG_LENGTH)
-    Qw.QMessageBox.warning(parent, title, msg, Qw.QMessageBox.Ok)
-
-
-def show_info(parent, title: str, msg: str):
-    msg = msg.ljust(MIN_MSG_LENGTH)
-    Qw.QMessageBox.information(parent, title, msg, Qw.QMessageBox.Ok)
-
-
-def show_question(parent, title: str, msg: str) -> bool:
-    msg = msg.ljust(MIN_MSG_LENGTH)
-    dlg = Qw.QMessageBox(parent)
-    dlg.setWindowTitle(title)
-    dlg.setText(msg)
-    dlg.setStandardButtons(Qw.QMessageBox.Yes | Qw.QMessageBox.Cancel)
-    dlg.setIcon(Qw.QMessageBox.Question)
-    response = dlg.exec()
-
-    return response == Qw.QMessageBox.Yes
 
 
 def format_char_count(count: int) -> str:
@@ -320,18 +247,7 @@ def weighted_average(old_value: float, new_value: float, weight: float = 0.25) -
     return old_value * (1 - weight) + new_value * weight
 
 
-def nuke_folder_contents(folder_path: Path):
-    """
-    Delete all files and folders in the given folder.
-    """
-    for child in folder_path.iterdir():
-        if child.is_dir():
-            nuke_folder_contents(child)
-            child.rmdir()
-        else:
-            child.unlink()
-
-
+# TODO this doesn't belong here.
 def zip_folder_to_epub(folder_unzipped: Path, destination: Path) -> bool:
     """
     Zip a folder to an epub file.

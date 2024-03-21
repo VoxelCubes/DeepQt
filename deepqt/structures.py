@@ -333,7 +333,7 @@ class EpubFile(InputFile):
         """
         self.write_to_cache(process_level)
         # Rebuild the epub file.
-        hp.zip_folder_to_epub(self.cache_dir, output_path)
+        ut.zip_folder_to_epub(self.cache_dir, output_path)
 
     def clear_translations(self):
         for f in self.html_files:

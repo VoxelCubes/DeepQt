@@ -178,7 +178,7 @@ class DeeplWorker(QRunnable):
                 chunk_count = len(input_file.text_chunks)
                 logger.info(f"Split {input_file.path.name} into {chunk_count} chunks.")
                 self.signals.progress.emit(
-                    key, f"Split into {chunk_count} {hp.f_plural(chunk_count, 'chunk')}", None, None
+                    key, f"Split into {chunk_count} {ut.f_plural(chunk_count, 'chunk')}", None, None
                 )
             else:
                 # Epub files are processed as file uploads, to avoid breaking the html formatting.
@@ -187,7 +187,7 @@ class DeeplWorker(QRunnable):
                 input_file: st.EpubFile  # Reinterpret type.
                 self.signals.progress.emit(
                     key,
-                    f"Split into {input_file.file_count} {hp.f_plural(input_file.file_count, 'file')}",
+                    f"Split into {input_file.file_count} {ut.f_plural(input_file.file_count, 'file')}",
                     None,
                     None,
                 )
@@ -229,7 +229,7 @@ class DeeplWorker(QRunnable):
                 self.signals.progress.emit(
                     key,
                     f"Translated {len(input_file.text_chunks)} / {len(input_file.text_chunks)} "
-                    f"{hp.f_plural(len(input_file.text_chunks), 'chunk')}",
+                    f"{ut.f_plural(len(input_file.text_chunks), 'chunk')}",
                     self.processed_chars,
                     self.total_chars,
                 )
@@ -338,7 +338,7 @@ class DeeplWorker(QRunnable):
                 d_time = time.time() - t_start
                 # Calculate how long it took per 1000 chars. Update the average.
                 time_per_mille = d_time / (length_processed / 1000)
-                self.config.avg_time_per_mille = hp.weighted_average(self.config.avg_time_per_mille, time_per_mille)
+                self.config.avg_time_per_mille = ut.weighted_average(self.config.avg_time_per_mille, time_per_mille)
                 logger.info(f"Translation took {d_time:.2f} seconds, {time_per_mille:.3f} seconds per 1000 chars.")
                 return translation
 

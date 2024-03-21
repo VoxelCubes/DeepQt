@@ -3,7 +3,7 @@ import PySide6.QtWidgets as Qw
 
 import deepqt.config as cfg
 from deepqt.ui_generated_files.ui_api_config import Ui_Dialog_API
-from deepqt.utils import show_info
+from deepqt.gui_utils import show_info
 
 
 class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):

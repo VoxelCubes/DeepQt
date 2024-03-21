@@ -27,7 +27,7 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
 
         # Abort if the epub file was not initialized.
         if not self.epub_file.initialized:
-            hp.show_warning(self, "Warning", "Please wait for the Epub to finish loading.")
+            ut.show_warning(self, "Warning", "Please wait for the Epub to finish loading.")
             self.close()
 
         # Show process level of all files
@@ -98,7 +98,7 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
         """
         Save the current state of the epub.
         """
-        # hp.zip_folder_to_epub(self.epub_file.cache_dir, self.epub_file.cache_dir.parent / self.epub_file.path.name)
+        # ut.zip_folder_to_epub(self.epub_file.cache_dir, self.epub_file.cache_dir.parent / self.epub_file.path.name)
         if self.radioButton_original.isChecked():
             process_level = st.ProcessLevel.RAW
             name_suffix = "original"

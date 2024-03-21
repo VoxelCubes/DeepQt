@@ -3,8 +3,8 @@ import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
 from loguru import logger
 
-import pcleaner.gui.log_parser as lp
-from pcleaner.gui.ui_generated_files.ui_ErrorDialog import Ui_ErrorDialog
+import deepqt.log_parser as lp
+from deepqt.ui_generated_files.ui_ErrorDialog import Ui_ErrorDialog
 
 
 class ErrorDialog(Qw.QDialog, Ui_ErrorDialog):

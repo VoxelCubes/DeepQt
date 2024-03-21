@@ -46,7 +46,7 @@ class Config:
                 json.dump(asdict(self), f, indent=4)
                 logger.debug("Saved config")
         except OSError as e:
-            hp.show_critical(
+            ut.show_critical(
                 None,
                 "Failed to write file",
                 f'Failed to write config file "{conf_path}"\n\n{e}',
@@ -74,7 +74,7 @@ class Config:
             error_message = f'Configuration file malformed "{conf_path}"\n\n{e}'
 
         conf = default_config()
-        if hp.show_question(
+        if ut.show_question(
             None,
             "Failed to read file",
             f"{error_message}\n\nDo you want to reset the config file? "

@@ -2,6 +2,7 @@ import shutil
 from functools import partial
 from math import ceil
 from pathlib import Path
+from enum import Enum
 
 import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
@@ -15,11 +16,12 @@ import deepqt.config as cfg
 import deepqt.glossary as gl
 import deepqt.structures as st
 import deepqt.worker_thread as wt
+import deepqt.constants as ct
 from deepqt import __program__, __version__
 from deepqt import utils as ut
 from deepqt.driver_api_config import ConfigureAccount
 from deepqt.file_table import Column, make_output_filename
-from deepqt.utils import show_warning, show_info, show_question
+from deepqt.gui_utils import show_warning, show_info, show_question
 from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 
 DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
@@ -27,10 +29,11 @@ DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the A
 
 # noinspection PyUnresolvedReferences
 class MainWindow(Qw.QMainWindow, Ui_MainWindow):
-
     config: cfg.Config = None
     glossary: st.Glossary = None
     translating: bool
+
+    api_widgets: dict[ct.Backend, Qw.QWidget]
 
     text_params_changed = Signal(st.Glossary)
     text_output_changed = Signal()
@@ -38,7 +41,14 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
     label_stats: Qw.QLabel
 
-    def __init__(self, mock: bool = False):
+    def __init__(
+        self,
+        command: ct.Command,
+        inputs: list[str] | str | None,
+        api: ct.Backend | None,
+        translate_now: bool,
+        debug: bool,
+    ) -> None:
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
         self.setWindowTitle(f"{__program__} {__version__}")
@@ -54,7 +64,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         self.config = cfg.Config.load()
         # Set debug flag.
-        self.config.tl_mock = mock
+        # self.config.tl_mock = mock
 
         logger.debug(f"Loaded config: {self.config.safe_dump()}")
         self.load_config_to_ui()
@@ -76,10 +86,10 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.pushButton_start.setMinimumHeight(self.pushButton_start.height() * 1.5)
         self.pushButton_abort.setMinimumHeight(self.pushButton_abort.height() * 1.5)
 
-        self.label_api_status_good_icon.setPixmap(Qg.QIcon.fromTheme("state-ok").pixmap(Qc.QSize(16, 16)))
-        self.label_api_status_bad_icon.setPixmap(Qg.QIcon.fromTheme("state-error").pixmap(Qc.QSize(16, 16)))
-        self.label_api_usage_error_icon.setPixmap(Qg.QIcon.fromTheme("data-error").pixmap(Qc.QSize(16, 16)))
-        self.label_api_usage_warn_icon.setPixmap(Qg.QIcon.fromTheme("data-warning").pixmap(Qc.QSize(16, 16)))
+        # self.label_api_status_good_icon.setPixmap(Qg.QIcon.fromTheme("state-ok").pixmap(Qc.QSize(16, 16)))
+        # self.label_api_status_bad_icon.setPixmap(Qg.QIcon.fromTheme("state-error").pixmap(Qc.QSize(16, 16)))
+        # self.label_api_usage_error_icon.setPixmap(Qg.QIcon.fromTheme("data-error").pixmap(Qc.QSize(16, 16)))
+        # self.label_api_usage_warn_icon.setPixmap(Qg.QIcon.fromTheme("data-warning").pixmap(Qc.QSize(16, 16)))
 
         # Allow the table to accept file drops and hide the ID column.
         self.file_table.setAcceptDrops(True)
@@ -90,29 +100,29 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Connect signals.
         self.connect_combobox_slots()
 
-        self.checkBox_file_fixed_dir.toggled.connect(self.fixed_output_dir_toggled)
+        # self.checkBox_file_fixed_dir.toggled.connect(self.fixed_output_dir_toggled)
         self.checkBox_use_glossary.toggled.connect(self.use_glossary_toggled)
         self.checkBox_extra_quote_protection.toggled.connect(self.extra_quote_protection_toggled)
-        self.pushButton_file_dir_browse.clicked.connect(self.browse_file_out_dir)
-        self.lineEdit_file_out_dir.textEdited.connect(partial(self.fixed_file_out_updated, False))
-        self.lineEdit_file_out_dir.editingFinished.connect(partial(self.fixed_file_out_updated, True))
+        # self.pushButton_file_dir_browse.clicked.connect(self.browse_file_out_dir)
+        # self.lineEdit_file_out_dir.textEdited.connect(partial(self.fixed_file_out_updated, False))
+        # self.lineEdit_file_out_dir.editingFinished.connect(partial(self.fixed_file_out_updated, True))
 
         self.pushButton_glossary_file_browse.clicked.connect(self.browse_glossary_file)
         self.lineEdit_glossary_file.textEdited.connect(partial(self.glossary_file_updated, self, False))
         self.lineEdit_glossary_file.editingFinished.connect(partial(self.glossary_file_updated, self, True))
-        self.pushButton_glossary_help.clicked.connect(self.show_glossary_help)
+        # self.pushButton_glossary_help.clicked.connect(self.show_glossary_help)
 
-        self.pushButton_api_config.clicked.connect(self.configure_api)
-        self.pushButton_refresh.clicked.connect(self.load_config_to_ui)
+        # self.pushButton_api_config.clicked.connect(self.configure_api)
+        # self.pushButton_refresh.clicked.connect(self.load_config_to_ui)
 
         self.text_output_changed.connect(self.file_table.update_all_output_filenames)
         self.text_params_changed.connect(self.file_table.update_all_text_params)
 
-        self.file_table.itemSelectionChanged.connect(self.update_input_buttons)
-        self.pushButton_file_add.clicked.connect(self.file_table.browse_add_file)
-        self.pushButton_file_preview.clicked.connect(self.file_table.preview_selected_file)
-        self.pushButton_file_remove.clicked.connect(self.file_table.remove_selected_file)
-        self.pushButton_file_remove_all.clicked.connect(self.file_table.remove_all_files)
+        # self.file_table.itemSelectionChanged.connect(self.update_input_buttons)
+        # self.pushButton_file_add.clicked.connect(self.file_table.browse_add_file)
+        # self.pushButton_file_preview.clicked.connect(self.file_table.preview_selected_file)
+        # self.pushButton_file_remove.clicked.connect(self.file_table.remove_selected_file)
+        # self.pushButton_file_remove_all.clicked.connect(self.file_table.remove_all_files)
 
         self.pushButton_start.clicked.connect(self.start_translating)
         self.pushButton_abort.clicked.connect(self.abort_translating)
@@ -158,6 +168,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     """
 
     def load_config_to_ui(self):
+        return
         """
         Apply data from config to ui widgets.
         """
@@ -408,9 +419,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         self.glossary = glossary
         terms_found = len(glossary)
-        self.statusbar.showMessage(f"Loaded {terms_found} {hp.f_plural(terms_found, 'term')} from glossary.")
-        logger.info(f"Glossary loaded, {terms_found} {hp.f_plural(terms_found, 'term')} found.")
-        logger.debug(f"Glossary dump: \n{glossary}")
+        self.statusbar.showMessage(f"Loaded {terms_found} {ut.f_plural(terms_found, 'term')} from glossary.")
+        logger.info(f"Glossary loaded, {terms_found} {ut.f_plural(terms_found, 'term')} found.")
+        # logger.debug(f"Glossary dump: \n{glossary}")
         self.text_params_changed.emit(self.glossary)
 
     def glossary_worker_error(self, error: wt.WorkerError):
@@ -470,24 +481,24 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             allowed_chars = api_usage.character.limit - api_usage.character.count
             remaining_chars = allowed_chars - total_chars
             warning_msg = (
-                f"You are about to translate {hp.format_char_count(total_chars)} "
-                f"{hp.f_plural(total_chars, 'character')},\n"
-                f"leaving you with {hp.format_char_count(remaining_chars)} "
-                f"{hp.f_plural(remaining_chars, 'character')}."
+                f"You are about to translate {ut.format_char_count(total_chars)} "
+                f"{ut.f_plural(total_chars, 'character')},\n"
+                f"leaving you with {ut.format_char_count(remaining_chars)} "
+                f"{ut.f_plural(remaining_chars, 'character')}."
                 f"\nProceed?"
             )
             if api_usage.character.limit_reached:
                 warning_msg = "You have reached your character limit.\nProceed anyway?"
             elif total_chars > allowed_chars:
                 warning_msg = (
-                    f"You are about to translate {hp.format_char_count(total_chars)} "
-                    f"{hp.f_plural(total_chars, 'character')}, "
-                    f"which exceeds your remaining character limit of {hp.format_char_count(allowed_chars)}.\nProceed anyway?"
+                    f"You are about to translate {ut.format_char_count(total_chars)} "
+                    f"{ut.f_plural(total_chars, 'character')}, "
+                    f"which exceeds your remaining character limit of {ut.format_char_count(allowed_chars)}.\nProceed anyway?"
                 )
         else:
             warning_msg = (
-                f"You are about to translate {hp.format_char_count(total_chars)} "
-                f"{hp.f_plural(total_chars, 'character')}."
+                f"You are about to translate {ut.format_char_count(total_chars)} "
+                f"{ut.f_plural(total_chars, 'character')}."
                 f"\nProceed?"
             )
         # Ask the user if he wants to proceed, just in case.
@@ -524,7 +535,11 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         elif exit_code == ai.State.QUOTA_EXCEEDED:
             self.statusbar.showMessage("API quota exceeded.")
-            show_warning(self, "API Quota Exceeded", "The DeepL API quota has been exceeded.\nDumping output files.")
+            show_warning(
+                self,
+                "API Quota Exceeded",
+                "The DeepL API quota has been exceeded.\nDumping output files.",
+            )
             for file_id in self.file_table.files:
                 self.write_output_file(file_id)
 
@@ -663,6 +678,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     """
 
     def set_up_statusbar(self):
+        return
         """
         Add a label to show the current char total and time estimate.
         Add a flat button to the statusbar to offer opening the config file.
@@ -675,12 +691,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.statusbar.addPermanentWidget(self.label_stats)
 
         button_config = Qw.QPushButton("Open Config")
-        button_config.clicked.connect(partial(hp.open_file, cfg.config_path()))
+        button_config.clicked.connect(partial(ut.open_file, cfg.config_path()))
         button_config.setFlat(True)
         self.statusbar.addPermanentWidget(button_config)
 
         button_log = Qw.QPushButton("Open Log")
-        button_log.clicked.connect(partial(hp.open_file, cfg.log_path()))
+        button_log.clicked.connect(partial(ut.open_file, cfg.log_path()))
         button_log.setFlat(True)
         self.statusbar.addPermanentWidget(button_log)
 
@@ -725,6 +741,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.label_api_status_bad_icon.setVisible(not good)
 
     def update_input_buttons(self):
+        return
         logger.debug("Updating input buttons")
         file_selected = self.file_table.hasSelected()
 
@@ -741,6 +758,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.pushButton_file_remove_all.setEnabled(self.file_table.rowCount() > 0)
 
     def update_current_usage(self, translator: deepl.Translator | None):
+        return
         if translator is None:
             self.label_api_usage.setText("—")
             self.label_api_usage_warn_icon.hide()
@@ -752,9 +770,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         limit = usage.character.limit
         percentage = count / limit * 100  # Output with 2 decimals.
 
-        count_str = hp.format_char_count(count)
-        limit_str = hp.format_char_count(limit)
-        
+        count_str = ut.format_char_count(count)
+        limit_str = ut.format_char_count(limit)
+
         if limit == DEEPL_USAGE_UNLIMITED:
             self.label_api_usage.setText(f"{count_str} characters / Unlimited")
         else:
@@ -806,8 +824,8 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             return
 
         time_total = ceil(self.config.avg_time_per_mille * char_total / 1000)
-        char_text = hp.format_char_count(char_total) + hp.f_plural(char_total, " character")
-        time_text = f"Approx. {hp.f_time(time_total)}"
+        char_text = ut.format_char_count(char_total) + ut.f_plural(char_total, " character")
+        time_text = f"Approx. {ut.f_time(time_total)}"
         self.label_stats.setText(char_text + "   " + time_text)
 
     def update_translation_status(self, processed_chars: int, char_total: int):
@@ -817,11 +835,11 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         if char_total == 0:
             logger.info("Total character count is 0. Nothing to do.")
             return
-        char_text = hp.format_char_count(processed_chars) + " / " + hp.format_char_count(char_total)
+        char_text = ut.format_char_count(processed_chars) + " / " + ut.format_char_count(char_total)
         time_total = ceil(self.config.avg_time_per_mille * (char_total - processed_chars) / 1000)
         self.label_progress.setText(
-            f"Translated {char_text} {hp.f_plural(char_total, 'character')}\n"
-            f"Approximately {hp.f_time(time_total)} remaining"
+            f"Translated {char_text} {ut.f_plural(char_total, 'character')}\n"
+            f"Approximately {ut.f_time(time_total)} remaining"
         )
         self.progressBar.setValue(processed_chars / char_total * 100)
 

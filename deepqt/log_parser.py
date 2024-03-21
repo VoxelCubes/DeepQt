@@ -3,8 +3,8 @@ import os
 from datetime import datetime
 from typing import Sequence
 
-import pcleaner.config as cfg
-import pcleaner.cli_utils as cu
+import deepqt.config as cfg
+import deepqt.utils as ut
 
 MAX_SESSIONS = 30
 
@@ -73,7 +73,7 @@ def load_log_file() -> str | None:
     """
     contents = None
     try:
-        with open(cu.get_log_path(), "r", encoding="utf-8") as file:
+        with open(ut.get_log_path(), "r", encoding="utf-8") as file:
             contents = file.read()
     except FileNotFoundError:
         pass

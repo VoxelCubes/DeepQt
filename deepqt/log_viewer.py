@@ -5,7 +5,7 @@ import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
 
-from pcleaner import data
+from deepqt import data
 
 colors_dark_theme = {
     "debug": Qg.QColor(41, 128, 185),

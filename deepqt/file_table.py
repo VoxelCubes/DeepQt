@@ -66,7 +66,7 @@ class FileTable(CTableWidget):
         paths_in_table = [file.path for file in self.files.values()]
         if path in paths_in_table:
             logger.warning(f"File {path} already in table.")
-            hp.show_warning(self, "Duplicate file", f"File {path} is already in the table.")
+            ut.show_warning(self, "Duplicate file", f"File {path} is already in the table.")
             return
 
         self.not_ready_for_translation.emit()
@@ -78,7 +78,7 @@ class FileTable(CTableWidget):
             # The ValueError is raised when the epub file isn't valid.
             logger.error(f"Failed to add file {path}")
             logger.error(e)
-            hp.show_warning(None, "Failed to add file", f"Failed to add file {path}\n\n{e}")
+            ut.show_warning(None, "Failed to add file", f"Failed to add file {path}\n\n{e}")
             return
 
         # Add the new file to the table.
@@ -87,7 +87,7 @@ class FileTable(CTableWidget):
             file_id,
             path.name,
             "File added",
-            hp.format_char_count(file.char_count),
+            ut.format_char_count(file.char_count),
             str(make_output_filename(file, self.config)),
             select_new=True,
         )
@@ -505,7 +505,7 @@ class FileTable(CTableWidget):
         file = self.files[file_id]
         char_count = file.char_count
         logger.debug(f"Recalculating char count for {file.path.name} ({char_count} chars).")
-        self.update_table_cell(file_id, Column.CHARS, hp.format_char_count(char_count))
+        self.update_table_cell(file_id, Column.CHARS, ut.format_char_count(char_count))
         self.recalculate_char_total.emit()
 
 
@@ -524,6 +524,6 @@ def make_output_filename(input_file: st.InputFile, config: cfg.Config) -> Path:
         path = Path("/") / config.fixed_output_path / path.name
         path = path.resolve()
 
-    path = hp.ensure_unique_file_path(path)
+    path = ut.ensure_unique_file_path(path)
 
     return path
