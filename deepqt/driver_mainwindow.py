@@ -17,11 +17,12 @@ import deepqt.glossary as gl
 import deepqt.structures as st
 import deepqt.worker_thread as wt
 import deepqt.constants as ct
+import deepqt.utils as ut
+import deepqt.gui_utils as gu
+import deepqt.issue_reporter_driver as ird
 from deepqt import __program__, __version__
-from deepqt import utils as ut
 from deepqt.driver_api_config import ConfigureAccount
 from deepqt.file_table import Column, make_output_filename
-from deepqt.gui_utils import show_warning, show_info, show_question
 from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 
 DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
@@ -102,7 +103,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         # self.checkBox_file_fixed_dir.toggled.connect(self.fixed_output_dir_toggled)
         self.checkBox_use_glossary.toggled.connect(self.use_glossary_toggled)
-        self.checkBox_extra_quote_protection.toggled.connect(self.extra_quote_protection_toggled)
+        # self.checkBox_extra_quote_protection.toggled.connect(self.extra_quote_protection_toggled)
         # self.pushButton_file_dir_browse.clicked.connect(self.browse_file_out_dir)
         # self.lineEdit_file_out_dir.textEdited.connect(partial(self.fixed_file_out_updated, False))
         # self.lineEdit_file_out_dir.editingFinished.connect(partial(self.fixed_file_out_updated, True))
@@ -179,7 +180,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         self.lineEdit_glossary_file.setText(self.config.glossary_path)
         self.checkBox_use_glossary.setChecked(self.config.use_glossary)
-        self.checkBox_extra_quote_protection.setChecked(self.config.use_quote_protection)
+        # self.checkBox_extra_quote_protection.setChecked(self.config.use_quote_protection)
 
         self.fixed_output_dir_enabled(self.config.use_fixed_output_path)
         self.glossary_enabled(self.config.use_glossary)
@@ -429,7 +430,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         Notify the user of an error.
         """
         self.statusbar.showMessage(f"Error loading glossary.", 10_000)
-        show_warning(self, "Glossary Error", f"Failed to open glossary file\n\n{error.value}")
+        gu.show_warning(self, "Glossary Error", f"Failed to open glossary file\n\n{error.value}")
         logger.error(f"Failed to open glossary file.\n{error}")
 
     """
@@ -441,9 +442,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Check if the API is ready.
         translator = self.open_translator()
         if translator is None:
-            show_warning(self, "API Error", "Failed to open DeepL translator. Please check account settings.")
+            gu.show_warning(self, "API Error", "Failed to open DeepL translator. Please check account settings.")
         if self.config.tl_mock:
-            show_warning(
+            gu.show_warning(
                 self,
                 "Mock Mode",
                 "Translations are being performed with the mock translator.\nDo not expect accurate results.",
@@ -503,7 +504,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             )
         # Ask the user if he wants to proceed, just in case.
         logger.info(f"Character limit warning: {warning_msg}")
-        affirmation = show_question(self, "API Limit", warning_msg)
+        affirmation = gu.show_question(self, "API Limit", warning_msg)
         if not affirmation:
             logger.info("Translation cancelled.")
             return False
@@ -522,20 +523,20 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         if exit_code == ai.State.DONE:
             self.statusbar.showMessage("Translation finished.")
-            show_info(self, "Finished", "Translations successfully completed.")
+            gu.show_info(self, "Finished", "Translations successfully completed.")
             for file_id in self.file_table.files:
                 self.write_output_file(file_id)
 
         elif exit_code == ai.State.ABORTED:
             self.statusbar.showMessage("Translation aborted.")
-            show_info(self, "Aborted", "Translation aborted.")
+            gu.show_info(self, "Aborted", "Translation aborted.")
             if self.config.dump_on_abort:
                 for file_id in self.file_table.files:
                     self.write_output_file(file_id)
 
         elif exit_code == ai.State.QUOTA_EXCEEDED:
             self.statusbar.showMessage("API quota exceeded.")
-            show_warning(
+            gu.show_warning(
                 self,
                 "API Quota Exceeded",
                 "The DeepL API quota has been exceeded.\nDumping output files.",
@@ -562,7 +563,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     def translation_worker_error(self, error: wt.WorkerError):
         logger.error(f"Translation failed.\n{error}")
         self.statusbar.showMessage(f"Translation failed.")
-        show_warning(self, "Translation Error", f"Translation failed.\n\n{error.value}")
+        gu.show_warning(self, "Translation Error", f"Translation failed.\n\n{error.value}")
         self.translation_worker_finished()
 
     def translation_worker_finished(self):
@@ -603,7 +604,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         except OSError as e:
             path_out = make_output_filename(file, self.config)
             logger.error(f"Failed to write translation to {path_out}.\n{e}\n\n")
-            show_warning(
+            gu.show_warning(
                 self,
                 "Output Error",
                 f"Failed to write translation to {path_out}.\n\n{e}\n\n"
@@ -678,7 +679,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     """
 
     def set_up_statusbar(self):
-        return
         """
         Add a label to show the current char total and time estimate.
         Add a flat button to the statusbar to offer opening the config file.
@@ -690,15 +690,15 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.label_stats = Qw.QLabel("")
         self.statusbar.addPermanentWidget(self.label_stats)
 
-        button_config = Qw.QPushButton("Open Config")
-        button_config.clicked.connect(partial(ut.open_file, cfg.config_path()))
-        button_config.setFlat(True)
-        self.statusbar.addPermanentWidget(button_config)
-
         button_log = Qw.QPushButton("Open Log")
-        button_log.clicked.connect(partial(ut.open_file, cfg.log_path()))
+        button_log.clicked.connect(self.open_log_viewer)
         button_log.setFlat(True)
         self.statusbar.addPermanentWidget(button_log)
+
+    def open_log_viewer(self) -> None:
+        logger.debug("Opening issue reporter.")
+        issue_reporter = ird.IssueReporter(self)
+        issue_reporter.exec()
 
     """
     Simple UI manipulation functions
@@ -848,7 +848,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         Show the glossary documentation in a web browser.
         Open the github page for this.
         """
-        show_info(
+        gu.show_info(
             self,
             "Glossary info",
             # language=HTML
@@ -876,7 +876,7 @@ def nuke_epub_cache():
     """
     Perform a sanity check first. The folder must exist and be named "epub".
     """
-    epub_cache_path = cfg.epub_cache_path()
+    epub_cache_path = ut.epub_cache_path()
     if not epub_cache_path.is_dir():
         logger.info("Epub cache folder does not exist. Nothing to do.")
         return

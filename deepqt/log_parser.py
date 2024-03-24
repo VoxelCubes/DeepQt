@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 from typing import Sequence
 
-import deepqt.config as cfg
 import deepqt.utils as ut
 
 MAX_SESSIONS = 30
@@ -91,14 +90,14 @@ def parse_log_file(contents: str, max_sessions: int = MAX_SESSIONS) -> Sequence[
 
     sessions = []
     # Split the log file into sections based on start and shutdown messages
-    raw_sessions = re.split(rf"({cfg.STARTUP_MESSAGE})", contents)
+    raw_sessions = re.split(rf"({ut.STARTUP_MESSAGE})", contents)
 
     # Pairing each startup message with its corresponding log session
     for i in range(len(raw_sessions) - 2, 0, -2):
-        if raw_sessions[i] == cfg.STARTUP_MESSAGE and i + 1 < len(raw_sessions):
+        if raw_sessions[i] == ut.STARTUP_MESSAGE and i + 1 < len(raw_sessions):
             session_text = raw_sessions[i + 1]
             # If there is a shutdown message, find it and truncate the session text
-            shutdown_index = session_text.find(cfg.SHUTDOWN_MESSAGE, -500)
+            shutdown_index = session_text.find(ut.SHUTDOWN_MESSAGE, -500)
             if shutdown_index != -1:
                 shutdown_index = session_text.find("\n", shutdown_index)
                 if shutdown_index != -1:
