@@ -35,7 +35,7 @@ class Trie:
                 try:
                     recurse = self._pattern(data[char])
                     alt.append(self.quote(char) + recurse)
-                except:
+                except Exception:
                     cc.append(self.quote(char))
             else:
                 q = 1

@@ -39,6 +39,11 @@ def show_exception(
 ) -> None:
     """
     Show an exception in a dialog along with logs.
+    This automatically gathers the exception information from the current context
+    or a given worker error object.
+
+    You can also skip collecting the exception if you have already logged this separately and
+    merely wish to open the Issue Reporter dialog for the user.
 
     :param parent: The parent widget.
     :param title: The title of the dialog.
@@ -108,7 +113,7 @@ def open_file(path: Path) -> None:
     try:
         # Use Qt to open the file, so that it works on all platforms.
         Qg.QDesktopServices.openUrl(Qc.QUrl.fromLocalFile(str(path)))
-    except:
+    except Exception:
         show_exception(None, "File Error", "Failed to open file.")
 
 
