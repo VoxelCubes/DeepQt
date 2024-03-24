@@ -13,6 +13,7 @@ from deepqt.driver_mainwindow import MainWindow
 
 
 # TODO Testing
+# TODO have a lock file
 
 
 def main():
@@ -44,18 +45,17 @@ def main():
         "clipboard", help="Translate text from clipboard. Usage: clipboard [--options]"
     )
 
-    supported_backends = [b.value for b in Backend]
+    supported_backends = list(Backend)
 
     # Common arguments
     for p in [parser_files, parser_text, parser_clipboard, parser]:
-        p.add_argument("--translate-now", "-n", action="store_true", help="Translate immediately at startup")
         p.add_argument(
             "--api",
-            "-a",
             choices=supported_backends,
             default=None,
             help="The translation API to use",
         )
+        p.add_argument("--translate-now", "-n", action="store_true", help="Translate immediately at startup")
         p.add_argument("--debug-api", "-D", action="store_true", help="Enable debug messages for the APIs")
         p.add_argument("--debug", "-d", action="store_true", help="Enable debug mode")
         p.add_argument("--version", "-v", action="version", version=f"{__display_name__} {__version__}")
@@ -63,10 +63,9 @@ def main():
     args = parser.parse_args()
 
     ut.get_log_path().parent.mkdir(parents=True, exist_ok=True)
-    # Log up to 10MB to the log file.
-    logger.add(str(ut.get_log_path()), rotation="10 MB", retention="1 week", level="DEBUG")
 
-    logger.info(ut.collect_system_info(__file__))
+    # Set up logging.
+    logger.remove()
 
     # When bundling an executable, stdout can be None if no console is supplied.
     if sys.stdout is not None:
@@ -75,12 +74,18 @@ def main():
         else:
             logger.add(sys.stdout, level="WARNING")
 
+    # Log up to 10MB to the log file.
+    logger.add(str(ut.get_log_path()), rotation="10 MB", retention="1 week", level="DEBUG")
+
     if args.debug_api:
         import logging
 
         logger.info("Enabled debugging network requests.")
         logging.basicConfig()
         logging.getLogger("deepl").setLevel(logging.DEBUG)
+
+    # Dump the system info.
+    logger.info(ut.collect_system_info(__file__))
 
     # Dump the command line arguments if in debug mode.
     if args.debug:
