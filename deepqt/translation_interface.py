@@ -127,7 +127,7 @@ class DeeplWorker(QRunnable):
                 self.signals.progress.emit(self.current_file_id, "Translation manually aborted.", None, None)
             self.signals.result.emit(State.ABORTED)
 
-        except:
+        except Exception:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit(wt.WorkerError(exctype, value, traceback.format_exc()))
