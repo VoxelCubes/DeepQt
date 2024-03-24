@@ -18,9 +18,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QFrame,
     QGridLayout, QGroupBox, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QMainWindow, QPlainTextEdit,
-    QProgressBar, QPushButton, QSizePolicy, QSpacerItem,
-    QSpinBox, QStackedWidget, QStatusBar, QTableWidgetItem,
-    QVBoxLayout, QWidget)
+    QProgressBar, QPushButton, QScrollArea, QSizePolicy,
+    QSpacerItem, QSpinBox, QStackedWidget, QStatusBar,
+    QTableWidgetItem, QVBoxLayout, QWidget)
 
 from deepqt.CustomQ.CComboBox import CComboBox
 from deepqt.CustomQ.CDropFrame import CDropFrame
@@ -104,10 +104,9 @@ class Ui_MainWindow(object):
         self.groupBox_api.setFlat(True)
         self.verticalLayout_3 = QVBoxLayout(self.groupBox_api)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_3.setContentsMargins(0, -1, 0, -1)
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(-1, -1, -1, 6)
+        self.horizontalLayout_2.setContentsMargins(-1, -1, -1, 0)
         self.label_api_logo = QLabel(self.groupBox_api)
         self.label_api_logo.setObjectName(u"label_api_logo")
 
@@ -136,10 +135,44 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
 
-        self.stackedWidget_api_overview = QStackedWidget(self.groupBox_api)
-        self.stackedWidget_api_overview.setObjectName(u"stackedWidget_api_overview")
+        self.pushButton_api_settings_visibility = QPushButton(self.groupBox_api)
+        self.pushButton_api_settings_visibility.setObjectName(u"pushButton_api_settings_visibility")
+        icon4 = QIcon()
+        iconThemeName = u"arrow-right"
+        if QIcon.hasThemeIcon(iconThemeName):
+            icon4 = QIcon.fromTheme(iconThemeName)
+        else:
+            icon4.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.verticalLayout_3.addWidget(self.stackedWidget_api_overview)
+        self.pushButton_api_settings_visibility.setIcon(icon4)
+        self.pushButton_api_settings_visibility.setCheckable(True)
+        self.pushButton_api_settings_visibility.setFlat(True)
+
+        self.verticalLayout_3.addWidget(self.pushButton_api_settings_visibility)
+
+        self.scrollArea = QScrollArea(self.groupBox_api)
+        self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setFrameShape(QFrame.NoFrame)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 436, 121))
+        self.verticalLayout_8 = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.stackedWidget_api_overview = QStackedWidget(self.scrollAreaWidgetContents)
+        self.stackedWidget_api_overview.setObjectName(u"stackedWidget_api_overview")
+        self.page = QWidget()
+        self.page.setObjectName(u"page")
+        self.verticalLayout_9 = QVBoxLayout(self.page)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.stackedWidget_api_overview.addWidget(self.page)
+
+        self.verticalLayout_8.addWidget(self.stackedWidget_api_overview)
+
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.verticalLayout_3.addWidget(self.scrollArea)
 
 
         self.verticalLayout.addWidget(self.groupBox_api)
@@ -154,7 +187,6 @@ class Ui_MainWindow(object):
         self.groupBox_language.setFlat(True)
         self.horizontalLayout_7 = QHBoxLayout(self.groupBox_language)
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.horizontalLayout_7.setContentsMargins(0, -1, 0, -1)
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.label_2 = QLabel(self.groupBox_language)
@@ -200,7 +232,6 @@ class Ui_MainWindow(object):
         self.groupBox_files.setFlat(True)
         self.verticalLayout_4 = QVBoxLayout(self.groupBox_files)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(0, -1, 0, -1)
         self.horizontalLayout_8 = QHBoxLayout()
         self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
         self.checkBox_use_glossary = QCheckBox(self.groupBox_files)
@@ -233,42 +264,20 @@ class Ui_MainWindow(object):
 
         self.pushButton_glossary_file_browse = QPushButton(self.groupBox_files)
         self.pushButton_glossary_file_browse.setObjectName(u"pushButton_glossary_file_browse")
-        icon4 = QIcon()
+        icon5 = QIcon()
         iconThemeName = u"document-open"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon4 = QIcon.fromTheme(iconThemeName)
+            icon5 = QIcon.fromTheme(iconThemeName)
         else:
-            icon4.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon5.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_glossary_file_browse.setIcon(icon4)
+        self.pushButton_glossary_file_browse.setIcon(icon5)
         self.pushButton_glossary_file_browse.setFlat(True)
 
         self.horizontalLayout.addWidget(self.pushButton_glossary_file_browse)
 
 
         self.verticalLayout_4.addLayout(self.horizontalLayout)
-
-        self.horizontalLayout_12 = QHBoxLayout()
-        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
-        self.checkBox_extra_quote_protection = QCheckBox(self.groupBox_files)
-        self.checkBox_extra_quote_protection.setObjectName(u"checkBox_extra_quote_protection")
-        self.checkBox_extra_quote_protection.setChecked(True)
-
-        self.horizontalLayout_12.addWidget(self.checkBox_extra_quote_protection)
-
-        self.label_extra_quote_protection_help = CTooltipLabel(self.groupBox_files)
-        self.label_extra_quote_protection_help.setObjectName(u"label_extra_quote_protection_help")
-        self.label_extra_quote_protection_help.setToolTipDuration(-1)
-        self.label_extra_quote_protection_help.setText(u"<helper>")
-
-        self.horizontalLayout_12.addWidget(self.label_extra_quote_protection_help)
-
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_12.addItem(self.horizontalSpacer_3)
-
-
-        self.verticalLayout_4.addLayout(self.horizontalLayout_12)
 
         self.horizontalLayout_10 = QHBoxLayout()
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
@@ -301,14 +310,14 @@ class Ui_MainWindow(object):
 
         self.pushButton_out_dir_browse = QPushButton(self.groupBox_files)
         self.pushButton_out_dir_browse.setObjectName(u"pushButton_out_dir_browse")
-        icon5 = QIcon()
+        icon6 = QIcon()
         iconThemeName = u"document-open-folder"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon5 = QIcon.fromTheme(iconThemeName)
+            icon6 = QIcon.fromTheme(iconThemeName)
         else:
-            icon5.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon6.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_out_dir_browse.setIcon(icon5)
+        self.pushButton_out_dir_browse.setIcon(icon6)
         self.pushButton_out_dir_browse.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.pushButton_out_dir_browse)
@@ -319,7 +328,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.groupBox_files)
 
-        self.verticalSpacer = QSpacerItem(350, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer = QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
@@ -349,28 +358,28 @@ class Ui_MainWindow(object):
         font1.setPointSize(10)
         font1.setBold(True)
         self.pushButton_start.setFont(font1)
-        icon6 = QIcon()
+        icon7 = QIcon()
         iconThemeName = u"media-playback-start"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon6 = QIcon.fromTheme(iconThemeName)
+            icon7 = QIcon.fromTheme(iconThemeName)
         else:
-            icon6.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon7.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_start.setIcon(icon6)
+        self.pushButton_start.setIcon(icon7)
 
         self.horizontalLayout_9.addWidget(self.pushButton_start)
 
         self.pushButton_abort = QPushButton(self.centralwidget)
         self.pushButton_abort.setObjectName(u"pushButton_abort")
         self.pushButton_abort.setFont(font1)
-        icon7 = QIcon()
+        icon8 = QIcon()
         iconThemeName = u"process-stop"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon7 = QIcon.fromTheme(iconThemeName)
+            icon8 = QIcon.fromTheme(iconThemeName)
         else:
-            icon7.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon8.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_abort.setIcon(icon7)
+        self.pushButton_abort.setIcon(icon8)
 
         self.horizontalLayout_9.addWidget(self.pushButton_abort)
 
@@ -592,6 +601,7 @@ class Ui_MainWindow(object):
         self.label_api_logo.setText(QCoreApplication.translate("MainWindow", u"<logo>", None))
         self.label_api_name.setText(QCoreApplication.translate("MainWindow", u"<current api>", None))
         self.pushButton_api_change.setText(QCoreApplication.translate("MainWindow", u"Change", None))
+        self.pushButton_api_settings_visibility.setText(QCoreApplication.translate("MainWindow", u"API Settings", None))
         self.groupBox_language.setTitle(QCoreApplication.translate("MainWindow", u"Language", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"From:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"To:", None))
@@ -604,10 +614,6 @@ class Ui_MainWindow(object):
         self.pushButton_glossary_file_browse.setToolTip(QCoreApplication.translate("MainWindow", u"Browse", None))
 #endif // QT_CONFIG(tooltip)
         self.pushButton_glossary_file_browse.setText("")
-        self.checkBox_extra_quote_protection.setText(QCoreApplication.translate("MainWindow", u"Use extra quotation protection", None))
-#if QT_CONFIG(tooltip)
-        self.label_extra_quote_protection_help.setToolTip(QCoreApplication.translate("MainWindow", u"You can use a relative path to create a subfolder at the image's original location, or use an absolute path.", None))
-#endif // QT_CONFIG(tooltip)
         self.label.setText(QCoreApplication.translate("MainWindow", u"Output directory:", None))
 #if QT_CONFIG(tooltip)
         self.label_outdir_help.setToolTip(QCoreApplication.translate("MainWindow", u"You can use a relative path to create a subfolder at the image's original location, or use an absolute path.", None))

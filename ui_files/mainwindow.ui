@@ -114,16 +114,10 @@
          <bool>true</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
            <property name="bottomMargin">
-            <number>6</number>
+            <number>0</number>
            </property>
            <item>
             <widget class="QLabel" name="label_api_logo">
@@ -156,7 +150,53 @@
           </layout>
          </item>
          <item>
-          <widget class="QStackedWidget" name="stackedWidget_api_overview"/>
+          <widget class="QPushButton" name="pushButton_api_settings_visibility">
+           <property name="text">
+            <string>API Settings</string>
+           </property>
+           <property name="icon">
+            <iconset theme="arrow-right">
+             <normaloff>.</normaloff>.</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QScrollArea" name="scrollArea">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>436</width>
+              <height>121</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <widget class="QStackedWidget" name="stackedWidget_api_overview">
+               <widget class="QWidget" name="page">
+                <layout class="QVBoxLayout" name="verticalLayout_9"/>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -176,12 +216,6 @@
          <bool>true</bool>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
@@ -236,12 +270,6 @@
          <bool>true</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
@@ -307,46 +335,6 @@
               <bool>true</bool>
              </property>
             </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_12">
-           <item>
-            <widget class="QCheckBox" name="checkBox_extra_quote_protection">
-             <property name="text">
-              <string>Use extra quotation protection</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="CTooltipLabel" name="label_extra_quote_protection_help">
-             <property name="toolTip">
-              <string extracomment="The &amp;apos; is the possessive 's apostrophe and should be ignored if the language doesn't call for it.">You can use a relative path to create a subfolder at the image's original location, or use an absolute path.</string>
-             </property>
-             <property name="toolTipDuration">
-              <number>-1</number>
-             </property>
-             <property name="text">
-              <string notr="true">&lt;helper&gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
            </item>
           </layout>
          </item>
@@ -425,8 +413,8 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>350</width>
-          <height>40</height>
+          <width>0</width>
+          <height>0</height>
          </size>
         </property>
        </spacer>

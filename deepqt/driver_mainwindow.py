@@ -312,13 +312,13 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.config.save()
             self.load_glossary()
 
-    def extra_quote_protection_toggled(self):
-        """
-        Enable or disable the extra quote protection checkbox and save it to the config.
-        """
-        self.config.use_quote_protection = self.checkBox_extra_quote_protection.isChecked()
-        self.config.save()
-        self.text_params_changed.emit(self.glossary)
+    # def extra_quote_protection_toggled(self):
+    #     """
+    #     Enable or disable the extra quote protection checkbox and save it to the config.
+    #     """
+    #     self.config.use_quote_protection = self.checkBox_extra_quote_protection.isChecked()
+    #     self.config.save()
+    #     self.text_params_changed.emit(self.glossary)
 
     """
     Dialogs
