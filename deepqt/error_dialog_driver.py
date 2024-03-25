@@ -37,7 +37,7 @@ class ErrorDialog(Qw.QDialog, Ui_ErrorDialog):
         self.pushButton_open_issues.clicked.connect(self.open_issues)
         self.pushButton_clipboard.clicked.connect(self.copy_to_clipboard)
 
-        self.label_name_hidden.setText(self.tr("Note: Name {name} was hidden").format(name=lp.get_username()))
+        self.label_name_hidden.setText("Note: Name {name} and api keys were hidden".format(name=lp.get_username()))
         self.load_session_log()
 
     @staticmethod
@@ -46,7 +46,7 @@ class ErrorDialog(Qw.QDialog, Ui_ErrorDialog):
         Open the issues page in the browser.
         """
         logger.debug("Opening github issues page.")
-        Qg.QDesktopServices.openUrl(Qc.QUrl("https://github.com/VoxelCubes/PanelCleaner/issues"))
+        Qg.QDesktopServices.openUrl(Qc.QUrl("https://github.com/VoxelCubes/DeepQt/issues"))
 
     def load_session_log(self) -> None:
         """
@@ -58,7 +58,7 @@ class ErrorDialog(Qw.QDialog, Ui_ErrorDialog):
 
         sessions = lp.parse_log_file(log_text, max_sessions=1)
         if len(sessions) != 1:
-            self.session_log = lp.LogSession(self.tr("Failed to load log."))
+            self.session_log = lp.LogSession("Failed to load log.")
         else:
             self.session_log = lp.parse_log_file(log_text, max_sessions=1)[0]
 
