@@ -1,12 +1,11 @@
 import difflib
 import os
 import platform
-import shutil
-import subprocess
 import sys
 import zipfile as zf
 from io import StringIO
 from pathlib import Path
+from typing import get_type_hints
 
 import PySide6
 import PySide6.QtCore as Qc
@@ -59,7 +58,7 @@ def get_config_path() -> Path:
     xdg_path = os.getenv("XDG_CONFIG_HOME") or Path.home() / ".config"
 
     if platform.system() == "Linux":
-        path = Path(XDG_CONFIG_HOME, __program__, __program__ + "rc")
+        path = Path(XDG_CONFIG_HOME, __program__ + "rc")
     elif platform.system() == "Windows":
         path = Path(
             xdg_path if "XDG_CONFIG_HOME" in os.environ else os.getenv("APPDATA"),
@@ -103,6 +102,19 @@ def get_cache_path() -> Path:
 
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def epub_cache_path(epub_path: None | Path = None) -> Path:
+    """
+    Get the path to the epub cache directory for this epub.
+    Each epub gets its own cache directory, to keep them separate.
+
+    :param epub_path: (Optional) Path to the epub file. If None, return the cache directory.
+    :return: Path to the cache directory.
+    """
+    if epub_path is None:
+        return get_cache_path() / "epubs"
+    return get_cache_path() / "epubs" / epub_path.name
 
 
 def get_log_path() -> Path:
@@ -245,6 +257,64 @@ def weighted_average(old_value: float, new_value: float, weight: float = 0.25) -
     When chained several times, it's an exponential moving average.
     """
     return old_value * (1 - weight) + new_value * weight
+
+
+def censor_key(key: str) -> str:
+    """
+    Replaces all characters in the key with asterisks.
+    """
+    return "*" * len(key)
+
+
+def load_dict_to_attrs_safely(
+    dataclass: object,
+    data: dict,
+    *,
+    skip_attrs: list[str] | None = None,
+    include_until_base: type | list[type] | None = None,
+) -> list[Exception]:
+    """
+    Load a dictionary into an attrs class while ensuring types are correct.
+    Any type issues are logged and returned as a list of exceptions.
+    If no exceptions are returned, the loading was successful.
+    In the worst case, the object is simply left unchanged.
+    When you have a dataclass that inherits from another one, type annotations won't be inherited,
+    so set include_until_base to the base class to include all attributes up to (and including) that class.
+
+    :param dataclass: The dataclass to load the dictionary into.
+    :param data: The dictionary to load.
+    :param skip_attrs: [Optional] A list of attributes to skip.
+    :param include_until_base: [Optional] Include attributes until this base class.
+    :return: A list of exceptions that occurred during loading.
+    """
+    errors: list[Exception] = []
+    type_info = get_type_hints(dataclass)
+    # Gather type hints from base classes if requested.
+    if include_until_base:
+        if not isinstance(include_until_base, list):
+            include_until_base = [include_until_base]
+        base_classes = list(type(dataclass).__bases__)
+        while base_classes:
+            base_class = base_classes.pop(0)
+            type_info.update(get_type_hints(base_class))
+            if base_class not in include_until_base:
+                base_classes.extend(list(base_class.__bases__))
+
+    for attribute in dataclass.__annotations__:
+        if skip_attrs and attribute in skip_attrs:
+            continue
+
+        if attribute in data:
+            # Attempt to coerce the type to the correct one.
+            value = data[attribute]
+            expected_type = type_info[attribute]
+            try:
+                setattr(dataclass, attribute, expected_type(value))
+            except Exception as e:
+                logger.exception(f"Failed to cast attribute {attribute} to the correct type.")
+                errors.append(type(e)(f"Failed to cast attribute {attribute} to the correct type: {e}"))
+
+    return errors
 
 
 # TODO this doesn't belong here.

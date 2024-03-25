@@ -2,8 +2,10 @@ import shutil
 from functools import partial
 from math import ceil
 from pathlib import Path
+import pprint
 from enum import Enum
 
+import psutil
 import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
@@ -11,7 +13,7 @@ import deepl
 from PySide6.QtCore import Signal
 from loguru import logger
 
-import deepqt.api_interface as ai
+import deepqt.translation_interface as ai
 import deepqt.config as cfg
 import deepqt.glossary as gl
 import deepqt.structures as st
@@ -33,6 +35,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     config: cfg.Config = None
     glossary: st.Glossary = None
     translating: bool
+    debug: bool
 
     api_widgets: dict[ct.Backend, Qw.QWidget]
 
@@ -54,25 +57,28 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle(f"{__program__} {__version__}")
         self.setWindowIcon(Qg.QIcon(":/icons/logo.png"))
+        self.debug = debug
+
         self.translating = False  # If true, the translation is in progress.
         self.glossary = st.Glossary()  # Create a dummy glossary
-        nuke_epub_cache()
+        nuke_epub_cache()  # TODO move to async routine
 
         self.initialize_ui()
 
         self.threadpool = Qc.QThreadPool.globalInstance()
         logger.info(f"Multithreading with maximum {self.threadpool.maxThreadCount()} threads")
 
-        self.config = cfg.Config.load()
-        # Set debug flag.
-        # self.config.tl_mock = mock
+        self.config = self.load_config()
+        self.config.save()
+        self.config.pretty_log()
 
-        logger.debug(f"Loaded config: {self.config.safe_dump()}")
         self.load_config_to_ui()
         # Share config with the file table.
         self.file_table.set_config(self.config)
 
         self.load_glossary()
+
+        self.test_and_set_lock_file()
 
     def initialize_ui(self):
         # Set window height to 650px.
@@ -139,6 +145,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         Notify config on close.
         """
         logger.info("Closing window.")
+        self.free_lock_file()
         self.abort_translation_worker.emit()
         if self.threadpool.activeThreadCount():
             self.statusbar.showMessage("Waiting for threads to finish...")
@@ -148,6 +155,36 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         nuke_epub_cache()
         event.accept()
+
+    def load_config(self) -> cfg.Config:
+        """
+        Load the config if there is one, handling errors as needed.
+
+        :return: The loaded or default config.
+        """
+        # Check if there is a config at all.
+        config_path = ut.get_config_path()
+        if not config_path.exists():
+            logger.info(f"No config found at {config_path}.")
+            return cfg.Config()
+
+        config, success, errors = cfg.load_config(config_path)
+
+        # Format them like: ValueError: 'lang_from' must be a string.
+        errors_str = "\n".join(f"{type(e).__name__}: {e}" for e in errors)
+
+        if not success:
+            gu.show_warning(
+                self,
+                "Config Error",
+                f"Failed to load the config file.\n\n{errors_str}\n\nProceeding with the default configuration.",
+            )
+        elif errors:
+            gu.show_info(
+                self, "Config Warnings", f"Minor issues were found and corrected in the config file.\n\n{errors_str}"
+            )
+
+        return config
 
     def connect_combobox_slots(self):
         """
@@ -870,6 +907,55 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
                     </body>
                 </html>""",
         )
+
+    # ========================================== Lock File ==========================================
+
+    def test_and_set_lock_file(self) -> None:
+        """
+        Create a lock file to warn against multiple instances of the application from running at the same time.
+        """
+        # In debug mode, don't bother with the lock file. All of the frequent crashing and force quitting
+        # will make it a nuisance.
+        if self.debug:
+            return
+
+        lock_file = ut.get_lock_file_path()
+        if lock_file.exists():
+            # Check if the lock file is newer than the current uptime.
+            if lock_file.stat().st_mtime >= psutil.boot_time():
+                logger.warning("Found active lock file.")
+                response = gu.show_critical(
+                    self,
+                    "Multiple Instances",
+                    "Another instance of Panel Cleaner appears to be running already "
+                    "or the previous instance was killed. "
+                    "Opening a new instance will make the old session unstable.\n\n"
+                    "Continue anyway?",
+                    detailedText=self.tr("Found process ID in lock file: ") + lock_file.read_text(),
+                )
+                if response == Qw.QMessageBox.Abort:
+                    logger.critical("User aborted due to lock file.")
+                    raise SystemExit(1)
+                logger.warning("User overrode lock file.")
+            else:
+                logger.warning("Found lock file, but it is older than the current uptime. Overwriting.")
+
+        with lock_file.open("w") as file:
+            file.write(str(Qw.QApplication.applicationPid()))
+
+    def free_lock_file(self) -> None:
+        """
+        Remove the lock file.
+        """
+        if self.debug:
+            return
+
+        lock_file = ut.get_lock_file_path()
+        if lock_file.exists():
+            logger.debug("Removing lock file.")
+            lock_file.unlink()
+        else:
+            logger.error("Lock file not found, a new instance was likely started.")
 
 
 def nuke_epub_cache():
