@@ -1,0 +1,17 @@
+{
+    "nonsense": "This shouldn't be here",
+    "lang_from": "Valid language code",
+    "lang_to": "EN-US",
+    "backend_configs": {
+        "mock": {
+            "avg_time_per_mille": -1.0,
+            "chunk_size": 1000,
+            "more nonsense": 42
+        },
+        "deepl": {
+            "avg_time_per_mille": -1.0,
+            "tl_preserve_formatting": true,
+            "wait_time_ms": 1000
+        }
+    }
+}

@@ -1,6 +1,7 @@
 import json
 import shutil
 from pathlib import Path
+from typing import Callable, Any
 
 import attrs
 import yaml
@@ -132,10 +133,12 @@ class Config:
         """
         data = self.safe_dump()
         # Dump to yaml string.
-        logger.debug(yaml.safe_dump(data, default_flow_style=False, sort_keys=False))
+        logger.debug("Config:\n" + yaml.safe_dump(data, default_flow_style=False, sort_keys=False))
 
 
-def load_config(conf_path: Path) -> tuple[Config, bool, list[Exception]]:
+def load_config(
+    conf_path: Path, config_factory: Callable[[], Any] = Config
+) -> tuple[Config, bool, list[ut.ParseException]]:
     """
     Load the configuration from the given path.
     If no errors occur, return the config, True, and an empty list.
@@ -143,13 +146,14 @@ def load_config(conf_path: Path) -> tuple[Config, bool, list[Exception]]:
     If non-critical errors occur, return the config, True, and the errors.
 
     :param conf_path: Path to the configuration file.
+    :param config_factory: [Optional] Factory function to create a new config object.
     :return: The configuration, whether it was loaded successfully (fully or in part), and any errors.
     """
 
-    config = Config()
+    config = config_factory()
 
     success = True
-    errors: list[Exception]
+    errors: list[ut.ParseException]
 
     try:
         with open(conf_path, "r") as f:
@@ -167,25 +171,23 @@ def load_config(conf_path: Path) -> tuple[Config, bool, list[Exception]]:
                 errors.extend(backend_errors)
     except OSError as e:
         logger.exception(f"Failed to read config file {conf_path}")
-        errors = [type(e)(f"Failed to read config file {conf_path}: {e}")]
+        errors = [ut.ParseException(f"{type(e).__name__}: Failed to read config file {conf_path}: {e}")]
         success = False
-    except (KeyError, TypeError, json.decoder.JSONDecodeError) as e:
+    except json.decoder.JSONDecodeError as e:
         logger.exception(f"Configuration file could not be parsed {conf_path}")
-        errors = [type(e)(f"Configuration file could not be parsed {conf_path}: {e}")]
+        errors = [ut.ParseException(f"{type(e).__name__}: Configuration file could not be parsed {conf_path}: {e}")]
         success = False
 
     # If fubar, reset the config just to be sure.
     if not success:
-        config = Config()
+        config = config_factory()
 
     return config, success, errors
 
 
-class UnknownBackend(Exception):
-    pass
-
-
-def structure_backend_configs(json_data: dict[str, dict]) -> tuple[dict[ct.Backend, bi.BackendConfig], list[Exception]]:
+def structure_backend_configs(
+    json_data: dict[str, dict]
+) -> tuple[dict[ct.Backend, bi.BackendConfig], list[ut.ParseException]]:
     """
     Attempt to structure the json data into the correct backend config class,
     based on the backend name.
@@ -195,7 +197,7 @@ def structure_backend_configs(json_data: dict[str, dict]) -> tuple[dict[ct.Backe
     :param json_data: The json data to structure.
     :return: The structured backend configs and any errors that occurred.
     """
-    errors: list[Exception] = []
+    errors: list[ut.ParseException] = []
     json_keys = list(json_data.keys())
     backend_data: dict[ct.Backend, bi.BackendConfig | dict] = {}
 
@@ -206,13 +208,13 @@ def structure_backend_configs(json_data: dict[str, dict]) -> tuple[dict[ct.Backe
             backend_data[backend_enum] = json_data[backend_name]
         except ValueError:
             logger.error(f"Unknown backend: {backend_name}")
-            errors.append(UnknownBackend(backend_name))
+            errors.append(ut.ParseException(f"Unknown backend: {backend_name}"))
 
     for backend in backend_data:
         # Because the string and the strenum hashes are identical and Python treats them as equal,
         # we can simply ask the json_data using the strenum as a key as well.
         # Alternatively, to be fully correct, use backend.value but the static type checker
-        # didn't like it for some reason, at least not a valid one.
+        # didn't like it for some reason, likely a false positive.
         try:
             if backend == ct.Backend.MOCK:
                 backend_data[backend], backend_errors = mb.MockConfig.from_dict(json_data[backend])
@@ -220,13 +222,15 @@ def structure_backend_configs(json_data: dict[str, dict]) -> tuple[dict[ct.Backe
                 backend_data[backend], backend_errors = db.DeepLConfig.from_dict(json_data[backend])
             else:
                 logger.error(f"Unknown backend: {backend}")
-                backend_errors = [UnknownBackend(f"Unknown backend: {backend}")]
+                backend_errors = [ut.ParseException(f"Unknown backend: {backend}")]
 
             errors.extend(backend_errors)
 
         except Exception as e:
             logger.exception(f"Failed to structure backend config for {backend}")
-            errors.append(type(e)(f"Failed to structure backend config for {backend}: {e}"))
+            errors.append(
+                ut.ParseException(f"{type(e).__name__}: Failed to structure backend config for {backend}: {e}")
+            )
 
     return backend_data, errors
 

@@ -171,7 +171,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         config, success, errors = cfg.load_config(config_path)
 
         # Format them like: ValueError: 'lang_from' must be a string.
-        errors_str = "\n".join(f"{type(e).__name__}: {e}" for e in errors)
+        errors_str = "\n".join(map(str, errors))
 
         if not success:
             gu.show_warning(

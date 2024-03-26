@@ -266,13 +266,22 @@ def censor_key(key: str) -> str:
     return "*" * len(key)
 
 
+class ParseException(Exception):
+    """
+    This serves to wrap any exceptions that occur during parsing,
+    so that additional info about the file can be included.
+    """
+
+    pass
+
+
 def load_dict_to_attrs_safely(
     dataclass: object,
     data: dict,
     *,
     skip_attrs: list[str] | None = None,
     include_until_base: type | list[type] | None = None,
-) -> list[Exception]:
+) -> list[ParseException]:
     """
     Load a dictionary into an attrs class while ensuring types are correct.
     Any type issues are logged and returned as a list of exceptions.
@@ -287,7 +296,7 @@ def load_dict_to_attrs_safely(
     :param include_until_base: [Optional] Include attributes until this base class.
     :return: A list of exceptions that occurred during loading.
     """
-    errors: list[Exception] = []
+    errors: list[ParseException] = []
     type_info = get_type_hints(dataclass)
     # Gather type hints from base classes if requested.
     if include_until_base:
@@ -300,7 +309,7 @@ def load_dict_to_attrs_safely(
             if base_class not in include_until_base:
                 base_classes.extend(list(base_class.__bases__))
 
-    for attribute in dataclass.__annotations__:
+    for attribute in type_info:
         if skip_attrs and attribute in skip_attrs:
             continue
 
@@ -312,7 +321,9 @@ def load_dict_to_attrs_safely(
                 setattr(dataclass, attribute, expected_type(value))
             except Exception as e:
                 logger.exception(f"Failed to cast attribute {attribute} to the correct type.")
-                errors.append(type(e)(f"Failed to cast attribute {attribute} to the correct type: {e}"))
+                errors.append(
+                    ParseException(f"{type(e).__name__}: Failed to cast attribute {attribute} to the correct type: {e}")
+                )
 
     return errors
 

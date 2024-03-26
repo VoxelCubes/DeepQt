@@ -1,0 +1,31 @@
+{
+    "lang_from": "Valid language code",
+    "lang_to": "EN-US",
+    "use_fixed_output_path": false,
+    "fixed_output_path": "",
+    "glossary_path": "",
+    "use_glossary": true,
+    "dump_on_abort": false,
+    "epub_nuke_kobo": true,
+    "epub_nuke_ruby": true,
+    "epub_nuke_indents": true,
+    "epub_crush": false,
+    "epub_make_text_horizontal": true,
+    "epub_ignore_empty_html": true,
+    "last_backend": "deepl",
+    "backend_configs": {
+        "mock": {
+            "avg_time_per_mille": "nonsense",
+            "chunk_size": 1000,
+            "wait_time_ms": 1000
+        },
+        "deepl": {
+            "avg_time_per_mille": -1.0,
+            "api_key": "sdkfjhasdflasjfhjsalhfla",
+            "tl_max_chunks": null,
+            "tl_min_chunk_size": 5000,
+            "tl_preserve_formatting": true,
+            "wait_time_ms": 1000
+        }
+    }
+}
