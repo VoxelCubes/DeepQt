@@ -82,10 +82,7 @@ class BackendStatus:
         """
         # Validate each attribute in the class is covered.
         meta = self._attribute_metadata()
-        # TODO make this a test instead
-        for attr in self.__annotations__:
-            if attr not in meta:
-                raise ValueError(f"Attribute {attr} not covered in metadata")
+        # Add whatever is missing from this base class.
         return meta
 
 
@@ -132,11 +129,6 @@ class BackendConfig(ABC):
         # Append the child metadata.
         child_meta = self._attribute_metadata()
         meta.update(child_meta)
-
-        # TODO make this a test instead
-        for attr in self.__annotations__:
-            if attr not in meta:
-                raise ValueError(f"Attribute {attr} not covered in metadata")
         return meta
 
 

@@ -31,6 +31,11 @@ class DeepLConfig(bi.BackendConfig):
 
     def _attribute_metadata(self) -> dict[str, bi.AttributeMetadata]:
         return {
+            "api_key": bi.AttributeMetadata(
+                name="API key",
+                type=str,
+                description="DeepL API key.",
+            ),
             "tl_max_chunks": bi.AttributeMetadata(
                 name="Max chunks",
                 type=int,
