@@ -1,7 +1,7 @@
 import hashlib
 import re
 import zipfile
-from dataclasses import dataclass, field
+from attrs import define, Factory
 from enum import IntEnum
 from functools import partial, cache
 from pathlib import Path
@@ -13,6 +13,8 @@ from deepqt import trie
 from deepqt import xml_parser
 
 
+# TODO remove protected, add translated_glossary for the post-processing rules.
+# Post pre and postprocessing regex can replace quote protection
 class ProcessLevel(IntEnum):
     # Represent the values in bit increments, so that gloss_prot = gloss | prot
     Error = -1
@@ -23,14 +25,14 @@ class ProcessLevel(IntEnum):
     TRANSLATED = 4  # Only used for dumping.
 
 
-@dataclass(slots=True)
+@define
 class InputFile:
     path: Path
     locked: bool = False
     finished: bool = False
     glossary_hash: str = ""  # To Prevent re-applying the same glossary.
 
-    def __post_init__(self):
+    def __attrs_post_init__(self):
         """
         Ensure the path exists.
         """
@@ -52,19 +54,19 @@ class InputFile:
         raise NotImplementedError
 
 
-@dataclass(slots=True)
+@define
 class TextFile(InputFile):
     text: str = ""
     text_glossary: str = ""
     text_protected: str = ""
     text_glossary_protected: str = ""
     process_level: ProcessLevel = ProcessLevel.RAW
-    text_chunks: list[str] = field(default_factory=list)
-    translation_chunks: list[str] = field(default_factory=list)
+    text_chunks: list[str] = Factory(list)
+    translation_chunks: list[str] = Factory(list)
     translation: str = ""
 
-    def __post_init__(self):
-        InputFile.__post_init__(self)
+    def __attrs_post_init__(self):
+        InputFile.__attrs_post_init__(self)
         with self.path.open("r", encoding="utf8") as f:
             self.text = f.read()
 
@@ -125,17 +127,17 @@ def incomplete_translation_banner() -> str:
 """
 
 
-@dataclass(slots=True)
+@define
 class CSSFile:
     path: Path
     text: str = ""
 
-    def __post_init__(self):
+    def __attrs_post_init__(self):
         with self.path.open("r", encoding="utf8") as f:
             self.text = f.read()
 
 
-@dataclass(slots=True)
+@define
 class XMLFile:
     """
     XML files don't support quote protection.
@@ -147,7 +149,7 @@ class XMLFile:
     process_level: ProcessLevel = ProcessLevel.RAW
     translation: str = ""
 
-    def __post_init__(self):
+    def __attrs_post_init__(self):
         with self.path.open("r", encoding="utf8") as f:
             self.text = f.read()
 
@@ -179,7 +181,7 @@ class XMLFile:
         self.translation = ""
 
 
-@dataclass(slots=True)
+@define
 class HTMLFile(XMLFile):
     def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool):
         # Apply heuristic improvements to html files.
@@ -190,7 +192,7 @@ class HTMLFile(XMLFile):
         logger.debug(f"Cleaned {self.path.name}, {len_before} -> {len(self.text)}, diff: {len_before - len(self.text)}")
 
 
-@dataclass(slots=True)
+@define
 class TocNCXFile(XMLFile):
     """
     The NCX file is a special XML file that contains the table of contents.
@@ -213,7 +215,7 @@ class TocNCXFile(XMLFile):
         return sum(len(text) for text in self.get_texts(self.text))
 
 
-@dataclass(slots=True)
+@define
 class EpubFile(InputFile):
     """
     Epub file support works by unzipping the file to a cache directory and then
@@ -221,14 +223,14 @@ class EpubFile(InputFile):
     """
 
     cache_dir: Path | None = None
-    html_files: list[HTMLFile] = field(default_factory=list)
-    css_files: list[CSSFile] = field(default_factory=list)
+    html_files: list[HTMLFile] = Factory(list)
+    css_files: list[CSSFile] = Factory(list)
     toc_file: TocNCXFile | None = None
     initialized: bool = False
     cover_image: Path | None = None
 
-    def __post_init__(self):
-        InputFile.__post_init__(self)
+    def __attrs_post_init__(self):
+        InputFile.__attrs_post_init__(self)
         self.cache_dir = Path(self.cache_dir) / self.path.stem
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -374,7 +376,7 @@ def extract_epub(epub_path: Path, cache_dir: Path) -> tuple[list[HTMLFile], list
     return html_files, css_files, toc_file, cover_image
 
 
-@dataclass(slots=True)
+@define
 class Glossary:
     """
     This type of glossary contains various types of entries, some providing more power than simple exact replacements.
@@ -395,20 +397,20 @@ class Glossary:
     - post terms: ~ These replacements are made last.
     """
 
-    exact_terms: dict[str, str] = field(default_factory=dict)
-    regex_terms: dict[str, str] = field(default_factory=dict)
-    honorific_terms: dict[str, str] = field(default_factory=dict)
-    title_terms: dict[str, str] = field(default_factory=dict)
-    post_terms: dict[str, str] = field(default_factory=dict)
-    no_suffix_terms: dict[str, str] = field(default_factory=dict)
+    exact_terms: dict[str, str] = Factory(dict)
+    regex_terms: dict[str, str] = Factory(dict)
+    honorific_terms: dict[str, str] = Factory(dict)
+    title_terms: dict[str, str] = Factory(dict)
+    post_terms: dict[str, str] = Factory(dict)
+    no_suffix_terms: dict[str, str] = Factory(dict)
 
     # Prefill the regex terms with a pattern that will never match.
     dummy_pattern = partial(re.compile, "^\b$")
-    exact_pattern: re.Pattern = field(default_factory=dummy_pattern)
-    honorific_pattern: re.Pattern = field(default_factory=dummy_pattern)
-    title_pattern: re.Pattern = field(default_factory=dummy_pattern)
-    post_pattern: re.Pattern = field(default_factory=dummy_pattern)
-    no_suffix_pattern: re.Pattern = field(default_factory=dummy_pattern)
+    exact_pattern: re.Pattern = Factory(dummy_pattern)
+    honorific_pattern: re.Pattern = Factory(dummy_pattern)
+    title_pattern: re.Pattern = Factory(dummy_pattern)
+    post_pattern: re.Pattern = Factory(dummy_pattern)
+    no_suffix_pattern: re.Pattern = Factory(dummy_pattern)
 
     hash: str = ""  # To Prevent re-applying the same glossary.
 
