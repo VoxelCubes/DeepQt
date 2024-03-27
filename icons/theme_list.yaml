@@ -21,6 +21,7 @@ Files:
       - list-add
       - media-playback-start
       - process-stop
+      - tools-report-bug
       - help-contents
       - view-refresh
       - view-list-text

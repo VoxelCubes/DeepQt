@@ -12,8 +12,8 @@ from deepqt.constants import Command, Backend
 from deepqt.driver_mainwindow import MainWindow
 
 
+# TODO Implement the damn thing
 # TODO Testing
-# TODO have a lock file
 
 
 def main():
@@ -66,6 +66,13 @@ def main():
 
     # Set up logging.
     logger.remove()
+
+    # Set up a preliminary exception handler so that this still shows up in the log.
+    # Once the gui is up and running it'll be replaced with a call to the gui's error dialog.
+    def exception_handler(exctype, value, traceback):
+        logger.opt(depth=1, exception=(exctype, value, traceback)).critical("An uncaught exception was raised")
+
+    sys.excepthook = exception_handler
 
     # When bundling an executable, stdout can be None if no console is supplied.
     if sys.stdout is not None:

@@ -5,7 +5,7 @@ import sys
 import zipfile as zf
 from io import StringIO
 from pathlib import Path
-from typing import get_type_hints
+from typing import get_type_hints, Generic, TypeVar, Optional
 
 import PySide6
 import PySide6.QtCore as Qc
@@ -15,6 +15,23 @@ from loguru import logger
 from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME
 
 from deepqt import __program__, __version__
+import deepqt.rc_generated_files.rc_themes
+
+T = TypeVar("T")
+
+
+class Shared(Generic[T]):
+    def __init__(self, initial_value: Optional[T] = None) -> None:
+        self._container = {"data": initial_value}
+
+    def get(self) -> Optional[T]:
+        return self._container["data"]
+
+    def set(self, value: T) -> None:
+        self._container["data"] = value
+
+    def is_none(self) -> bool:
+        return self._container["data"] is None
 
 
 # Logging session markers.

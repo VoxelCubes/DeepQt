@@ -1,3 +1,4 @@
+import sys
 import shutil
 from functools import partial
 from math import ceil
@@ -27,8 +28,6 @@ from deepqt.driver_api_config import ConfigureAccount
 from deepqt.file_table import Column, make_output_filename
 from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 
-DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
-
 
 # noinspection PyUnresolvedReferences
 class MainWindow(Qw.QMainWindow, Ui_MainWindow):
@@ -37,7 +36,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     translating: bool
     debug: bool
 
+    threadpool: Qc.QThreadPool
+
     api_widgets: dict[ct.Backend, Qw.QWidget]
+
+    hamburger_menu: Qw.QMenu
+    theming_menu: Qw.QMenu
 
     text_params_changed = Signal(st.Glossary)
     text_output_changed = Signal()
@@ -65,38 +69,36 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.setWindowIcon(Qg.QIcon(":/icons/logo.png"))
         self.debug = debug
 
+        self.test_and_set_lock_file()
+
         self.theme_is_dark = ut.Shared[bool](True)
 
         self.translating = False  # If true, the translation is in progress.
         self.glossary = st.Glossary()  # Create a dummy glossary
-        nuke_epub_cache()  # TODO move to async routine
+        self.hamburger_menu = Qw.QMenu()
 
         self.initialize_ui()
 
         self.threadpool = Qc.QThreadPool.globalInstance()
-        logger.info(f"Multithreading with maximum {self.threadpool.maxThreadCount()} threads")
 
         self.config = self.load_config()
         self.config.save()
         self.config.pretty_log()
-
         self.load_config_to_ui()
         # Share config with the file table.
         self.file_table.set_config(self.config)
 
-        self.load_glossary()
         self.save_default_palette()
         self.load_config_theme()
 
-        self.test_and_set_lock_file()
+        Qc.QTimer.singleShot(0, self.post_init)
 
     def initialize_ui(self):
         # Set window height to 650px.
-        self.resize(self.width(), 650)
+        # self.resize(self.width(), 650)
         self.hide_progress()
         self.start_button_enabled(False)
         self.show_button_start()
-        self.update_input_buttons()
         self.set_up_statusbar()
         self.set_up_hamburger_menu()
 
@@ -118,7 +120,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Connect signals.
         self.connect_combobox_slots()
 
-        # self.checkBox_file_fixed_dir.toggled.connect(self.fixed_output_dir_toggled)
         self.checkBox_use_glossary.toggled.connect(self.use_glossary_toggled)
         self.pushButton_out_dir_browse.clicked.connect(self.browse_out_dir)
         self.lineEdit_out_dir.textEdited.connect(partial(self.fixed_out_updated, False))
@@ -127,7 +128,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.pushButton_glossary_file_browse.clicked.connect(self.browse_glossary_file)
         self.lineEdit_glossary_file.textEdited.connect(partial(self.glossary_file_updated, self, False))
         self.lineEdit_glossary_file.editingFinished.connect(partial(self.glossary_file_updated, self, True))
-        # self.pushButton_glossary_help.clicked.connect(self.show_glossary_help)
 
         # self.pushButton_api_config.clicked.connect(self.configure_api)
         # self.pushButton_refresh.clicked.connect(self.load_config_to_ui)
@@ -135,7 +135,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.text_output_changed.connect(self.file_table.update_all_output_filenames)
         self.text_params_changed.connect(self.file_table.update_all_text_params)
 
-        # self.file_table.itemSelectionChanged.connect(self.update_input_buttons)
+        # TODO make these part of the right click menu for the file table.
         # self.pushButton_file_add.clicked.connect(self.file_table.browse_add_file)
         # self.pushButton_file_preview.clicked.connect(self.file_table.preview_selected_file)
         # self.pushButton_file_remove.clicked.connect(self.file_table.remove_selected_file)
@@ -149,6 +149,23 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.file_table.not_ready_for_translation.connect(self.not_ready_to_translate)
         self.file_table.statusbar_message.connect(self.statusbar.showMessage)
         self.file_table.recalculate_char_total.connect(self.recalculate_char_total)
+
+    def post_init(self):
+        """
+        Post-initialization tasks, mostly stuff that needs to happen after the window is shown.
+        """
+        nuke_epub_cache()
+        self.load_glossary()
+
+        def exception_handler(exctype, value, traceback):
+            gu.show_exception(
+                self,
+                "Uncaught Exception",
+                "An uncaught exception was raised.",
+                exception_information=(exctype, value, traceback),
+            )
+
+        sys.excepthook = exception_handler
 
     def closeEvent(self, event: Qg.QCloseEvent):
         """
@@ -229,7 +246,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.checkBox_use_glossary.setChecked(self.config.use_glossary)
         # self.checkBox_extra_quote_protection.setChecked(self.config.use_quote_protection)
 
-        self.fixed_output_dir_enabled(self.config.use_fixed_output_path)
         self.glossary_enabled(self.config.use_glossary)
 
         # Ignore the mock because it cannot give language options. It is only to be used for translation.
@@ -286,16 +302,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.text_output_changed.emit()
         self.config.save()
 
-    def fixed_output_dir_toggled(self):
-        """
-        Enable or disable the fixed output directory checkbox and save it to the config.
-        """
-        self.config.use_fixed_output_path = self.checkBox_file_fixed_dir.isChecked()
-        self.fixed_output_dir_enabled(self.config.use_fixed_output_path)
-        self.text_output_changed.emit()
-        self.config.save()
-
-    def browse_file_out_dir(self):
+    def browse_out_dir(self):
         """
         Browse for a directory to save files to.
         """
@@ -306,7 +313,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.text_output_changed.emit()
             self.config.save()
 
-    def fixed_file_out_updated(self, save: bool, *_):
+    def fixed_out_updated(self, save: bool, *_):
         """
         Copy fixed_file_out from the lineedit into the config and save it.
         Don't save until the line edit signals the end of editing.
@@ -759,6 +766,14 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             action.triggered.connect(partial(self.set_theme, theme))
             self.theming_menu.addAction(action)
 
+        if self.debug:
+            # Add an intentional crash button.
+            self.hamburger_menu.addSeparator()
+            action = Qg.QAction(Qg.QIcon.fromTheme("tools-report-bug"), "Simulate crash", self)
+            action.triggered.connect(self.simulate_crash)
+            logger.warning("Debug mode active.")
+            self.hamburger_menu.addAction(action)
+
     def open_log_viewer(self) -> None:
         logger.debug("Opening issue reporter.")
         issue_reporter = ird.IssueReporter(self)
@@ -775,10 +790,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     def show_progress(self):
         self.progressBar.show()
         self.label_progress.show()
-
-    def fixed_output_dir_enabled(self, enabled: bool):
-        self.lineEdit_file_out_dir.setEnabled(enabled)
-        self.pushButton_file_dir_browse.setEnabled(enabled)
 
     def glossary_enabled(self, enabled: bool):
         self.lineEdit_glossary_file.setEnabled(enabled)
@@ -803,23 +814,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.label_api_status_good_icon.setVisible(good)
         self.label_api_status_bad.setVisible(not good)
         self.label_api_status_bad_icon.setVisible(not good)
-
-    def update_input_buttons(self):
-        return
-        logger.debug("Updating input buttons")
-        file_selected = self.file_table.hasSelected()
-
-        self.pushButton_file_preview.setEnabled(file_selected)
-
-        if self.translating:
-            self.pushButton_file_add.setEnabled(False)
-            self.pushButton_file_remove.setEnabled(False)
-            self.pushButton_file_remove_all.setEnabled(False)
-        else:
-            self.pushButton_file_add.setEnabled(True)
-            self.pushButton_file_remove.setEnabled(file_selected)
-            self.pushButton_file_preview.setEnabled(file_selected)
-            self.pushButton_file_remove_all.setEnabled(self.file_table.rowCount() > 0)
 
     def update_current_usage(self, translator: deepl.Translator | None):
         return
@@ -906,34 +900,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             f"Approximately {ut.f_time(time_total)} remaining"
         )
         self.progressBar.setValue(processed_chars / char_total * 100)
-
-    def show_glossary_help(self):
-        """
-        Show the glossary documentation in a web browser.
-        Open the github page for this.
-        """
-        gu.show_info(
-            self,
-            "Glossary info",
-            # language=HTML
-            """<html>
-                    <head/>
-                    <body>
-                        <p> DeepQt uses glossary files to pre-process files before sending them to the API; 
-                            this is not the same as DeepL's glossary functions. Therefore, they can be used
-                            with any language and offer special features, which DeepL's glossaries cannot
-                            offer.
-                        </p>
-                        <p>
-                           The format of these glossaries is outlined in the 
-                            <a href="https://github.com/VoxelCubes/DeepQt/blob/master/docs/glossary_help.md">
-                                online documentation
-                            </a>
-                            .
-                        </p>
-                    </body>
-                </html>""",
-        )
 
     # ========================================== Lock File ==========================================
 
@@ -1051,6 +1017,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         if prev_value != theme:
             self.config.gui_theme = theme
             self.config.save()
+
+    def simulate_crash(self):
+        """
+        Simulate a crash by raising an exception.
+        """
+        raise Exception("This is a simulated crash.")
 
 
 def nuke_epub_cache():

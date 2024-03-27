@@ -157,7 +157,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 436, 121))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 436, 83))
         self.verticalLayout_8 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.stackedWidget_api_overview = QStackedWidget(self.scrollAreaWidgetContents)
@@ -608,16 +608,36 @@ class Ui_MainWindow(object):
         self.groupBox_files.setTitle(QCoreApplication.translate("MainWindow", u"Translation Settings", None))
         self.checkBox_use_glossary.setText(QCoreApplication.translate("MainWindow", u"Use glossary:", None))
 #if QT_CONFIG(tooltip)
-        self.label_glossary_info.setToolTip(QCoreApplication.translate("MainWindow", u"You can use a relative path to create a subfolder at the image's original location, or use an absolute path.", None))
+        self.label_glossary_info.setToolTip(QCoreApplication.translate("MainWindow", u"<html>\n"
+"                    <head/>\n"
+"                    <body>\n"
+"                        <p> DeepQt uses glossary files to pre-process files before sending them to the API; \n"
+"                            this is not the same as DeepL's glossary functions. Therefore, they can be used\n"
+"                            with any language and offer special features, which DeepL's glossaries cannot\n"
+"                            offer.\n"
+"                        </p>\n"
+"                        <p>\n"
+"                           The format of these glossaries is outlined in the \n"
+"                            <a href=\"https://github.com/VoxelCubes/DeepQt/blob/master/docs/glossary_help.md\">\n"
+"                                online documentation\n"
+"                            </a>\n"
+"                            .\n"
+"                        </p>\n"
+"                    </body>\n"
+"                </html>", None))
 #endif // QT_CONFIG(tooltip)
+        self.lineEdit_glossary_file.setPlaceholderText(QCoreApplication.translate("MainWindow", u"No glossary selected", None))
 #if QT_CONFIG(tooltip)
         self.pushButton_glossary_file_browse.setToolTip(QCoreApplication.translate("MainWindow", u"Browse", None))
 #endif // QT_CONFIG(tooltip)
         self.pushButton_glossary_file_browse.setText("")
         self.label.setText(QCoreApplication.translate("MainWindow", u"Output directory:", None))
 #if QT_CONFIG(tooltip)
-        self.label_outdir_help.setToolTip(QCoreApplication.translate("MainWindow", u"You can use a relative path to create a subfolder at the image's original location, or use an absolute path.", None))
+        self.label_outdir_help.setToolTip(QCoreApplication.translate("MainWindow", u"You can use a relative path to place translations inside a subfolder of the file's original location, or specify an absolute path to place all outputs into the same place.\n"
+"\n"
+"Leave it blank to have them placed next to the original files.", None))
 #endif // QT_CONFIG(tooltip)
+        self.lineEdit_out_dir.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Same as original file", None))
 #if QT_CONFIG(tooltip)
         self.pushButton_out_dir_browse.setToolTip(QCoreApplication.translate("MainWindow", u"Browse", None))
 #endif // QT_CONFIG(tooltip)

@@ -35,6 +35,7 @@ def show_exception(
     title: str,
     msg: str,
     worker_error: None | wt.WorkerError = None,
+    exception_information: tuple[type[BaseException], BaseException, TracebackType] | None = None,
     collect_exception: bool = True,
 ) -> None:
     """
@@ -49,6 +50,7 @@ def show_exception(
     :param title: The title of the dialog.
     :param msg: The message to show.
     :param worker_error: [Optional] A worker error object to read the exception from.
+    :param exception_information: [Optional] A tuple of exception information to use instead of the current context.
     :param collect_exception: [Optional] Whether to add exception information to the log.
     """
 
@@ -56,15 +58,19 @@ def show_exception(
         exception_type: type[BaseException]
         exception_value: BaseException
         exception_traceback: TracebackType
+        depth = 1
 
         if worker_error is not None:
             exception_type = worker_error.exception_type
             exception_value = worker_error.value
             exception_traceback = worker_error.traceback
+        elif exception_information is not None:
+            exception_type, exception_value, exception_traceback = exception_information
+            depth = 2
         else:
             exception_type, exception_value, exception_traceback = sys.exc_info()
 
-        logger.opt(depth=1, exception=(exception_type, exception_value, exception_traceback)).critical(msg)
+        logger.opt(depth=depth, exception=(exception_type, exception_value, exception_traceback)).critical(msg)
 
     box = ErrorDialog(parent, title, msg)
     box.exec()

@@ -183,7 +183,7 @@
               <x>0</x>
               <y>0</y>
               <width>436</width>
-              <height>121</height>
+              <height>83</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -285,7 +285,23 @@
            <item>
             <widget class="CTooltipLabel" name="label_glossary_info">
              <property name="toolTip">
-              <string extracomment="The &amp;apos; is the possessive 's apostrophe and should be ignored if the language doesn't call for it.">You can use a relative path to create a subfolder at the image's original location, or use an absolute path.</string>
+              <string extracomment="The &amp;apos; is the possessive 's apostrophe and should be ignored if the language doesn't call for it.">&lt;html&gt;
+                    &lt;head/&gt;
+                    &lt;body&gt;
+                        &lt;p&gt; DeepQt uses glossary files to pre-process files before sending them to the API; 
+                            this is not the same as DeepL's glossary functions. Therefore, they can be used
+                            with any language and offer special features, which DeepL's glossaries cannot
+                            offer.
+                        &lt;/p&gt;
+                        &lt;p&gt;
+                           The format of these glossaries is outlined in the 
+                            &lt;a href=&quot;https://github.com/VoxelCubes/DeepQt/blob/master/docs/glossary_help.md&quot;&gt;
+                                online documentation
+                            &lt;/a&gt;
+                            .
+                        &lt;/p&gt;
+                    &lt;/body&gt;
+                &lt;/html&gt;</string>
              </property>
              <property name="toolTipDuration">
               <number>-1</number>
@@ -314,6 +330,9 @@
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
             <widget class="QLineEdit" name="lineEdit_glossary_file">
+             <property name="placeholderText">
+              <string>No glossary selected</string>
+             </property>
              <property name="clearButtonEnabled">
               <bool>true</bool>
              </property>
@@ -350,7 +369,9 @@
            <item>
             <widget class="CTooltipLabel" name="label_outdir_help">
              <property name="toolTip">
-              <string extracomment="The &amp;apos; is the possessive 's apostrophe and should be ignored if the language doesn't call for it.">You can use a relative path to create a subfolder at the image's original location, or use an absolute path.</string>
+              <string extracomment="The &amp;apos; is the possessive 's apostrophe and should be ignored if the language doesn't call for it.">You can use a relative path to place translations inside a subfolder of the file's original location, or specify an absolute path to place all outputs into the same place.
+
+Leave it blank to have them placed next to the original files.</string>
              </property>
              <property name="toolTipDuration">
               <number>-1</number>
@@ -379,6 +400,9 @@
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QLineEdit" name="lineEdit_out_dir">
+             <property name="placeholderText">
+              <string>Same as original file</string>
+             </property>
              <property name="clearButtonEnabled">
               <bool>true</bool>
              </property>
