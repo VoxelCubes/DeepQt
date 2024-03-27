@@ -45,6 +45,7 @@ def collect_system_info(callers_file: str) -> str:
     buffer.write(f"Python Version: {sys.version}\n")
     buffer.write(f"PySide (Qt) Version: {PySide6.__version__}\n")
     buffer.write(f"Available Qt Themes: {', '.join(Qw.QStyleFactory.keys())}\n")
+    buffer.write(f"Available Color Themes: {', '.join(map(lambda a: a[1], get_available_themes()))}\n")
     buffer.write(f"System locale: {Qc.QLocale.system().name()}\n")
     buffer.write(f"CPU Cores: {os.cpu_count()}\n")
 
@@ -131,6 +132,48 @@ def get_lock_file_path() -> Path:
     Use the cache directory for this.
     """
     return get_cache_path() / f"{__program__}.lock"
+
+
+def get_available_themes() -> list[tuple[str, str]]:
+    """
+    Check the Qt Resource System for available themes in :/themes/.
+    The theme name is the plain file name. The display name is either defined in the
+    theme file under section General, key name.
+    If not defined, the display name is the theme name but capitalized and
+    with spaces instead of underscores.
+
+    Note: The implicit system theme is not included in the list.
+
+    :return: A list of available theme names with their display names.
+    """
+    # Simply discover all files in the themes folder.
+    themes = []
+    theme_dir = Qc.QDir(":/themes")
+    for entry in theme_dir.entryInfoList():
+        theme_name = entry.fileName()
+        theme_file = Qc.QFile(f":/themes/{theme_name}")
+        if theme_file.open(Qc.QFile.ReadOnly | Qc.QFile.Text):
+            stream = Qc.QTextStream(theme_file)
+            content = stream.readAll()
+            display_name = theme_name.replace("_", " ").capitalize()
+            in_general_section = False
+            for line in content.split("\n"):
+                line = line.strip()
+                if line.startswith("[General]"):
+                    in_general_section = True
+                elif line.startswith("[") and line.endswith("]"):
+                    if in_general_section:
+                        # We found general, but came across the next section now.
+                        break
+                    in_general_section = False
+                elif "=" in line:
+                    key, value = map(str.strip, line.split("=", 1))
+                    if key == "Name":
+                        display_name = value
+                        break
+            themes.append((theme_name, display_name))
+
+    return themes
 
 
 def empty_cache_dir(cache_dir: Path) -> None:

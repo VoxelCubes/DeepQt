@@ -24,6 +24,8 @@ backend_to_config = {
 
 @define
 class Config:
+    gui_theme: str = ""  # Blank means system theme.
+
     lang_from: str = ""
     lang_to: str = ""
 

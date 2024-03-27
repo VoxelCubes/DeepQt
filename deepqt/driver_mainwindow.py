@@ -2,7 +2,7 @@ import shutil
 from functools import partial
 from math import ceil
 from pathlib import Path
-import pprint
+import platform
 from enum import Enum
 
 import psutil
@@ -45,6 +45,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
     label_stats: Qw.QLabel
 
+    default_palette: Qg.QPalette
+    default_style: str
+    default_icon_theme: str
+    theme_is_dark: ut.Shared[bool]
+    theme_is_dark_changed = Signal(bool)  # When true, the new theme is dark.
+
     def __init__(
         self,
         command: ct.Command,
@@ -58,6 +64,8 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.setWindowTitle(f"{__program__} {__version__}")
         self.setWindowIcon(Qg.QIcon(":/icons/logo.png"))
         self.debug = debug
+
+        self.theme_is_dark = ut.Shared[bool](True)
 
         self.translating = False  # If true, the translation is in progress.
         self.glossary = st.Glossary()  # Create a dummy glossary
@@ -77,6 +85,8 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.file_table.set_config(self.config)
 
         self.load_glossary()
+        self.save_default_palette()
+        self.load_config_theme()
 
         self.test_and_set_lock_file()
 
@@ -88,6 +98,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.show_button_start()
         self.update_input_buttons()
         self.set_up_statusbar()
+        self.set_up_hamburger_menu()
 
         # Make the start and abort buttons 50% taller.
         self.pushButton_start.setMinimumHeight(self.pushButton_start.height() * 1.5)
@@ -109,10 +120,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         # self.checkBox_file_fixed_dir.toggled.connect(self.fixed_output_dir_toggled)
         self.checkBox_use_glossary.toggled.connect(self.use_glossary_toggled)
-        # self.checkBox_extra_quote_protection.toggled.connect(self.extra_quote_protection_toggled)
-        # self.pushButton_file_dir_browse.clicked.connect(self.browse_file_out_dir)
-        # self.lineEdit_file_out_dir.textEdited.connect(partial(self.fixed_file_out_updated, False))
-        # self.lineEdit_file_out_dir.editingFinished.connect(partial(self.fixed_file_out_updated, True))
+        self.pushButton_out_dir_browse.clicked.connect(self.browse_out_dir)
+        self.lineEdit_out_dir.textEdited.connect(partial(self.fixed_out_updated, False))
+        self.lineEdit_out_dir.editingFinished.connect(partial(self.fixed_out_updated, True))
 
         self.pushButton_glossary_file_browse.clicked.connect(self.browse_glossary_file)
         self.lineEdit_glossary_file.textEdited.connect(partial(self.glossary_file_updated, self, False))
@@ -732,6 +742,23 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         button_log.setFlat(True)
         self.statusbar.addPermanentWidget(button_log)
 
+    def set_up_hamburger_menu(self):
+        """
+        This is the hamburger menu on the main window.
+        It contains several menu-bar-esque actions.
+        """
+        self.pushButton_menu.setMenu(self.hamburger_menu)
+        # Add theming menu.
+        self.theming_menu = self.hamburger_menu.addMenu("Theme")
+        themes = [("", "System")]
+        themes.extend(ut.get_available_themes())
+        for theme, name in themes:
+            action = Qg.QAction(name, self)
+            action.setCheckable(True)
+            action.theme = theme
+            action.triggered.connect(partial(self.set_theme, theme))
+            self.theming_menu.addAction(action)
+
     def open_log_viewer(self) -> None:
         logger.debug("Opening issue reporter.")
         issue_reporter = ird.IssueReporter(self)
@@ -956,6 +983,74 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             lock_file.unlink()
         else:
             logger.error("Lock file not found, a new instance was likely started.")
+
+    # =========================================== Theming ===========================================
+
+    def save_default_palette(self) -> None:
+        self.default_palette = self.palette()
+        # Patch palette to use the text color with 50% opacity for placeholder text.
+        placeholder_color = self.default_palette.color(Qg.QPalette.Inactive, Qg.QPalette.Text)
+        placeholder_color.setAlphaF(0.5)
+        logger.debug(f"Placeholder color: {placeholder_color.name()}")
+        self.default_palette.setColor(Qg.QPalette.PlaceholderText, placeholder_color)
+        self.default_icon_theme = Qg.QIcon.themeName()
+        self.default_style = Qw.QApplication.style().objectName()
+
+    def load_config_theme(self) -> None:
+        """
+        Load the theme specified in the config, or the system theme if none.
+        """
+        theme = self.config.gui_theme
+        self.set_theme(theme)
+
+    def set_theme(self, theme: str = "") -> None:
+        """
+        Apply the given theme to the application, or if none, revert to the default theme.
+        """
+        palette: Qg.QPalette
+
+        if not theme:
+            logger.info(f"Using system theme.")
+            palette = self.default_palette
+            Qg.QIcon.setThemeName(self.default_icon_theme)
+            # Check if we need to restore the style.
+            if Qw.QApplication.style().objectName() != self.default_style:
+                Qw.QApplication.setStyle(self.default_style)
+        else:
+            logger.info(f"Using theme: {theme}")
+            palette = gu.load_color_palette(theme)
+
+            Qg.QIcon.setThemeName(theme)
+            if platform.system() == "Windows":
+                Qw.QApplication.setStyle("Fusion")
+
+        self.setPalette(palette)
+        Qw.QApplication.setPalette(self.palette())
+
+        # Check the brightness of the background color to determine if the theme is dark.
+        # This is a heuristic, but it works well enough.
+        background_color = palette.color(Qg.QPalette.Window)
+        self.theme_is_dark.set(background_color.lightness() < 128)
+        logger.info(f"Theme is dark: {self.theme_is_dark.get()}")
+        self.theme_is_dark_changed.emit(self.theme_is_dark)
+
+        # Update the fallback icon theme accordingly.
+        if self.theme_is_dark.get():
+            Qg.QIcon.setFallbackThemeName("breeze-dark")
+        else:
+            Qg.QIcon.setFallbackThemeName("breeze")
+
+        # Toggle the theme menu items.
+        for action in self.theming_menu.actions():
+            action.setChecked(action.theme == theme)
+
+        self.update()
+
+        # Update the config it necessary.
+        prev_value = self.config.gui_theme
+        if prev_value != theme:
+            self.config.gui_theme = theme
+            self.config.save()
 
 
 def nuke_epub_cache():
