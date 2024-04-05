@@ -21,7 +21,7 @@ class SelectableMessageBox(Qw.QMessageBox):
     Subclass the QMessageBox to make the text selectable.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(SelectableMessageBox, self).__init__(*args, **kwargs)
         self.setTextInteractionFlags(Qc.Qt.TextSelectableByMouse)
 

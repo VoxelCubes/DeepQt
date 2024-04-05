@@ -16,7 +16,7 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
     config: cfg.Config
     epub_file: st.EpubFile
 
-    def __init__(self, parent, epub_file: st.EpubFile, config: cfg.Config):
+    def __init__(self, parent, epub_file: st.EpubFile, config: cfg.Config) -> None:
         # Don't pass the parent due to a bug in PySide6.
         Qw.QDialog.__init__(self)
         self.setupUi(self)
@@ -50,7 +50,7 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
         if not epub_file.is_translated():
             self.radioButton_translation.hide()
 
-    def preview_epub(self):
+    def preview_epub(self) -> None:
         """
         Determine how many previews to generate and show each in a tab.
         Show the html files and the toc file.
@@ -75,7 +75,7 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
                 self.add_preview(self.tabWidget_translation, html_file.path.name, html_file.translation)
 
     @staticmethod
-    def add_preview(stack_page: Qw.QTabWidget, title: str, text: str):
+    def add_preview(stack_page: Qw.QTabWidget, title: str, text: str) -> None:
         """
         Add a preview tab to the dialog.
         Show the text in a QPlainTextEdit set to read only mode.
@@ -94,7 +94,7 @@ class EpubPreview(Qw.QDialog, Ui_EpubPreview):
         preview_layout.addWidget(preview_text)
         stack_page.addTab(preview_tab, title)
 
-    def save_preview(self):
+    def save_preview(self) -> None:
         """
         Save the current state of the epub.
         """

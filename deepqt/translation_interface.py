@@ -88,7 +88,7 @@ class DeeplWorker(QRunnable):
     total_chars: int
     processed_chars: int
 
-    def __init__(self, translator: deepl.Translator, input_files: dict[str, st.InputFile], config: cfg.Config):
+    def __init__(self, translator: deepl.Translator, input_files: dict[str, st.InputFile], config: cfg.Config) -> None:
         """
         Initialise the worker thread.
 
@@ -108,7 +108,7 @@ class DeeplWorker(QRunnable):
         self.processed_chars = 0
 
     @Slot()
-    def run(self):
+    def run(self) -> None:
         """
         Initialise the runner function with passed args, kwargs.
         """
@@ -134,7 +134,7 @@ class DeeplWorker(QRunnable):
         else:
             self.signals.result.emit(State.DONE)  # Return the result of the processing
 
-    def main(self):
+    def main(self) -> None:
         """
         The main function of the worker thread.
         """
@@ -148,7 +148,7 @@ class DeeplWorker(QRunnable):
         self.translate_input_files()
         self.check_aborted()
 
-    def clean_up_previous_translations(self):
+    def clean_up_previous_translations(self) -> None:
         """
         Clean up any previous translations.
         """
@@ -156,7 +156,7 @@ class DeeplWorker(QRunnable):
         for input_file in self.input_files.values():
             input_file.clear_translations()
 
-    def partition_input_files(self):
+    def partition_input_files(self) -> None:
         """
         Partition the input files into text_chunks.
         """
@@ -192,7 +192,7 @@ class DeeplWorker(QRunnable):
                     None,
                 )
 
-    def translate_input_files(self):
+    def translate_input_files(self) -> None:
         logger.info("Translating text_chunks.")
         for key, input_file in self.input_files.items():
             self.check_aborted()
@@ -398,13 +398,13 @@ class DeeplWorker(QRunnable):
         return translation
 
     @Slot()
-    def abort(self):
+    def abort(self) -> None:
         """
         Abort the worker thread.
         """
         self.state = State.ABORTED
 
-    def check_aborted(self):
+    def check_aborted(self) -> None:
         """
         Check if the worker thread has been aborted.
         """

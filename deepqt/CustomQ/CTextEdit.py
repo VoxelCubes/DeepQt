@@ -23,7 +23,7 @@ class CTextEdit(Qw.QTextEdit):
         self.clear_shortcut.setContext(Qt.WidgetWithChildrenShortcut)
         self.clear_shortcut.activated.connect(self.clear)
 
-    def contextMenuEvent(self, event):
+    def contextMenuEvent(self, event) -> None:
         menu = self.createStandardContextMenu()
 
         menu.addAction(self.clear_action)

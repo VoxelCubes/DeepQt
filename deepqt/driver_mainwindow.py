@@ -150,14 +150,14 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.file_table.statusbar_message.connect(self.statusbar.showMessage)
         self.file_table.recalculate_char_total.connect(self.recalculate_char_total)
 
-    def post_init(self):
+    def post_init(self) -> None:
         """
         Post-initialization tasks, mostly stuff that needs to happen after the window is shown.
         """
         nuke_epub_cache()
         self.load_glossary()
 
-        def exception_handler(exctype, value, traceback):
+        def exception_handler(exctype, value, traceback) -> None:
             gu.show_exception(
                 self,
                 "Uncaught Exception",
@@ -167,7 +167,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         sys.excepthook = exception_handler
 
-    def closeEvent(self, event: Qg.QCloseEvent):
+    def closeEvent(self, event: Qg.QCloseEvent) -> None:
         """
         Notify config on close.
         """
@@ -213,14 +213,14 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         return config
 
-    def connect_combobox_slots(self):
+    def connect_combobox_slots(self) -> None:
         """
         Connect the combobox slots.
         """
         self.comboBox_lang_from.currentIndexChanged.connect(self.lang_from_updated)
         self.comboBox_lang_to.currentIndexChanged.connect(self.lang_to_updated)
 
-    def disconnect_combobox_slots(self):
+    def disconnect_combobox_slots(self) -> None:
         """
         Disconnect the combobox slots. This prevents erroneous signals from being sent during
         setup of new language options.
@@ -232,7 +232,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     Config interactions
     """
 
-    def load_config_to_ui(self):
+    def load_config_to_ui(self) -> None:
         return
         """
         Apply data from config to ui widgets.
@@ -285,7 +285,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         else:
             self.statusbar.showMessage("Error connecting to the API.")
 
-    def lang_from_updated(self):
+    def lang_from_updated(self) -> None:
         """
         Copy lang_from from the combobox into the config and save it.
         """
@@ -293,7 +293,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         logger.debug(f"Saving lang_from: {self.config.lang_from}")
         self.config.save()
 
-    def lang_to_updated(self):
+    def lang_to_updated(self) -> None:
         """
         Copy lang_to from the combobox into the config and save it.
         """
@@ -302,7 +302,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.text_output_changed.emit()
         self.config.save()
 
-    def browse_out_dir(self):
+    def browse_out_dir(self) -> None:
         """
         Browse for a directory to save files to.
         """
@@ -313,7 +313,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.text_output_changed.emit()
             self.config.save()
 
-    def fixed_out_updated(self, save: bool, *_):
+    def fixed_out_updated(self, save: bool, *_) -> None:
         """
         Copy fixed_file_out from the lineedit into the config and save it.
         Don't save until the line edit signals the end of editing.
@@ -328,7 +328,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.config.save()
         self.text_output_changed.emit()
 
-    def use_glossary_toggled(self):
+    def use_glossary_toggled(self) -> None:
         """
         Enable or disable the glossary checkbox and save it to the config.
         """
@@ -339,7 +339,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.load_glossary()
         self.text_params_changed.emit(self.glossary)
 
-    def browse_glossary_file(self):
+    def browse_glossary_file(self) -> None:
         """
         Browse for a glossary file.
         Accepts whatever pyexcel can handle.
@@ -351,7 +351,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.config.save()
             self.load_glossary()
 
-    def glossary_file_updated(self, save: bool, *_):
+    def glossary_file_updated(self, save: bool, *_) -> None:
         """
         Copy glossary_file from the lineedit into the config and save it.
         Don't save until the line edit signals the end of editing.
@@ -366,7 +366,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.config.save()
             self.load_glossary()
 
-    # def extra_quote_protection_toggled(self):
+    # def extra_quote_protection_toggled(self) -> None:
     #     """
     #     Enable or disable the extra quote protection checkbox and save it to the config.
     #     """
@@ -423,7 +423,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             show_warning(self, "API Error", f"Failed to connect to DeepL API\n\n{e}")
             return None
 
-    def update_file_table_params(self):
+    def update_file_table_params(self) -> None:
         """
         Update the file table with the current parameters.
         """
@@ -433,7 +433,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     Glossary
     """
 
-    def load_glossary(self):
+    def load_glossary(self) -> None:
         """
         Open a glossary file and parse it.
         Afterwards, notify any files to apply it.
@@ -452,7 +452,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Start the worker.
         self.glossary_worker_start(path)
 
-    def glossary_worker_start(self, path: Path):
+    def glossary_worker_start(self, path: Path) -> None:
         """
         Initialize generic QRunner worker to load a glossary file.
 
@@ -466,7 +466,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Execute.
         self.threadpool.start(worker)
 
-    def glossary_worker_result(self, glossary: st.Glossary):
+    def glossary_worker_result(self, glossary: st.Glossary) -> None:
         """
         Notify any files to apply the glossary.
 
@@ -479,7 +479,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # logger.debug(f"Glossary dump: \n{glossary}")
         self.text_params_changed.emit(self.glossary)
 
-    def glossary_worker_error(self, error: wt.WorkerError):
+    def glossary_worker_error(self, error: wt.WorkerError) -> None:
         """
         Notify the user of an error.
         """
@@ -491,7 +491,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     Translation
     """
 
-    def start_translating(self):
+    def start_translating(self) -> None:
         logger.info("Starting translation.")
         # Check if the API is ready.
         translator = self.open_translator()
@@ -564,7 +564,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             return False
         return True
 
-    def translation_worker_result(self, exit_code: ai.State):
+    def translation_worker_result(self, exit_code: ai.State) -> None:
         """
         If we made it here, the translation was either successful or aborted.
         Notify the user, write the output, and reset the ui.
@@ -614,13 +614,13 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         if processed_chars is not None and total_chars is not None:
             self.update_translation_status(processed_chars, total_chars)
 
-    def translation_worker_error(self, error: wt.WorkerError):
+    def translation_worker_error(self, error: wt.WorkerError) -> None:
         logger.error(f"Translation failed.\n{error}")
         self.statusbar.showMessage(f"Translation failed.")
         gu.show_warning(self, "Translation Error", f"Translation failed.\n\n{error.value}")
         self.translation_worker_finished()
 
-    def translation_worker_finished(self):
+    def translation_worker_finished(self) -> None:
         """
         Update the UI to reflect the finished state.
         """
@@ -633,12 +633,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.config.save()  # Save the last average time/1000 characters.
         self.load_config_to_ui()
 
-    def abort_translating(self):
+    def abort_translating(self) -> None:
         logger.info("Aborting translation.")
         self.abort_translation_worker.emit()
         self.statusbar.showMessage("Aborting translation...")
 
-    def write_output_file(self, file_id: str):
+    def write_output_file(self, file_id: str) -> None:
         """
         Write the output file to disk.
         Check the type of the file (text or epub) and run the appropriate function.
@@ -669,7 +669,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             )
             self.file_table.show_file_progress(file_id, "Could not write output!")
 
-    def write_output_text_file(self, file_id: str):
+    def write_output_text_file(self, file_id: str) -> None:
         """
         Write the translation of a file to the assigned output path.
 
@@ -703,7 +703,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
                 else:
                     self.file_table.show_file_progress(file_id, "Translation written.")
 
-    def write_output_epub_file(self, file_id: str):
+    def write_output_epub_file(self, file_id: str) -> None:
         """
         Write the translation of a file to the assigned output path.
 
@@ -732,7 +732,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     Log file
     """
 
-    def set_up_statusbar(self):
+    def set_up_statusbar(self) -> None:
         """
         Add a label to show the current char total and time estimate.
         Add a flat button to the statusbar to offer opening the config file.
@@ -749,7 +749,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         button_log.setFlat(True)
         self.statusbar.addPermanentWidget(button_log)
 
-    def set_up_hamburger_menu(self):
+    def set_up_hamburger_menu(self) -> None:
         """
         This is the hamburger menu on the main window.
         It contains several menu-bar-esque actions.
@@ -783,39 +783,39 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     Simple UI manipulation functions
     """
 
-    def hide_progress(self):
+    def hide_progress(self) -> None:
         self.progressBar.hide()
         self.label_progress.hide()
 
-    def show_progress(self):
+    def show_progress(self) -> None:
         self.progressBar.show()
         self.label_progress.show()
 
-    def glossary_enabled(self, enabled: bool):
+    def glossary_enabled(self, enabled: bool) -> None:
         self.lineEdit_glossary_file.setEnabled(enabled)
         self.pushButton_glossary_file_browse.setEnabled(enabled)
 
-    def start_button_enabled(self, enabled: bool):
+    def start_button_enabled(self, enabled: bool) -> None:
         self.pushButton_start.setEnabled(enabled)
 
-    def abort_button_enabled(self, enabled: bool):
+    def abort_button_enabled(self, enabled: bool) -> None:
         self.pushButton_abort.setEnabled(enabled)
 
-    def show_button_start(self):
+    def show_button_start(self) -> None:
         self.pushButton_start.show()
         self.pushButton_abort.hide()
 
-    def show_button_abort(self):
+    def show_button_abort(self) -> None:
         self.pushButton_start.hide()
         self.pushButton_abort.show()
 
-    def show_api_status(self, good: bool):
+    def show_api_status(self, good: bool) -> None:
         self.label_api_status_good.setVisible(good)
         self.label_api_status_good_icon.setVisible(good)
         self.label_api_status_bad.setVisible(not good)
         self.label_api_status_bad_icon.setVisible(not good)
 
-    def update_current_usage(self, translator: deepl.Translator | None):
+    def update_current_usage(self, translator: deepl.Translator | None) -> None:
         return
         if translator is None:
             self.label_api_usage.setText("—")
@@ -846,7 +846,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.label_api_usage_warn_icon.hide()
             self.label_api_usage_error_icon.show()
 
-    def ready_to_translate(self):
+    def ready_to_translate(self) -> None:
         logger.info("Ready to translate.")
         if self.threadpool.activeThreadCount() > 0:
             logger.error("Threadpool still has active threads.")
@@ -854,12 +854,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.show_button_start()
         self.statusbar.showMessage("Ready to translate.")
 
-    def not_ready_to_translate(self):
+    def not_ready_to_translate(self) -> None:
         logger.info("Not ready to translate.")
         self.start_button_enabled(False)
         self.show_button_start()
 
-    def set_translation_parameters_enabled(self, enabled: bool):
+    def set_translation_parameters_enabled(self, enabled: bool) -> None:
         """
         When translating, language, output, glossary, and account settings must all be locked.
 
@@ -872,7 +872,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.lineEdit_file_out_dir.setEnabled(enabled)
         self.pushButton_file_dir_browse.setEnabled(enabled)
 
-    def recalculate_char_total(self):
+    def recalculate_char_total(self) -> None:
         """
         Calculate a new total of characters to translate and display it in the status bar.
         """
@@ -886,7 +886,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         time_text = f"Approx. {ut.f_time(time_total)}"
         self.label_stats.setText(char_text + "   " + time_text)
 
-    def update_translation_status(self, processed_chars: int, char_total: int):
+    def update_translation_status(self, processed_chars: int, char_total: int) -> None:
         """
         Update the translation status label.
         """
@@ -1018,14 +1018,14 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.config.gui_theme = theme
             self.config.save()
 
-    def simulate_crash(self):
+    def simulate_crash(self) -> None:
         """
         Simulate a crash by raising an exception.
         """
         raise Exception("This is a simulated crash.")
 
 
-def nuke_epub_cache():
+def nuke_epub_cache() -> None:
     """
     Perform a sanity check first. The folder must exist and be named "epub".
     """

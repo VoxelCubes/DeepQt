@@ -14,7 +14,7 @@ class TextPreview(Qw.QDialog, Ui_TextPreview):
     config: cfg.Config
     text_file: st.TextFile
 
-    def __init__(self, parent, text_file: st.TextFile, config: cfg.Config):
+    def __init__(self, parent, text_file: st.TextFile, config: cfg.Config) -> None:
         # Don't pass the parent due to a bug in PySide6.
         Qw.QDialog.__init__(self)
         self.setupUi(self)
@@ -27,7 +27,7 @@ class TextPreview(Qw.QDialog, Ui_TextPreview):
 
         self.pushButton_save.clicked.connect(self.save_preview)
 
-    def preview_text(self):
+    def preview_text(self) -> None:
         """
         Determine how many previews to generate and show each in a tab.
         """
@@ -44,7 +44,7 @@ class TextPreview(Qw.QDialog, Ui_TextPreview):
         if self.text_file.translation:
             self.add_preview("Translation", self.text_file.translation)
 
-    def add_preview(self, title: str, text: str):
+    def add_preview(self, title: str, text: str) -> None:
         """
         Add a preview tab to the dialog.
         Show the text in a QPlainTextEdit set to read only mode.
@@ -63,7 +63,7 @@ class TextPreview(Qw.QDialog, Ui_TextPreview):
         preview_layout.addWidget(preview_text)
         self.tabWidget.addTab(preview_tab, title)
 
-    def save_preview(self):
+    def save_preview(self) -> None:
         """
         Save the preview in the currently visible QPlainTextEdit to a file.
         """

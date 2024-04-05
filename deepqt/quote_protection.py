@@ -42,7 +42,7 @@ r_raphael_re = re.compile(r"\[RAPHAEL\].*?\n+(.*?)\n+?\[ENDRAPHAEL\]")
 r_raphael = (r_raphael_re, r"<<\1>>")
 
 
-def protect_line(line: str):
+def protect_line(line: str) -> None:
     """
     Apply each protection pattern to a line.
     :param line:
@@ -56,7 +56,7 @@ def protect_line(line: str):
     return line
 
 
-def protect_text(text: str):
+def protect_text(text: str) -> None:
     """
     Apply each protection pattern to the full text.
     :param text:
@@ -65,7 +65,7 @@ def protect_text(text: str):
     return "\n".join(protect_line(line) for line in text.splitlines())
 
 
-def restore(text_: str):
+def restore(text_: str) -> None:
     """
     Apply each restoration pattern to the full text due to the line breaks introduced by the protection patterns.
     :param text_:

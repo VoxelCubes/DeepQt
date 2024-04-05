@@ -48,7 +48,7 @@ class Config:
     last_backend: ct.Backend = ct.Backend.DEEPL
     backend_configs: dict[ct.Backend, bi.BackendConfig] = Factory(dict)
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         # Preload the backend configs.
         self.backend_configs = {backend: conf_class() for backend, conf_class in backend_to_config.items()}
 
@@ -106,7 +106,7 @@ class Config:
         converter = config_converter_factory()
 
         # Censor all attributes that have the suffix "_key".
-        def censor_keys_hook(inst):
+        def censor_keys_hook(inst) -> None:
             result = {}
             for field in attrs.fields(inst.__class__):
                 value = getattr(inst, field.name)

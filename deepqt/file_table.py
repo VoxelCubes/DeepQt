@@ -43,7 +43,7 @@ class FileTable(CTableWidget):
     statusbar_message = Qc.Signal(str, int)
     recalculate_char_total = Qc.Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         CTableWidget.__init__(self, parent)
 
         self.files = {}
@@ -53,14 +53,14 @@ class FileTable(CTableWidget):
         # Make icons larger so the epub covers are more visible.
         self.setIconSize(Qc.QSize(32, 32))
 
-    def set_config(self, config: cfg.Config):
+    def set_config(self, config: cfg.Config) -> None:
         self.config = config
 
-    def handleDrop(self, path: str):
+    def handleDrop(self, path: str) -> None:
         logger.debug(f"Dropped {path}")
         self.add_file(Path(path))
 
-    def add_file(self, path: Path):
+    def add_file(self, path: Path) -> None:
         logger.info(f"Added {path}")
         # Make sure the file is not already in the table.
         paths_in_table = [file.path for file in self.files.values()]
@@ -115,7 +115,7 @@ class FileTable(CTableWidget):
             return st.TextFile(path=path)
 
     @Slot()
-    def update_all_output_filenames(self):
+    def update_all_output_filenames(self) -> None:
         """
         Update all output filenames in the table.
         The file names need to match the output directory preference and target language.
@@ -136,7 +136,7 @@ class FileTable(CTableWidget):
     """
 
     @Slot(st.Glossary)
-    def update_all_text_params(self, glossary: st.Glossary):
+    def update_all_text_params(self, glossary: st.Glossary) -> None:
         """
         Update all text file parameters.
         This means processing the glossary and quote protection, if so configured.
@@ -164,7 +164,7 @@ class FileTable(CTableWidget):
         for row in range(self.rowCount()):
             self.update_file_params(row, glossary)
 
-    def update_file_params(self, row: int, glossary: st.Glossary):
+    def update_file_params(self, row: int, glossary: st.Glossary) -> None:
         """
         Update the text file parameters for the given row.
         This means processing the glossary and quote protection, if so configured.
@@ -331,7 +331,7 @@ class FileTable(CTableWidget):
     Worker Callbacks
     """
 
-    def file_process_worker_result(self, file_id: str):
+    def file_process_worker_result(self, file_id: str) -> None:
         """
         Update the table with the result of the glossary processing.
         """
@@ -355,7 +355,7 @@ class FileTable(CTableWidget):
                 logger.error(f"Could not load cover image {absolute_path}")
                 logger.exception(e)
 
-    def file_process_worker_progress(self, progress: tuple[str, str]):
+    def file_process_worker_progress(self, progress: tuple[str, str]) -> None:
         """
         Update the progress bar in the table.
         Unwrap the tuple. This is just because worker signals only transmit 1 object.
@@ -369,7 +369,7 @@ class FileTable(CTableWidget):
             return
         self.show_file_progress(file_id, message)
 
-    def file_process_worker_error(self, error: wt.WorkerError):
+    def file_process_worker_error(self, error: wt.WorkerError) -> None:
         """
         Display an error message in the table.
         """
@@ -379,7 +379,7 @@ class FileTable(CTableWidget):
         logger.error(f"Failed to process {file.path.name}\n{error}")
         self.update_table_cell(file_id, Column.STATUS, "Failed to process.")
 
-    def file_process_worker_finished(self, initial_args: tuple[list, dict]):
+    def file_process_worker_finished(self, initial_args: tuple[list, dict]) -> None:
         """
         Unlock the file after processing is finished.
         """
@@ -403,13 +403,13 @@ class FileTable(CTableWidget):
     Misc.
     """
 
-    def update_table_cell(self, file_id: str, column: int, message: str):
+    def update_table_cell(self, file_id: str, column: int, message: str) -> None:
         """
         Show the translation progress in the table.
         """
         self.item(self.findItems(file_id, Qc.Qt.MatchExactly)[0].row(), column).setText(message)
 
-    def show_file_progress(self, file_id: str, message: str):
+    def show_file_progress(self, file_id: str, message: str) -> None:
         """
         Show the translation progress in the table.
         """
@@ -448,7 +448,7 @@ class FileTable(CTableWidget):
                     return False
         return True
 
-    def browse_add_file(self):
+    def browse_add_file(self) -> None:
         """
         Browse for a file and add it to the table.
         Supported file types: txt and epub.
@@ -458,7 +458,7 @@ class FileTable(CTableWidget):
             self.add_file(Path(path))
             self.request_text_param_update.emit()
 
-    def preview_selected_file(self):
+    def preview_selected_file(self) -> None:
         """
         Open the preview window for the selected file.
         """
@@ -470,7 +470,7 @@ class FileTable(CTableWidget):
         else:
             dep.EpubPreview(self, file, self.config).exec()
 
-    def remove_selected_file(self):
+    def remove_selected_file(self) -> None:
         """
         Remove the selected file from the table.
         """
@@ -487,7 +487,7 @@ class FileTable(CTableWidget):
             self.not_ready_for_translation.emit()
         self.recalculate_char_total.emit()
 
-    def remove_all_files(self):
+    def remove_all_files(self) -> None:
         """
         Remove all files from the table.
         """
@@ -496,7 +496,7 @@ class FileTable(CTableWidget):
         self.not_ready_for_translation.emit()
         self.recalculate_char_total.emit()
 
-    def recalculate_char_count(self, file_id: str):
+    def recalculate_char_count(self, file_id: str) -> None:
         """
         Update the table after a file has been processed.
 

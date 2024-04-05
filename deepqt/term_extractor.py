@@ -18,7 +18,7 @@ import pyexcel
 import deepqt.structures as st
 
 
-def main():
+def main() -> None:
     # Use argparse to gather the input and output paths.
     parser = argparse.ArgumentParser(description="Swap left and right terms in a glossary. Export simplified format.")
     parser.add_argument("glossary", type=Path, help="The glossary file to read.")
@@ -34,7 +34,7 @@ def main():
     dump_glossary_ods(glossary, args.output)
 
 
-def parse_glossary_file(path: Path, glossary: st.Glossary):
+def parse_glossary_file(path: Path, glossary: st.Glossary) -> None:
     """
     Parse an ods file into a glossary.
     Exceptions need to be handled by the caller.
@@ -59,7 +59,7 @@ def parse_glossary_file(path: Path, glossary: st.Glossary):
                 parse_cell(original, replacement, glossary, pattern)
 
 
-def dump_glossary_ods(glossary: st.Glossary, path: Path):
+def dump_glossary_ods(glossary: st.Glossary, path: Path) -> None:
     """
     Take each dictionary in the glossary and dump it on it's own row as key value.
     Start each dictionary dump with the name of the dictionary on its own row.
@@ -70,7 +70,7 @@ def dump_glossary_ods(glossary: st.Glossary, path: Path):
     """
     sheet = []
 
-    def dump_dictionary(dictionary: dict[str, str], name: str):
+    def dump_dictionary(dictionary: dict[str, str], name: str) -> None:
         sheet.append([name])
         for key, value in dictionary.items():
             sheet.append([key, value])
@@ -86,7 +86,7 @@ def dump_glossary_ods(glossary: st.Glossary, path: Path):
     pyexcel.save_as(array=sheet, dest_file_name=str(path))
 
 
-def parse_cell(cell: Any, next_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern):
+def parse_cell(cell: Any, next_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern) -> None:
     """
     Format agnostic parsing of a cell.
     Pyexcel inserts comment text into cells, which we need to remove using the comment pattern.

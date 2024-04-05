@@ -32,14 +32,14 @@ class InputFile:
     finished: bool = False
     glossary_hash: str = ""  # To Prevent re-applying the same glossary.
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         """
         Ensure the path exists.
         """
         if not self.path.exists():
             raise FileNotFoundError(f"File {self.path} does not exist.")
 
-    def translation_incomplete(self):
+    def translation_incomplete(self) -> None:
         pass
 
     @property
@@ -50,7 +50,7 @@ class InputFile:
     def is_translated(self) -> bool:
         raise NotImplementedError
 
-    def clear_translations(self):
+    def clear_translations(self) -> None:
         raise NotImplementedError
 
 
@@ -65,12 +65,12 @@ class TextFile(InputFile):
     translation_chunks: list[str] = Factory(list)
     translation: str = ""
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         InputFile.__attrs_post_init__(self)
         with self.path.open("r", encoding="utf8") as f:
             self.text = f.read()
 
-    def current_text(self):
+    def current_text(self) -> None:
         match self.process_level:
             case ProcessLevel.RAW:
                 return self.text
@@ -82,7 +82,7 @@ class TextFile(InputFile):
                 return self.text_glossary_protected
 
     @property
-    def char_count(self):
+    def char_count(self) -> None:
         # Use caching to speed up the process, since the text doesn't change often, but can be very long.
         return text_length(self.current_text())
 
@@ -94,14 +94,14 @@ class TextFile(InputFile):
         else:
             return None
 
-    def translation_incomplete(self):
+    def translation_incomplete(self) -> None:
         return self.translation_chunks and not self.translation
 
     @property
     def is_translated(self) -> bool:
         return bool(self.translation)
 
-    def clear_translations(self):
+    def clear_translations(self) -> None:
         self.translation = ""
         self.translation_chunks = []
 
@@ -132,7 +132,7 @@ class CSSFile:
     path: Path
     text: str = ""
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         with self.path.open("r", encoding="utf8") as f:
             self.text = f.read()
 
@@ -149,14 +149,14 @@ class XMLFile:
     process_level: ProcessLevel = ProcessLevel.RAW
     translation: str = ""
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         with self.path.open("r", encoding="utf8") as f:
             self.text = f.read()
 
-    def prepare_text(self, *args, **kwargs):
+    def prepare_text(self, *args, **kwargs) -> None:
         pass
 
-    def current_text(self):
+    def current_text(self) -> None:
         match self.process_level:
             case ProcessLevel.RAW:
                 return self.text
@@ -164,7 +164,7 @@ class XMLFile:
                 return self.text_glossary
 
     @property
-    def char_count(self):
+    def char_count(self) -> None:
         return xml_parser.get_char_count(self.current_text())
 
     def get_translated_text(self) -> str | None:
@@ -177,13 +177,13 @@ class XMLFile:
     def is_translated(self) -> bool:
         return bool(self.translation)
 
-    def clear_translations(self):
+    def clear_translations(self) -> None:
         self.translation = ""
 
 
 @define
 class HTMLFile(XMLFile):
-    def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool):
+    def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool) -> None:
         # Apply heuristic improvements to html files.
         len_before = len(self.text)
 
@@ -211,7 +211,7 @@ class TocNCXFile(XMLFile):
         return re.sub(r"<text>.*?</text>", lambda m: f"<text>{texts.pop(0)}</text>", xml, re.DOTALL)
 
     @property
-    def char_count(self):
+    def char_count(self) -> None:
         return sum(len(text) for text in self.get_texts(self.text))
 
 
@@ -229,7 +229,7 @@ class EpubFile(InputFile):
     initialized: bool = False
     cover_image: Path | None = None
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         InputFile.__attrs_post_init__(self)
         self.cache_dir = Path(self.cache_dir) / self.path.stem
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -275,22 +275,22 @@ class EpubFile(InputFile):
         self.initialized = True
 
     @property
-    def char_count(self):
+    def char_count(self) -> None:
         return sum(f.char_count for f in self.html_files)
 
     @property
-    def process_level(self):
+    def process_level(self) -> None:
         if all(f.process_level == ProcessLevel.GLOSSARY for f in self.html_files):
             return ProcessLevel.GLOSSARY
         else:
             return ProcessLevel.RAW
 
     @process_level.setter
-    def process_level(self, value):
+    def process_level(self, value) -> None:
         for f in self.html_files:
             f.process_level = value
 
-    def translation_incomplete(self):
+    def translation_incomplete(self) -> None:
         # Return true, if some, but not all, are translated.
         all_translated = all(f.is_translated for f in self.html_files)
         any_translated = any(f.is_translated for f in self.html_files)
@@ -300,10 +300,10 @@ class EpubFile(InputFile):
         return all(f.is_translated for f in self.html_files)
 
     @property
-    def file_count(self):
+    def file_count(self) -> None:
         return len(self.html_files) + 1  # +1 for the toc file.
 
-    def write_to_cache(self, process_level: ProcessLevel):
+    def write_to_cache(self, process_level: ProcessLevel) -> None:
         """
         Write the current text of the given process level to the cache folder.
         """
@@ -326,7 +326,7 @@ class EpubFile(InputFile):
         for css_file in self.css_files:
             css_file.path.write_text(css_file.text, encoding="utf8")
 
-    def write(self, process_level: ProcessLevel, output_path: Path):
+    def write(self, process_level: ProcessLevel, output_path: Path) -> None:
         """
         Write the current text of the given process level to the output file.
 
@@ -337,7 +337,7 @@ class EpubFile(InputFile):
         # Rebuild the epub file.
         ut.zip_folder_to_epub(self.cache_dir, output_path)
 
-    def clear_translations(self):
+    def clear_translations(self) -> None:
         for f in self.html_files:
             f.clear_translations()
         self.toc_file.clear_translations()
@@ -414,7 +414,7 @@ class Glossary:
 
     hash: str = ""  # To Prevent re-applying the same glossary.
 
-    def generate_patterns(self):
+    def generate_patterns(self) -> None:
         """
         Generate the regex patterns from the dictionaries.
         """
@@ -433,20 +433,20 @@ class Glossary:
         if self.no_suffix_terms:
             self.no_suffix_pattern = trie.trie_regex_from_words(self.no_suffix_terms.keys())
 
-    def set_hash(self, path: Path):
+    def set_hash(self, path: Path) -> None:
         """
         Set the glossary hash to the md5 hash of the glossary file.
         """
         with path.open("rb") as f:
             self.hash = hashlib.md5(f.read()).hexdigest()
 
-    def is_same_glossary(self, path: Path):
+    def is_same_glossary(self, path: Path) -> None:
         """
         Check if the glossary file is the same as the one already applied.
         """
         return self.hash == hashlib.md5(path.read_bytes()).hexdigest()
 
-    def __len__(self):
+    def __len__(self) -> None:
         """
         Return the number of terms in the glossary.
         Sum up the values in each of the dictionaries.
@@ -463,7 +463,7 @@ class Glossary:
             )
         )
 
-    def is_valid(self):
+    def is_valid(self) -> None:
         """
         Check if the glossary is valid.
         It needs a file hash showing it isn't the uninitialized glossary,
@@ -471,7 +471,7 @@ class Glossary:
         """
         return self.hash != "" and len(self) > 0
 
-    def __str__(self):
+    def __str__(self) -> None:
         """
         Print the glossary with each term on it's own line, divided into the different groups.
         """

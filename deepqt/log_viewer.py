@@ -28,15 +28,15 @@ colors_light_theme = {
 
 
 class Highlighter(Qg.QSyntaxHighlighter):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         Qg.QSyntaxHighlighter.__init__(self, parent)
 
         self._mappings = {}
 
-    def add_mapping(self, pattern, format_):
+    def add_mapping(self, pattern, format_) -> None:
         self._mappings[pattern] = format_
 
-    def highlightBlock(self, text):
+    def highlightBlock(self, text) -> None:
         for pattern, format_ in self._mappings.items():
             for match in re.finditer(pattern, text):
                 start, end = match.span()
@@ -44,14 +44,14 @@ class Highlighter(Qg.QSyntaxHighlighter):
 
 
 class LogSyntaxManager(Qc.QObject):
-    def __init__(self, parent, widget: Qw.QPlainTextEdit, palette: Qg.QPalette):
+    def __init__(self, parent, widget: Qw.QPlainTextEdit, palette: Qg.QPalette) -> None:
         Qc.QObject.__init__(self, parent)
 
         self._highlighter = Highlighter()
 
         self.setup_editor(widget, palette)
 
-    def setup_editor(self, widget: Qw.QPlainTextEdit, palette: Qg.QPalette):
+    def setup_editor(self, widget: Qw.QPlainTextEdit, palette: Qg.QPalette) -> None:
         background_color = palette.color(Qg.QPalette.Window)
         theme_is_dark = background_color.lightness() < 128
 

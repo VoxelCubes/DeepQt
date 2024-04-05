@@ -16,7 +16,7 @@ from deepqt.driver_mainwindow import MainWindow
 # TODO Testing
 
 
-def main():
+def main() -> None:
     # Parse command line arguments.
     parser = argparse.ArgumentParser(
         description=__description__,
@@ -69,7 +69,7 @@ def main():
 
     # Set up a preliminary exception handler so that this still shows up in the log.
     # Once the gui is up and running it'll be replaced with a call to the gui's error dialog.
-    def exception_handler(exctype, value, traceback):
+    def exception_handler(exctype, value, traceback) -> None:
         logger.opt(depth=1, exception=(exctype, value, traceback)).critical("An uncaught exception was raised")
 
     sys.excepthook = exception_handler

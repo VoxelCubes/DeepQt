@@ -21,7 +21,7 @@ class UnsupportedFileType(Exception):
     pass
 
 
-def make_imports_used_so_they_dont_get_auto_removed():
+def make_imports_used_so_they_dont_get_auto_removed() -> None:
     # Never call this function.
     # It purely serves to distract the linter from removing the imports,
     # so that they get included in pyinstaller builds.
@@ -48,7 +48,7 @@ def process_text(text: str, glossary: st.Glossary) -> str:
     return "\n".join(lines_out)
 
 
-def process_epub_file(epub: st.EpubFile, glossary: st.Glossary):
+def process_epub_file(epub: st.EpubFile, glossary: st.Glossary) -> None:
     """
     Process an epub file with the glossary.
 
@@ -94,7 +94,7 @@ def parse_glossary(path: Path) -> st.Glossary:
     return glossary
 
 
-def parse_glossary_file(path: Path, glossary: st.Glossary):
+def parse_glossary_file(path: Path, glossary: st.Glossary) -> None:
     """
     Parse an ods file into a glossary.
     Exceptions need to be handled by the caller.
@@ -142,7 +142,7 @@ def parse_term(
         target_dict[prefix + original_term] = replacement_term
 
 
-def parse_cell(cell: Any, prev_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern):
+def parse_cell(cell: Any, prev_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern) -> None:
     """
     Format agnostic parsing of a cell.
     Pyexcel inserts comment text into cells, which we need to remove using the comment pattern.

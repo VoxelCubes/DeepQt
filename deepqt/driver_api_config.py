@@ -12,7 +12,7 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
     This way the API key is normally hidden from the user.
     """
 
-    def __init__(self, parent, config: cfg.Config):
+    def __init__(self, parent, config: cfg.Config) -> None:
         # Don't pass the parent due to a bug in PySide6.
         Qw.QDialog.__init__(self)
         self.setupUi(self)
@@ -24,7 +24,7 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
 
         self.comboBox_api_type.setCurrentIndex(1 if config.is_pro_version else 0)
 
-    def get_key(self):
+    def get_key(self) -> None:
         """
         If the api is supposed to be PRO, remove :fx from the key and vice versa.
         """
@@ -39,7 +39,7 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
             key = re.sub("^(.*?)(:fx)?$", r"\1:fx", key)
         return key
 
-    def show_api_help(self):
+    def show_api_help(self) -> None:
         """
         Show the deepl api documentation in a web browser.
         Open the github page for this.
