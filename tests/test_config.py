@@ -94,10 +94,10 @@ def test_missing_and_extra_keys():
     assert "nonsense" not in config.__annotations__
     assert config.use_glossary == default_config.use_glossary
     assert (
-        config.backend_configs[ct.Backend.MOCK].wait_time_ms
-        == default_config.backend_configs[ct.Backend.MOCK].wait_time_ms
+        config.backend_configs[ct.Backend.MOCK].wait_time == default_config.backend_configs[ct.Backend.MOCK].wait_time
     )
     assert "more nonsense" not in config.backend_configs[ct.Backend.MOCK].__annotations__
+    assert config.backend_configs[ct.Backend.MOCK].name == default_config.backend_configs[ct.Backend.MOCK].name
 
 
 def test_missing_backend():
@@ -113,8 +113,7 @@ def test_missing_backend():
     assert config.lang_from == "Valid language code"
     assert config.use_glossary == default_config.use_glossary
     assert (
-        config.backend_configs[ct.Backend.MOCK].wait_time_ms
-        == default_config.backend_configs[ct.Backend.MOCK].wait_time_ms
+        config.backend_configs[ct.Backend.MOCK].wait_time == default_config.backend_configs[ct.Backend.MOCK].wait_time
     )
     assert (
         config.backend_configs[ct.Backend.DEEPL].tl_preserve_formatting
@@ -137,8 +136,7 @@ def test_type_mismatch():
     assert config.lang_from == "Valid language code"
     assert config.use_glossary == default_config.use_glossary
     assert (
-        config.backend_configs[ct.Backend.MOCK].wait_time_ms
-        == default_config.backend_configs[ct.Backend.MOCK].wait_time_ms
+        config.backend_configs[ct.Backend.MOCK].wait_time == default_config.backend_configs[ct.Backend.MOCK].wait_time
     )
 
 
@@ -151,4 +149,4 @@ def test_unknown_backend():
     assert len(errors) == 1
     assert str(errors[0]).startswith("Unknown backend")
     assert isinstance(config, cfg.Config)
-    assert config.backend_configs[ct.Backend.DEEPL].wait_time_ms == 42
+    assert config.backend_configs[ct.Backend.DEEPL].wait_time == 42

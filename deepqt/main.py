@@ -9,6 +9,7 @@ from loguru import logger
 import deepqt.utils as ut
 from deepqt import __program__, __display_name__, __version__, __description__
 from deepqt.constants import Command, Backend
+import deepqt.gui_utils as gu
 from deepqt.driver_mainwindow import MainWindow
 
 
@@ -120,7 +121,7 @@ def main() -> None:
         window.show()
         sys.exit(app.exec())
     except Exception:
-        logger.opt(exception=True).critical("Failed to initialize the main window.")
+        gu.show_exception(None, "Failed to launch", "Failed to initialize the main window.")
     finally:
         logger.info(ut.SHUTDOWN_MESSAGE + "\n")
 

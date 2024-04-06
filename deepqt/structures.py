@@ -20,9 +20,10 @@ class ProcessLevel(IntEnum):
     Error = -1
     RAW = 0
     GLOSSARY = 1
-    PROTECTED = 2
-    GLOSSARY_PROTECTED = 3
-    TRANSLATED = 4  # Only used for dumping.
+    # PROTECTED = 2
+    # GLOSSARY_PROTECTED = 3
+    TRANSLATED = 2  # Only used for dumping.
+    TRANSLATED_GLOSSARY = 3  # Only used for dumping if glossary is applied.
 
 
 @define

@@ -5,24 +5,24 @@ class Trie:
     """Regex::Trie in Python. Creates a Trie out of a list of words. The trie can be exported to a Regex pattern.
     The corresponding Regex should match much faster than a simple Regex union."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.data = {}
 
-    def add(self, word):
+    def add(self, word) -> None:
         ref = self.data
         for char in word:
             ref[char] = char in ref and ref[char] or {}
             ref = ref[char]
         ref[""] = 1
 
-    def dump(self):
+    def dump(self) -> None:
         return self.data
 
     @staticmethod
-    def quote(char):
+    def quote(char) -> None:
         return re.escape(char)
 
-    def _pattern(self, pData):
+    def _pattern(self, pData) -> None:
         data = pData
         if "" in data and len(data.keys()) == 1:
             return None
@@ -59,11 +59,11 @@ class Trie:
                 result = "(?:%s)?" % result
         return result
 
-    def pattern(self):
+    def pattern(self) -> None:
         return self._pattern(self.dump())
 
 
-def trie_regex_from_words(words, prefix="", suffix=""):
+def trie_regex_from_words(words, prefix="", suffix="") -> None:
     trie = Trie()
     for word in words:
         trie.add(word)

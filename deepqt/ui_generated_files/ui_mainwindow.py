@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QFram
 from deepqt.CustomQ.CComboBox import CComboBox
 from deepqt.CustomQ.CDropFrame import CDropFrame
 from deepqt.CustomQ.CTooltipLabel import CTooltipLabel
+from deepqt.backend_settings import BackendSettings
 from deepqt.file_table import FileTable
 
 class Ui_MainWindow(object):
@@ -107,18 +108,18 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.horizontalLayout_2.setContentsMargins(-1, -1, -1, 0)
-        self.label_api_logo = QLabel(self.groupBox_api)
-        self.label_api_logo.setObjectName(u"label_api_logo")
+        self.label_backend_logo = QLabel(self.groupBox_api)
+        self.label_backend_logo.setObjectName(u"label_backend_logo")
 
-        self.horizontalLayout_2.addWidget(self.label_api_logo)
+        self.horizontalLayout_2.addWidget(self.label_backend_logo)
 
-        self.label_api_name = QLabel(self.groupBox_api)
-        self.label_api_name.setObjectName(u"label_api_name")
+        self.label_backend_name = QLabel(self.groupBox_api)
+        self.label_backend_name.setObjectName(u"label_backend_name")
 
-        self.horizontalLayout_2.addWidget(self.label_api_name)
+        self.horizontalLayout_2.addWidget(self.label_backend_name)
 
-        self.pushButton_api_change = QPushButton(self.groupBox_api)
-        self.pushButton_api_change.setObjectName(u"pushButton_api_change")
+        self.pushButton_backend_change = QPushButton(self.groupBox_api)
+        self.pushButton_backend_change.setObjectName(u"pushButton_backend_change")
         icon3 = QIcon()
         iconThemeName = u"exchange-positions"
         if QIcon.hasThemeIcon(iconThemeName):
@@ -126,17 +127,17 @@ class Ui_MainWindow(object):
         else:
             icon3.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_api_change.setIcon(icon3)
-        self.pushButton_api_change.setFlat(True)
+        self.pushButton_backend_change.setIcon(icon3)
+        self.pushButton_backend_change.setFlat(True)
 
-        self.horizontalLayout_2.addWidget(self.pushButton_api_change)
+        self.horizontalLayout_2.addWidget(self.pushButton_backend_change)
 
         self.horizontalLayout_2.setStretch(1, 1)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
 
-        self.pushButton_api_settings_visibility = QPushButton(self.groupBox_api)
-        self.pushButton_api_settings_visibility.setObjectName(u"pushButton_api_settings_visibility")
+        self.pushButton_backend_config_visibility = QPushButton(self.groupBox_api)
+        self.pushButton_backend_config_visibility.setObjectName(u"pushButton_backend_config_visibility")
         icon4 = QIcon()
         iconThemeName = u"arrow-right"
         if QIcon.hasThemeIcon(iconThemeName):
@@ -144,33 +145,23 @@ class Ui_MainWindow(object):
         else:
             icon4.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_api_settings_visibility.setIcon(icon4)
-        self.pushButton_api_settings_visibility.setCheckable(True)
-        self.pushButton_api_settings_visibility.setFlat(True)
+        self.pushButton_backend_config_visibility.setIcon(icon4)
+        self.pushButton_backend_config_visibility.setCheckable(True)
+        self.pushButton_backend_config_visibility.setFlat(True)
 
-        self.verticalLayout_3.addWidget(self.pushButton_api_settings_visibility)
+        self.verticalLayout_3.addWidget(self.pushButton_backend_config_visibility)
 
         self.scrollArea = QScrollArea(self.groupBox_api)
         self.scrollArea.setObjectName(u"scrollArea")
         self.scrollArea.setFrameShape(QFrame.NoFrame)
         self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 436, 83))
-        self.verticalLayout_8 = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.scrollArea_backend_config = BackendSettings()
+        self.scrollArea_backend_config.setObjectName(u"scrollArea_backend_config")
+        self.scrollArea_backend_config.setGeometry(QRect(0, 0, 436, 83))
+        self.verticalLayout_8 = QVBoxLayout(self.scrollArea_backend_config)
         self.verticalLayout_8.setObjectName(u"verticalLayout_8")
-        self.stackedWidget_api_overview = QStackedWidget(self.scrollAreaWidgetContents)
-        self.stackedWidget_api_overview.setObjectName(u"stackedWidget_api_overview")
-        self.page = QWidget()
-        self.page.setObjectName(u"page")
-        self.verticalLayout_9 = QVBoxLayout(self.page)
-        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
-        self.stackedWidget_api_overview.addWidget(self.page)
-
-        self.verticalLayout_8.addWidget(self.stackedWidget_api_overview)
-
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scrollArea.setWidget(self.scrollArea_backend_config)
 
         self.verticalLayout_3.addWidget(self.scrollArea)
 
@@ -559,6 +550,12 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setColumnStretch(3, 10)
         self.gridLayout_2.setColumnStretch(4, 1)
         self.stackedWidget.addWidget(self.page_interactive_reliable)
+        self.page_interactive_unreliable = QWidget()
+        self.page_interactive_unreliable.setObjectName(u"page_interactive_unreliable")
+        self.stackedWidget.addWidget(self.page_interactive_unreliable)
+        self.page_supervision = QWidget()
+        self.page_supervision.setObjectName(u"page_supervision")
+        self.stackedWidget.addWidget(self.page_supervision)
 
         self.gridLayout.addWidget(self.stackedWidget, 0, 1, 1, 1)
 
@@ -586,7 +583,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.pushButton_translate_files.setDefault(True)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -598,10 +595,10 @@ class Ui_MainWindow(object):
         self.pushButton_translate_text.setText(QCoreApplication.translate("MainWindow", u"Translate Text", None))
         self.pushButton_menu.setText("")
         self.groupBox_api.setTitle(QCoreApplication.translate("MainWindow", u"API", None))
-        self.label_api_logo.setText(QCoreApplication.translate("MainWindow", u"<logo>", None))
-        self.label_api_name.setText(QCoreApplication.translate("MainWindow", u"<current api>", None))
-        self.pushButton_api_change.setText(QCoreApplication.translate("MainWindow", u"Change", None))
-        self.pushButton_api_settings_visibility.setText(QCoreApplication.translate("MainWindow", u"API Settings", None))
+        self.label_backend_logo.setText(QCoreApplication.translate("MainWindow", u"<logo>", None))
+        self.label_backend_name.setText(QCoreApplication.translate("MainWindow", u"<current api>", None))
+        self.pushButton_backend_change.setText(QCoreApplication.translate("MainWindow", u"Change", None))
+        self.pushButton_backend_config_visibility.setText(QCoreApplication.translate("MainWindow", u"API Settings", None))
         self.groupBox_language.setTitle(QCoreApplication.translate("MainWindow", u"Language", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"From:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"To:", None))

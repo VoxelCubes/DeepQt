@@ -36,6 +36,8 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     translating: bool
     debug: bool
 
+    translation_mode: ct.TranslationMode
+
     threadpool: Qc.QThreadPool
 
     api_widgets: dict[ct.Backend, Qw.QWidget]
@@ -91,9 +93,16 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.save_default_palette()
         self.load_config_theme()
 
+        self.load_backend(api)
+
         Qc.QTimer.singleShot(0, self.post_init)
 
-    def initialize_ui(self):
+    @property
+    def translation_mode(self) -> ct.TranslationMode:
+        # The translation mode is dictated by the button states in the gui.
+        return ct.TranslationMode.File if self.pushButton_translate_files.isChecked() else ct.TranslationMode.Text
+
+    def initialize_ui(self) -> None:
         # Set window height to 650px.
         # self.resize(self.width(), 650)
         self.hide_progress()
@@ -374,11 +383,27 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     #     self.config.save()
     #     self.text_params_changed.emit(self.glossary)
 
-    """
-    Dialogs
-    """
+    # ======================================== Backends ========================================
 
-    def configure_api(self):
+    def load_backend(self, backend: ct.Backend | None) -> None:
+        """
+        Load the backend specified as an argument, or fall back to the config's last used one.
+
+        :param backend: The backend to load.
+        """
+        if backend is None:
+            backend = self.config.last_backend
+
+        backend_config = self.config.backend_configs[backend]
+
+        self.label_backend_name.setText(backend_config.name)
+        self.label_backend_logo.setPixmap(Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24)))
+
+        self.scrollArea_backend_config.load_backend(backend_config)
+
+    # ======================================== Dialogs ========================================
+
+    def configure_api(self) -> None:
         """
         Configure the DeepL API.
         """
@@ -600,7 +625,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         self.translation_worker_finished()
 
-    def translation_worker_progress(self, key: str, message: str, processed_chars: int | None, total_chars: int | None):
+    def translation_worker_progress(
+        self, key: str, message: str, processed_chars: int | None, total_chars: int | None
+    ) -> None:
         """
         Update the file with the key in the file table to display this message.
 

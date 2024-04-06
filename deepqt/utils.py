@@ -1,5 +1,6 @@
 import difflib
 import os
+import re
 import platform
 import sys
 import zipfile as zf
@@ -388,7 +389,6 @@ def load_dict_to_attrs_safely(
     return errors
 
 
-# TODO this doesn't belong here.
 def zip_folder_to_epub(folder_unzipped: Path, destination: Path) -> bool:
     """
     Zip a folder to an epub file.
@@ -399,7 +399,7 @@ def zip_folder_to_epub(folder_unzipped: Path, destination: Path) -> bool:
     """
     seen = set()
 
-    def add_to_zip(zip_file: zf.ZipFile, path: Path):
+    def add_to_zip(zip_file: zf.ZipFile, path: Path) -> None:
         """
         Add a file or folder to the zip file.
         """
@@ -432,3 +432,36 @@ def zip_folder_to_epub(folder_unzipped: Path, destination: Path) -> bool:
     else:
         logger.error(f"Folder {folder_unzipped} is missing mimetype and/or META-INF folder.")
         return False
+
+
+def to_snake_case(name: str) -> str:
+    """
+    Convert the given name to snake case.
+
+    Example:
+        "ThisIsATest" -> "this_is_a_test"
+
+    :param name: The name to convert.
+    :return: The converted name.
+    """
+    # https://stackoverflow.com/a/1176023
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
+
+def to_display_name(name: str) -> str:
+    """
+    Convert the given name to a display name.
+    Split on underscores or CamelCase and capitalize each word.
+
+    Example:
+        "this_is_a_test" -> "This Is A Test"
+
+    :param name: The name to convert.
+    :return: The converted name.
+    """
+    name = name.replace("_", " ")
+    # https://stackoverflow.com/a/1176023
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1 \2", name)
+    s2 = re.sub("([a-z0-9])([A-Z])", r"\1 \2", s1)
+    return " ".join(word.capitalize() for word in s2.split(" ")).replace("Ai ", "AI ").replace("Ocr", "OCR")

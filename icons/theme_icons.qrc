@@ -29,6 +29,7 @@
     <file>breeze/status/16/state-error.svg</file>
     <file>breeze/status/16/state-ok.svg</file>
     <file>breeze/status/64/dialog-error.svg</file>
+    <file>breeze/places/24/network-server.svg</file>
     <file>breeze-dark/index.theme</file>
     <file>breeze-dark/actions/16/configure.svg</file>
     <file>breeze-dark/actions/16/dialog-cancel.svg</file>
@@ -58,5 +59,6 @@
     <file>breeze-dark/status/16/state-error.svg</file>
     <file>breeze-dark/status/16/state-ok.svg</file>
     <file>breeze-dark/status/64/dialog-error.svg</file>
+    <file>breeze-dark/places/24/network-server.svg</file>
   </qresource>
 </RCC>

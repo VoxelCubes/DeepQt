@@ -8,19 +8,25 @@ import deepqt.backends.backend_interface as bi
 import deepqt.constants as ct
 import deepqt.utils as ut
 
+DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
+
 
 @define
 class DeepLConfig(bi.BackendConfig):
-    api_key: str = "sdkfjhasdflasjfhjsalhfla"
+    name: str = "DeepL"
+    api_key: ct.APIKey = "sdkfjhasdflasjfhjsalhfla"
     tl_max_chunks: int = 20
     tl_min_chunk_size: int = 5_000
     tl_preserve_formatting: bool = True
-    wait_time_ms: int = 1000
+    wait_time: ct.Milliseconds = 1000
 
     @classmethod
     def from_dict(cls, data: dict) -> tuple["DeepLConfig", list[Exception]]:
         dataclass = cls()
-        return dataclass, ut.load_dict_to_attrs_safely(dataclass, data, include_until_base=bi.BackendConfig)
+        no_save_attrs = dataclass.no_save_attributes()
+        return dataclass, ut.load_dict_to_attrs_safely(
+            dataclass, data, skip_attrs=no_save_attrs, include_until_base=bi.BackendConfig
+        )
 
     def validate(self) -> list[bi.ConfigIssue]:
         """
@@ -51,9 +57,9 @@ class DeepLConfig(bi.BackendConfig):
                 type=bool,
                 description="Preserve formatting in the translated text.",
             ),
-            "wait_time_ms": bi.AttributeMetadata(
+            "wait_time": bi.AttributeMetadata(
                 name="Wait time",
-                type=int,
+                type=ct.Milliseconds,
                 description="Time to wait between chunks (ms).",
             ),
         }

@@ -39,3 +39,6 @@ Files:
       - state-ok
     64:
       - dialog-error
+  places:
+    24:
+      - network-server

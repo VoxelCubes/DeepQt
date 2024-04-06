@@ -12,13 +12,24 @@ import deepqt.utils as ut
 
 @define
 class MockConfig(bi.BackendConfig):
+    name = "Mock"
+    description = (
+        'This is a "fake" backend for **testing purposes**.\n '
+        "It simulates a reliable translation service, "
+        "meaning one that is expected to always return a translation, without much (if any) supervision.\n"
+        "This is as opposed to LLM chatbots that may return nonsense at a high rate, "
+        "if not outright refuse to perform the task asked of them."
+    )
     chunk_size: int = 1000
-    wait_time_ms: int = 1000
+    wait_time: ct.Milliseconds = 1000
 
     @classmethod
     def from_dict(cls, data: dict) -> tuple["MockConfig", list[Exception]]:
         dataclass = cls()
-        return dataclass, ut.load_dict_to_attrs_safely(dataclass, data, include_until_base=bi.BackendConfig)
+        no_save_attrs = dataclass.no_save_attributes()
+        return dataclass, ut.load_dict_to_attrs_safely(
+            dataclass, data, skip_attrs=no_save_attrs, include_until_base=bi.BackendConfig
+        )
 
     def validate(self) -> list[bi.ConfigIssue]:
         """
@@ -34,9 +45,9 @@ class MockConfig(bi.BackendConfig):
                 type=int,
                 description="Number of characters to translate at once.",
             ),
-            "wait_time_ms": bi.AttributeMetadata(
+            "wait_time": bi.AttributeMetadata(
                 name="Wait time",
-                type=int,
+                type=ct.Milliseconds,
                 description="Time to wait between chunks (ms).",
             ),
         }

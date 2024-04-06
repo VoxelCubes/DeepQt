@@ -4,6 +4,7 @@
     "lang_to": "EN-US",
     "backend_configs": {
         "mock": {
+            "name": "This should never be here",
             "avg_time_per_mille": -1.0,
             "chunk_size": 1000,
             "more nonsense": 42
@@ -11,7 +12,7 @@
         "deepl": {
             "avg_time_per_mille": -1.0,
             "tl_preserve_formatting": true,
-            "wait_time_ms": 1000
+            "wait_time": 1000
         }
     }
 }

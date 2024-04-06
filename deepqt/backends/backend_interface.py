@@ -52,12 +52,16 @@ class ConfigIssue:
 class AttributeMetadata:
     """
     Metadata for an attribute.
+
+    hidden means the value is not configurable by the user.
+    no_save means the value is not saved to or read from the config file.
     """
 
-    name: str
-    type: type
-    description: str
+    name: str = ""
+    type: type = None
+    description: str = ""
     hidden: bool = False
+    no_save: bool = False
 
 
 @frozen
@@ -89,6 +93,9 @@ class BackendStatus:
 @define
 class BackendConfig(ABC):
     # How long it took to translate 1000 characters on average. (-1 if unknown)
+    name: str = "Unset"
+    icon: str = "network-server"
+    description: str = "Blank description."  # Markdown enabled.
     avg_time_per_mille: float = -1.0
 
     @classmethod
@@ -116,20 +123,43 @@ class BackendConfig(ABC):
     def attribute_metadata(self) -> dict[str, AttributeMetadata]:
         """
         Returns the metadata for each attribute.
+        Hidden metadata won't be configurable by the user.
         """
         # Validate each attribute in the class is covered.
         meta = {
-            "avg_time_per_mille": AttributeMetadata(
-                name="Average time per 1000 characters",
-                type=float,
-                description="Historical average time to translate 1000 characters, internal use only.",
+            "name": AttributeMetadata(
+                type=str,
                 hidden=True,
-            )
+                no_save=True,
+            ),
+            "icon": AttributeMetadata(
+                type=str,
+                hidden=True,
+                no_save=True,
+            ),
+            "description": AttributeMetadata(
+                type=str,
+                hidden=True,
+                no_save=True,
+            ),
+            "avg_time_per_mille": AttributeMetadata(
+                # Historical average time to translate 1000 characters, internal use only.
+                type=float,
+                hidden=True,
+            ),
         }
         # Append the child metadata.
         child_meta = self._attribute_metadata()
         meta.update(child_meta)
         return meta
+
+    def no_save_attributes(self) -> list[str]:
+        """
+        Returns a list of attribute names that should not be saved to the config file.
+        This is because the name, description etc. should be defined in the code, without the possibility
+        of stale names and descriptions being stuck in the config file, never getting updated.
+        """
+        return [key for key, meta in self.attribute_metadata().items() if meta.no_save]
 
 
 class Backend(Protocol):

@@ -17,7 +17,7 @@
         "mock": {
             "avg_time_per_mille": "-2.0",
             "chunk_size": 1000.0,
-            "wait_time_ms": 1000
+            "wait_time": 1000
         },
         "deepl": {
             "avg_time_per_mille": -1.0,
@@ -25,7 +25,7 @@
             "tl_max_chunks": 20,
             "tl_min_chunk_size": 5000,
             "tl_preserve_formatting": 42,
-            "wait_time_ms": 1000
+            "wait_time": 1000
         }
     }
 }
