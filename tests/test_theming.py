@@ -12,6 +12,9 @@ def test_get_available_themes():
     """
     Test the get_available_themes function.
     """
+    assert deepqt.rc_generated_files.rc_themes
+    assert deepqt.rc_generated_files.rc_theme_icons
+
     themes = ut.get_available_themes()
 
     assert themes
@@ -22,6 +25,9 @@ def test_theme_icon_presence():
     """
     Test that all icons are present in the resources.
     """
+    assert deepqt.rc_generated_files.rc_themes
+    assert deepqt.rc_generated_files.rc_theme_icons
+    
     # Read the icon list from the yaml file located at DeepQt/icons/theme_list.yaml
     yaml_path = Path(__file__).parent.parent / "icons" / "theme_list.yaml"
     qrc_theme_icons = Qc.QDir(":/icon-themes/")

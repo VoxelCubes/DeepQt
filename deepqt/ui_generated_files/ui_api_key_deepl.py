@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'api_config_deepl.ui'
+## Form generated from reading UI file 'api_key_deepl.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.6.3
 ##

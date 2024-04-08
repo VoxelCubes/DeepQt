@@ -14,6 +14,8 @@ SecondsF = NewType("Seconds", float)
 
 APIKey = NewType("APIKey", str)
 
+HTML = NewType("HTML", str)
+
 
 class TranslationMode(StrEnum):
     Text = "Text"

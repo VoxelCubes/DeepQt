@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'api_config_deepl.ui'
+## Form generated from reading UI file 'api_key_input.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.6.3
 ##
@@ -15,15 +15,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
-    QDialogButtonBox, QFormLayout, QLabel, QLineEdit,
-    QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
+    QFormLayout, QLabel, QLineEdit, QSizePolicy,
+    QVBoxLayout, QWidget)
 
 class Ui_Dialog_API(object):
     def setupUi(self, Dialog_API):
         if not Dialog_API.objectName():
             Dialog_API.setObjectName(u"Dialog_API")
-        Dialog_API.resize(450, 200)
+        Dialog_API.resize(450, 141)
         self.verticalLayout = QVBoxLayout(Dialog_API)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.formLayout = QFormLayout()
@@ -38,18 +38,6 @@ class Ui_Dialog_API(object):
         self.lineEdit_api_key.setMaxLength(100)
 
         self.formLayout.setWidget(0, QFormLayout.FieldRole, self.lineEdit_api_key)
-
-        self.label_2 = QLabel(Dialog_API)
-        self.label_2.setObjectName(u"label_2")
-
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
-
-        self.comboBox_api_type = QComboBox(Dialog_API)
-        self.comboBox_api_type.addItem("")
-        self.comboBox_api_type.addItem("")
-        self.comboBox_api_type.setObjectName(u"comboBox_api_type")
-
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.comboBox_api_type)
 
 
         self.verticalLayout.addLayout(self.formLayout)
@@ -70,11 +58,7 @@ class Ui_Dialog_API(object):
     # setupUi
 
     def retranslateUi(self, Dialog_API):
-        Dialog_API.setWindowTitle(QCoreApplication.translate("Dialog_API", u"Account Settings", None))
+        Dialog_API.setWindowTitle(QCoreApplication.translate("Dialog_API", u"API Key", None))
         self.label.setText(QCoreApplication.translate("Dialog_API", u"API Key:", None))
-        self.label_2.setText(QCoreApplication.translate("Dialog_API", u"Account Type:", None))
-        self.comboBox_api_type.setItemText(0, QCoreApplication.translate("Dialog_API", u"DeepL API FREE", None))
-        self.comboBox_api_type.setItemText(1, QCoreApplication.translate("Dialog_API", u"DeepL API PRO", None))
-
     # retranslateUi
 

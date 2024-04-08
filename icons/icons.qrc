@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="/">
     <file>logo.svg</file>
+    <file>custom_icons/static/heart.svg</file>
+    <file>custom_icons/static/deepl.png</file>
+    <file>custom_icons/static/generic-backend.svg</file>
   </qresource>
 </RCC>

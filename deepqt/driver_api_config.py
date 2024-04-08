@@ -1,8 +1,9 @@
+# DEPRECATED
 import re
 import PySide6.QtWidgets as Qw
 
 import deepqt.config as cfg
-from deepqt.ui_generated_files.ui_api_config import Ui_Dialog_API
+from deepqt.ui_generated_files.ui_api_key_deepl import Ui_Dialog_API
 from deepqt.gui_utils import show_info
 
 
@@ -13,6 +14,7 @@ class ConfigureAccount(Qw.QDialog, Ui_Dialog_API):
     """
 
     def __init__(self, parent, config: cfg.Config) -> None:
+        raise DeprecationWarning("This class is deprecated.")
         # Don't pass the parent due to a bug in PySide6.
         Qw.QDialog.__init__(self)
         self.setupUi(self)

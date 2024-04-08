@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>116</height>
+    <width>405</width>
+    <height>66</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -143,17 +143,6 @@
       </layout>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pushButton_api_config">
-     <property name="text">
-      <string>API Settings</string>
-     </property>
-     <property name="icon">
-      <iconset theme="configure">
-       <normaloff>.</normaloff>.</iconset>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

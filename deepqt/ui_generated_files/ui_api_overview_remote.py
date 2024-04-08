@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'api_overview_remote.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.2
+## Created by: Qt User Interface Compiler version 6.6.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -23,7 +23,7 @@ class Ui_api_overview_deepl(object):
     def setupUi(self, api_overview_deepl):
         if not api_overview_deepl.objectName():
             api_overview_deepl.setObjectName(u"api_overview_deepl")
-        api_overview_deepl.resize(400, 116)
+        api_overview_deepl.resize(405, 66)
         self.verticalLayout = QVBoxLayout(api_overview_deepl)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -110,19 +110,6 @@ class Ui_api_overview_deepl(object):
 
         self.verticalLayout.addLayout(self.formLayout_2)
 
-        self.pushButton_api_config = QPushButton(api_overview_deepl)
-        self.pushButton_api_config.setObjectName(u"pushButton_api_config")
-        icon1 = QIcon()
-        iconThemeName = u"configure"
-        if QIcon.hasThemeIcon(iconThemeName):
-            icon1 = QIcon.fromTheme(iconThemeName)
-        else:
-            icon1.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-
-        self.pushButton_api_config.setIcon(icon1)
-
-        self.verticalLayout.addWidget(self.pushButton_api_config)
-
 
         self.retranslateUi(api_overview_deepl)
 
@@ -143,6 +130,5 @@ class Ui_api_overview_deepl(object):
         self.label_api_usage_error_icon.setText(QCoreApplication.translate("api_overview_deepl", u"<error_icon>", None))
         self.label_api_usage_warn_icon.setText(QCoreApplication.translate("api_overview_deepl", u"<warn_icon>", None))
         self.label_api_usage.setText(QCoreApplication.translate("api_overview_deepl", u"<usage_placeholder>", None))
-        self.pushButton_api_config.setText(QCoreApplication.translate("api_overview_deepl", u"API Settings", None))
     # retranslateUi
 

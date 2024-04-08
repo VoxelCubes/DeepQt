@@ -10,10 +10,11 @@ import deepqt.constants as ct
 import deepqt.utils as ut
 
 
+# Note: dataclass attributes MUST have a type annotation, otherwise they won't be loaded from the subclass.
 @define
 class MockConfig(bi.BackendConfig):
-    name = "Mock"
-    description = (
+    name: str = "Mock"
+    description: str = (
         'This is a "fake" backend for **testing purposes**.\n '
         "It simulates a reliable translation service, "
         "meaning one that is expected to always return a translation, without much (if any) supervision.\n"

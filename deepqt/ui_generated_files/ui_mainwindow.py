@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.2
+## Created by: Qt User Interface Compiler version 6.6.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -19,8 +19,8 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QFram
     QGridLayout, QGroupBox, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QMainWindow, QPlainTextEdit,
     QProgressBar, QPushButton, QScrollArea, QSizePolicy,
-    QSpacerItem, QSpinBox, QStackedWidget, QStatusBar,
-    QTableWidgetItem, QVBoxLayout, QWidget)
+    QSpacerItem, QSpinBox, QSplitter, QStackedWidget,
+    QStatusBar, QTableWidgetItem, QVBoxLayout, QWidget)
 
 from deepqt.CustomQ.CComboBox import CComboBox
 from deepqt.CustomQ.CDropFrame import CDropFrame
@@ -32,22 +32,27 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1280, 742)
+        MainWindow.resize(1280, 772)
         font = QFont()
         font.setPointSize(10)
         MainWindow.setFont(font)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.gridLayout = QGridLayout(self.centralwidget)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.gridLayout.setHorizontalSpacing(12)
-        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout_8 = QVBoxLayout(self.centralwidget)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.verticalLayout_8.setContentsMargins(0, 0, 0, 6)
+        self.splitter = QSplitter(self.centralwidget)
+        self.splitter.setObjectName(u"splitter")
+        self.splitter.setOrientation(Qt.Horizontal)
+        self.layoutWidget = QWidget(self.splitter)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setSpacing(12)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(-1, 0, -1, -1)
+        self.verticalLayout.setContentsMargins(6, 6, 6, 0)
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.pushButton_translate_files = QPushButton(self.centralwidget)
+        self.pushButton_translate_files = QPushButton(self.layoutWidget)
         self.pushButton_translate_files.setObjectName(u"pushButton_translate_files")
         icon = QIcon()
         iconThemeName = u"document-multiple"
@@ -63,7 +68,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.pushButton_translate_files)
 
-        self.pushButton_translate_text = QPushButton(self.centralwidget)
+        self.pushButton_translate_text = QPushButton(self.layoutWidget)
         self.pushButton_translate_text.setObjectName(u"pushButton_translate_text")
         icon1 = QIcon()
         iconThemeName = u"view-list-text"
@@ -83,7 +88,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer_4)
 
-        self.pushButton_menu = QPushButton(self.centralwidget)
+        self.pushButton_menu = QPushButton(self.layoutWidget)
         self.pushButton_menu.setObjectName(u"pushButton_menu")
         icon2 = QIcon()
         iconThemeName = u"application-menu"
@@ -100,10 +105,11 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
-        self.groupBox_api = QGroupBox(self.centralwidget)
+        self.groupBox_api = QGroupBox(self.layoutWidget)
         self.groupBox_api.setObjectName(u"groupBox_api")
         self.groupBox_api.setFlat(True)
         self.verticalLayout_3 = QVBoxLayout(self.groupBox_api)
+        self.verticalLayout_3.setSpacing(12)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -136,31 +142,18 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
 
-        self.pushButton_backend_config_visibility = QPushButton(self.groupBox_api)
-        self.pushButton_backend_config_visibility.setObjectName(u"pushButton_backend_config_visibility")
-        icon4 = QIcon()
-        iconThemeName = u"arrow-right"
-        if QIcon.hasThemeIcon(iconThemeName):
-            icon4 = QIcon.fromTheme(iconThemeName)
-        else:
-            icon4.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-
-        self.pushButton_backend_config_visibility.setIcon(icon4)
-        self.pushButton_backend_config_visibility.setCheckable(True)
-        self.pushButton_backend_config_visibility.setFlat(True)
-
-        self.verticalLayout_3.addWidget(self.pushButton_backend_config_visibility)
-
         self.scrollArea = QScrollArea(self.groupBox_api)
         self.scrollArea.setObjectName(u"scrollArea")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
+        self.scrollArea.setSizePolicy(sizePolicy)
         self.scrollArea.setFrameShape(QFrame.NoFrame)
-        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea_backend_config = BackendSettings()
         self.scrollArea_backend_config.setObjectName(u"scrollArea_backend_config")
-        self.scrollArea_backend_config.setGeometry(QRect(0, 0, 436, 83))
-        self.verticalLayout_8 = QVBoxLayout(self.scrollArea_backend_config)
-        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.scrollArea_backend_config.setGeometry(QRect(0, 0, 390, 93))
         self.scrollArea.setWidget(self.scrollArea_backend_config)
 
         self.verticalLayout_3.addWidget(self.scrollArea)
@@ -168,13 +161,13 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.groupBox_api)
 
-        self.groupBox_language = QGroupBox(self.centralwidget)
+        self.groupBox_language = QGroupBox(self.layoutWidget)
         self.groupBox_language.setObjectName(u"groupBox_language")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.groupBox_language.sizePolicy().hasHeightForWidth())
-        self.groupBox_language.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.groupBox_language.sizePolicy().hasHeightForWidth())
+        self.groupBox_language.setSizePolicy(sizePolicy1)
         self.groupBox_language.setFlat(True)
         self.horizontalLayout_7 = QHBoxLayout(self.groupBox_language)
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
@@ -187,11 +180,11 @@ class Ui_MainWindow(object):
 
         self.comboBox_lang_from = CComboBox(self.groupBox_language)
         self.comboBox_lang_from.setObjectName(u"comboBox_lang_from")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.comboBox_lang_from.sizePolicy().hasHeightForWidth())
-        self.comboBox_lang_from.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.comboBox_lang_from.sizePolicy().hasHeightForWidth())
+        self.comboBox_lang_from.setSizePolicy(sizePolicy2)
 
         self.horizontalLayout_5.addWidget(self.comboBox_lang_from)
 
@@ -207,8 +200,8 @@ class Ui_MainWindow(object):
 
         self.comboBox_lang_to = CComboBox(self.groupBox_language)
         self.comboBox_lang_to.setObjectName(u"comboBox_lang_to")
-        sizePolicy1.setHeightForWidth(self.comboBox_lang_to.sizePolicy().hasHeightForWidth())
-        self.comboBox_lang_to.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.comboBox_lang_to.sizePolicy().hasHeightForWidth())
+        self.comboBox_lang_to.setSizePolicy(sizePolicy2)
 
         self.horizontalLayout_6.addWidget(self.comboBox_lang_to)
 
@@ -218,7 +211,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.groupBox_language)
 
-        self.groupBox_files = QGroupBox(self.centralwidget)
+        self.groupBox_files = QGroupBox(self.layoutWidget)
         self.groupBox_files.setObjectName(u"groupBox_files")
         self.groupBox_files.setFlat(True)
         self.verticalLayout_4 = QVBoxLayout(self.groupBox_files)
@@ -255,14 +248,14 @@ class Ui_MainWindow(object):
 
         self.pushButton_glossary_file_browse = QPushButton(self.groupBox_files)
         self.pushButton_glossary_file_browse.setObjectName(u"pushButton_glossary_file_browse")
-        icon5 = QIcon()
+        icon4 = QIcon()
         iconThemeName = u"document-open"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon5 = QIcon.fromTheme(iconThemeName)
+            icon4 = QIcon.fromTheme(iconThemeName)
         else:
-            icon5.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon4.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_glossary_file_browse.setIcon(icon5)
+        self.pushButton_glossary_file_browse.setIcon(icon4)
         self.pushButton_glossary_file_browse.setFlat(True)
 
         self.horizontalLayout.addWidget(self.pushButton_glossary_file_browse)
@@ -301,14 +294,14 @@ class Ui_MainWindow(object):
 
         self.pushButton_out_dir_browse = QPushButton(self.groupBox_files)
         self.pushButton_out_dir_browse.setObjectName(u"pushButton_out_dir_browse")
-        icon6 = QIcon()
+        icon5 = QIcon()
         iconThemeName = u"document-open-folder"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon6 = QIcon.fromTheme(iconThemeName)
+            icon5 = QIcon.fromTheme(iconThemeName)
         else:
-            icon6.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon5.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_out_dir_browse.setIcon(icon6)
+        self.pushButton_out_dir_browse.setIcon(icon5)
         self.pushButton_out_dir_browse.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.pushButton_out_dir_browse)
@@ -319,19 +312,19 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.groupBox_files)
 
-        self.verticalSpacer = QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer = QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.MinimumExpanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
         self.horizontalLayout_15 = QHBoxLayout()
         self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
-        self.checkBox_auto_start = QCheckBox(self.centralwidget)
+        self.checkBox_auto_start = QCheckBox(self.layoutWidget)
         self.checkBox_auto_start.setObjectName(u"checkBox_auto_start")
         self.checkBox_auto_start.setChecked(True)
 
         self.horizontalLayout_15.addWidget(self.checkBox_auto_start)
 
-        self.spinBox_auto_start = QSpinBox(self.centralwidget)
+        self.spinBox_auto_start = QSpinBox(self.layoutWidget)
         self.spinBox_auto_start.setObjectName(u"spinBox_auto_start")
         self.spinBox_auto_start.setMinimum(1)
         self.spinBox_auto_start.setMaximum(10000)
@@ -343,44 +336,42 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_9 = QHBoxLayout()
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
-        self.pushButton_start = QPushButton(self.centralwidget)
+        self.pushButton_start = QPushButton(self.layoutWidget)
         self.pushButton_start.setObjectName(u"pushButton_start")
         font1 = QFont()
         font1.setPointSize(10)
         font1.setBold(True)
         self.pushButton_start.setFont(font1)
-        icon7 = QIcon()
+        icon6 = QIcon()
         iconThemeName = u"media-playback-start"
+        if QIcon.hasThemeIcon(iconThemeName):
+            icon6 = QIcon.fromTheme(iconThemeName)
+        else:
+            icon6.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+
+        self.pushButton_start.setIcon(icon6)
+
+        self.horizontalLayout_9.addWidget(self.pushButton_start)
+
+        self.pushButton_abort = QPushButton(self.layoutWidget)
+        self.pushButton_abort.setObjectName(u"pushButton_abort")
+        self.pushButton_abort.setFont(font1)
+        icon7 = QIcon()
+        iconThemeName = u"process-stop"
         if QIcon.hasThemeIcon(iconThemeName):
             icon7 = QIcon.fromTheme(iconThemeName)
         else:
             icon7.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_start.setIcon(icon7)
-
-        self.horizontalLayout_9.addWidget(self.pushButton_start)
-
-        self.pushButton_abort = QPushButton(self.centralwidget)
-        self.pushButton_abort.setObjectName(u"pushButton_abort")
-        self.pushButton_abort.setFont(font1)
-        icon8 = QIcon()
-        iconThemeName = u"process-stop"
-        if QIcon.hasThemeIcon(iconThemeName):
-            icon8 = QIcon.fromTheme(iconThemeName)
-        else:
-            icon8.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-
-        self.pushButton_abort.setIcon(icon8)
+        self.pushButton_abort.setIcon(icon7)
 
         self.horizontalLayout_9.addWidget(self.pushButton_abort)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_9)
 
-
-        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
-
-        self.stackedWidget = QStackedWidget(self.centralwidget)
+        self.splitter.addWidget(self.layoutWidget)
+        self.stackedWidget = QStackedWidget(self.splitter)
         self.stackedWidget.setObjectName(u"stackedWidget")
         self.page_files = QWidget()
         self.page_files.setObjectName(u"page_files")
@@ -480,8 +471,8 @@ class Ui_MainWindow(object):
 
         self.comboBox_lang_from_interactive = CComboBox(self.page_interactive_reliable)
         self.comboBox_lang_from_interactive.setObjectName(u"comboBox_lang_from_interactive")
-        sizePolicy1.setHeightForWidth(self.comboBox_lang_from_interactive.sizePolicy().hasHeightForWidth())
-        self.comboBox_lang_from_interactive.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.comboBox_lang_from_interactive.sizePolicy().hasHeightForWidth())
+        self.comboBox_lang_from_interactive.setSizePolicy(sizePolicy2)
         self.comboBox_lang_from_interactive.setFrame(False)
 
         self.horizontalLayout_13.addWidget(self.comboBox_lang_from_interactive)
@@ -508,8 +499,8 @@ class Ui_MainWindow(object):
 
         self.comboBox_lang_to_interactive = CComboBox(self.page_interactive_reliable)
         self.comboBox_lang_to_interactive.setObjectName(u"comboBox_lang_to_interactive")
-        sizePolicy1.setHeightForWidth(self.comboBox_lang_to_interactive.sizePolicy().hasHeightForWidth())
-        self.comboBox_lang_to_interactive.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.comboBox_lang_to_interactive.sizePolicy().hasHeightForWidth())
+        self.comboBox_lang_to_interactive.setSizePolicy(sizePolicy2)
         self.comboBox_lang_to_interactive.setFrame(False)
 
         self.horizontalLayout_14.addWidget(self.comboBox_lang_to_interactive)
@@ -556,25 +547,34 @@ class Ui_MainWindow(object):
         self.page_supervision = QWidget()
         self.page_supervision.setObjectName(u"page_supervision")
         self.stackedWidget.addWidget(self.page_supervision)
+        self.splitter.addWidget(self.stackedWidget)
 
-        self.gridLayout.addWidget(self.stackedWidget, 0, 1, 1, 1)
+        self.verticalLayout_8.addWidget(self.splitter)
 
-        self.label_progress = QLabel(self.centralwidget)
+        self.frame_progress_drawer = QFrame(self.centralwidget)
+        self.frame_progress_drawer.setObjectName(u"frame_progress_drawer")
+        self.horizontalLayout_12 = QHBoxLayout(self.frame_progress_drawer)
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.label_progress = QLabel(self.frame_progress_drawer)
         self.label_progress.setObjectName(u"label_progress")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.label_progress.sizePolicy().hasHeightForWidth())
-        self.label_progress.setSizePolicy(sizePolicy2)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.label_progress.sizePolicy().hasHeightForWidth())
+        self.label_progress.setSizePolicy(sizePolicy3)
 
-        self.gridLayout.addWidget(self.label_progress, 1, 0, 1, 1)
+        self.horizontalLayout_12.addWidget(self.label_progress)
 
-        self.progressBar = QProgressBar(self.centralwidget)
+        self.progressBar = QProgressBar(self.frame_progress_drawer)
         self.progressBar.setObjectName(u"progressBar")
         self.progressBar.setValue(0)
 
-        self.gridLayout.addWidget(self.progressBar, 1, 1, 1, 1)
+        self.horizontalLayout_12.addWidget(self.progressBar)
 
+
+        self.verticalLayout_8.addWidget(self.frame_progress_drawer)
+
+        self.verticalLayout_8.setStretch(0, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -598,7 +598,6 @@ class Ui_MainWindow(object):
         self.label_backend_logo.setText(QCoreApplication.translate("MainWindow", u"<logo>", None))
         self.label_backend_name.setText(QCoreApplication.translate("MainWindow", u"<current api>", None))
         self.pushButton_backend_change.setText(QCoreApplication.translate("MainWindow", u"Change", None))
-        self.pushButton_backend_config_visibility.setText(QCoreApplication.translate("MainWindow", u"API Settings", None))
         self.groupBox_language.setTitle(QCoreApplication.translate("MainWindow", u"Language", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"From:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"To:", None))

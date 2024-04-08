@@ -14,11 +14,21 @@ DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the A
 @define
 class DeepLConfig(bi.BackendConfig):
     name: str = "DeepL"
-    api_key: ct.APIKey = "sdkfjhasdflasjfhjsalhfla"
+    icon: str = ":/custom_icons/static/deepl.png"
+    api_key: ct.APIKey = ct.APIKey("sdkfjhasdflasjfhjsalhfla")
     tl_max_chunks: int = 20
     tl_min_chunk_size: int = 5_000
     tl_preserve_formatting: bool = True
     wait_time: ct.Milliseconds = 1000
+    key_help_text: ct.HTML = """<html> <head/> <body>
+        <p> To use this specific translation service you need a DeepL API key.
+            You can get one by signing up for an account at 
+            <a href="https://www.deepl.com/pro-api">deepl.com</a>.
+        </p>
+        <p> For more information on the API, see the 
+            <a href="https://github.com/VoxelCubes/DeepQt/blob/master/docs/api_help.md">
+            online documentation</a>.
+        </p> </body> </html>"""
 
     @classmethod
     def from_dict(cls, data: dict) -> tuple["DeepLConfig", list[Exception]]:
@@ -39,8 +49,12 @@ class DeepLConfig(bi.BackendConfig):
         return {
             "api_key": bi.AttributeMetadata(
                 name="API key",
-                type=str,
-                description="DeepL API key.",
+                type=ct.APIKey,
+            ),
+            "key_help_text": bi.AttributeMetadata(
+                type=ct.HTML,
+                hidden=True,
+                no_save=True,
             ),
             "tl_max_chunks": bi.AttributeMetadata(
                 name="Max chunks",

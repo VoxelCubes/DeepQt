@@ -16,6 +16,10 @@ from deepqt.driver_mainwindow import MainWindow
 # TODO Implement the damn thing
 # TODO Testing
 
+import deepqt.rc_generated_files.rc_themes
+import deepqt.rc_generated_files.rc_theme_icons
+import deepqt.rc_generated_files.rc_icons
+
 
 def main() -> None:
     # Parse command line arguments.
@@ -98,6 +102,11 @@ def main() -> None:
     # Dump the command line arguments if in debug mode.
     if args.debug:
         logger.debug(f"Launch arguments: {args}")
+        
+    # Assert the compiled resource files were imported.
+    assert deepqt.rc_generated_files.rc_themes
+    assert deepqt.rc_generated_files.rc_theme_icons
+    assert deepqt.rc_generated_files.rc_icons
 
     # Start Qt runtime.
     app = Qw.QApplication(sys.argv)
@@ -108,7 +117,7 @@ def main() -> None:
     if platform.system() == "Windows" or ut.running_in_flatpak():
         Qg.QIcon.setThemeName("breeze")
         Qg.QIcon.setThemeSearchPaths([":/icons", ":/icon-themes"])
-
+    
     command = Command(args.command)
     inputs = None
     if command == Command.FILES:

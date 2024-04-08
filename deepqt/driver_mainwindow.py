@@ -217,7 +217,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             )
         elif errors:
             gu.show_info(
-                self, "Config Warnings", f"Minor issues were found and corrected in the config file.\n\n{errors_str}"
+                self,
+                "Config Warnings",
+                f"Minor issues were found and corrected in the config file.\n\n{errors_str}",
             )
 
         return config
@@ -397,9 +399,19 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         backend_config = self.config.backend_configs[backend]
 
         self.label_backend_name.setText(backend_config.name)
-        self.label_backend_logo.setPixmap(Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24)))
+        icon_path = backend_config.icon
+        if icon_path.startswith(":"):
+            self.label_backend_logo.setPixmap(Qg.QIcon(backend_config.icon).pixmap(Qc.QSize(24, 24)))
+
+        else:  # Theme icon
+            self.label_backend_logo.setPixmap(Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24)))
 
         self.scrollArea_backend_config.load_backend(backend_config)
+
+        # Attention: this is black magic that makes the scroll area resize to the size of the widget inside it.
+        # For whatever stupid reason it won't do that by itself when loading the children dynamically.
+        self.scrollArea.sizeHint = lambda: self.scrollArea_backend_config.sizeHint()
+        self.scrollArea.updateGeometry()
 
     # ======================================== Dialogs ========================================
 
@@ -773,6 +785,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         button_log = Qw.QPushButton("Open Log")
         button_log.clicked.connect(self.open_log_viewer)
+        button_log.setIcon(Qg.QIcon.fromTheme("text-x-changelog"))
         button_log.setFlat(True)
         self.statusbar.addPermanentWidget(button_log)
 

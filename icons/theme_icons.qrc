@@ -1,7 +1,6 @@
 <RCC>
   <qresource prefix="icon-themes">
     <file>breeze/index.theme</file>
-    <file>breeze/actions/16/configure.svg</file>
     <file>breeze/actions/16/dialog-cancel.svg</file>
     <file>breeze/actions/16/dialog-ok-apply.svg</file>
     <file>breeze/actions/16/document-open.svg</file>
@@ -22,6 +21,7 @@
     <file>breeze/actions/16/view-refresh.svg</file>
     <file>breeze/actions/16/view-list-text.svg</file>
     <file>breeze/actions/22/exchange-positions.svg</file>
+    <file>breeze/mimetypes/16/text-x-changelog.svg</file>
     <file>breeze/mimetypes/32/application-epub+zip.svg</file>
     <file>breeze/mimetypes/32/text-x-generic.svg</file>
     <file>breeze/status/16/data-error.svg</file>
@@ -29,9 +29,7 @@
     <file>breeze/status/16/state-error.svg</file>
     <file>breeze/status/16/state-ok.svg</file>
     <file>breeze/status/64/dialog-error.svg</file>
-    <file>breeze/places/24/network-server.svg</file>
     <file>breeze-dark/index.theme</file>
-    <file>breeze-dark/actions/16/configure.svg</file>
     <file>breeze-dark/actions/16/dialog-cancel.svg</file>
     <file>breeze-dark/actions/16/dialog-ok-apply.svg</file>
     <file>breeze-dark/actions/16/document-open.svg</file>
@@ -52,6 +50,7 @@
     <file>breeze-dark/actions/16/view-refresh.svg</file>
     <file>breeze-dark/actions/16/view-list-text.svg</file>
     <file>breeze-dark/actions/22/exchange-positions.svg</file>
+    <file>breeze-dark/mimetypes/16/text-x-changelog.svg</file>
     <file>breeze-dark/mimetypes/32/application-epub+zip.svg</file>
     <file>breeze-dark/mimetypes/32/text-x-generic.svg</file>
     <file>breeze-dark/status/16/data-error.svg</file>
@@ -59,6 +58,5 @@
     <file>breeze-dark/status/16/state-error.svg</file>
     <file>breeze-dark/status/16/state-ok.svg</file>
     <file>breeze-dark/status/64/dialog-error.svg</file>
-    <file>breeze-dark/places/24/network-server.svg</file>
   </qresource>
 </RCC>

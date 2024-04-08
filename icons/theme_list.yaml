@@ -5,7 +5,6 @@ Theme directories:
 Files:
   actions:
     16:
-      - configure
       - dialog-cancel
       - dialog-ok-apply
       - document-open
@@ -28,6 +27,8 @@ Files:
     22:
       - exchange-positions
   mimetypes:
+    16:
+      - text-x-changelog
     32:
       - application-epub+zip
       - text-x-generic
@@ -39,6 +40,3 @@ Files:
       - state-ok
     64:
       - dialog-error
-  places:
-    24:
-      - network-server

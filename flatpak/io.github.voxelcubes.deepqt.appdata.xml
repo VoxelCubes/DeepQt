@@ -3,7 +3,7 @@
   <id>io.github.voxelcubes.deepqt</id>
   <launchable type="desktop-id">io.github.voxelcubes.deepqt.desktop</launchable>
   <name>DeepQt</name>
-  <summary>Harness the power of the DeepL API with this friendly user interface</summary>
+  <summary>Harness the power of the DeepL API</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <url type="homepage">https://github.com/VoxelCubes/DeepQt</url>

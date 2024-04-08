@@ -94,7 +94,7 @@ class BackendStatus:
 class BackendConfig(ABC):
     # How long it took to translate 1000 characters on average. (-1 if unknown)
     name: str = "Unset"
-    icon: str = "network-server"
+    icon: str = ":/custom_icons/static/generic-backend.svg"
     description: str = "Blank description."  # Markdown enabled.
     avg_time_per_mille: float = -1.0
 

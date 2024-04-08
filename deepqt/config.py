@@ -21,6 +21,8 @@ backend_to_config = {
     ct.Backend.DEEPL: db.DeepLConfig,
 }
 
+# TODO no-save fields are being saved.
+
 
 @define
 class Config:
@@ -45,7 +47,7 @@ class Config:
     epub_ignore_empty_html: bool = True
 
     # Backend configs:
-    last_backend: ct.Backend = ct.Backend.DEEPL
+    last_backend: ct.Backend = ct.Backend.MOCK
     backend_configs: dict[ct.Backend, bi.BackendConfig] = Factory(dict)
 
     def __attrs_post_init__(self) -> None:
@@ -106,7 +108,7 @@ class Config:
         converter = config_converter_factory()
 
         # Censor all attributes that have the suffix "_key".
-        def censor_keys_hook(inst) -> None:
+        def censor_keys_hook(inst) -> dict:
             result = {}
             for field in attrs.fields(inst.__class__):
                 value = getattr(inst, field.name)

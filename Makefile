@@ -31,6 +31,10 @@ install:
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(BUILD_CACHE)
+	rm -rf AUR/deepqt/pkg
+	rm -rf AUR/deepqt/src
+	rm -rf AUR/deepqt/*.tar.gz
+	rm -rf AUR/deepqt/*.tar.zst
 
 release:
 	twine upload $(BUILD_DIR)/*

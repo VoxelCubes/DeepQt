@@ -11,6 +11,8 @@ import deepqt.CustomQ.CTooltipLabel as ctl
 import deepqt.constants as ct
 import deepqt.utils as ut
 import deepqt.backends.backend_interface as bi
+import deepqt.backends.deepl_backend as db
+import deepqt.key_button as kb
 
 # TODO make key type, create button to open dialog to input key.
 
@@ -78,6 +80,17 @@ class BackendOptionWidget(Qw.QHBoxLayout):
             self._data_setter = self._data_widget.setText
             self._data_getter = self._data_widget.text
 
+        elif entry_type == ct.APIKey:
+            self._data_widget: kb.APIKeyButton = kb.APIKeyButton()
+            self._data_setter = self._data_widget.set_key
+            self._data_getter = self._data_widget.get_key
+
+        elif entry_type == ct.HTML:
+            raise TypeError("HTML type not supported in this context")
+
+        else:
+            raise TypeError(f"Unsupported entry type {entry_type}")
+
         # elif entry_type == EntryTypes.MimeSuffixIMG:
         #     # Use a spinbox and populate it with the mime suffixes from the config.
         #     # Use "Same as image" as the default value, with a linked data of None.
@@ -99,6 +112,10 @@ class BackendOptionWidget(Qw.QHBoxLayout):
     def get_value(self) -> Any:
         return self._data_getter()
 
+    def set_up_key_input(self, key: ct.APIKey, help_html: ct.HTML = "") -> None:
+        self._data_widget: kb.APIKeyButton
+        self._data_widget.setup(key, help_html)
+
 
 class BackendSettings(Qw.QWidget):
     """
@@ -115,7 +132,10 @@ class BackendSettings(Qw.QWidget):
         Qw.QWidget.__init__(self, parent)
         self.current_backend = None
         self.layout = Qw.QFormLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self._data_widgets = {}
+        size_policy = Qw.QSizePolicy(Qw.QSizePolicy.Preferred, Qw.QSizePolicy.Preferred)
+        self.setSizePolicy(size_policy)
 
     def load_backend(self, backend: bi.BackendConfig) -> None:
         """
@@ -138,15 +158,22 @@ class BackendSettings(Qw.QWidget):
             self.layout.removeWidget(child)
             child.deleteLater()
 
-        def add_attribute(_attribute: str, _meta: bi.AttributeMetadata) -> BackendOptionWidget:
+        def add_attribute(
+            _attribute: str, _meta: bi.AttributeMetadata, _backend: bi.BackendConfig
+        ) -> BackendOptionWidget:
             widget = BackendOptionWidget(_attribute, _meta.type, _meta.description)
+            # Set up key input if the attribute is an API key.
+            if _meta.type == ct.APIKey:
+                # Only certain APIs have API keys.
+                _backend: db.DeepLConfig
+                widget.set_up_key_input(_backend.api_key, _backend.key_help_text)
             self.layout.addRow(_meta.name, widget)
             return widget
 
         for attribute, meta in attributes:
             if meta.hidden:
                 continue
-            self._data_widgets[attribute] = add_attribute(attribute, meta)
+            self._data_widgets[attribute] = add_attribute(attribute, meta, backend)
 
     def _load_backend_values(self, backend: bi.BackendConfig) -> None:
         """
