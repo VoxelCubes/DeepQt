@@ -27,6 +27,7 @@
     <file>breeze/status/16/data-error.svg</file>
     <file>breeze/status/16/data-warning.svg</file>
     <file>breeze/status/16/state-error.svg</file>
+    <file>breeze/status/16/state-offline.svg</file>
     <file>breeze/status/16/state-ok.svg</file>
     <file>breeze/status/64/dialog-error.svg</file>
     <file>breeze-dark/index.theme</file>
@@ -56,6 +57,7 @@
     <file>breeze-dark/status/16/data-error.svg</file>
     <file>breeze-dark/status/16/data-warning.svg</file>
     <file>breeze-dark/status/16/state-error.svg</file>
+    <file>breeze-dark/status/16/state-offline.svg</file>
     <file>breeze-dark/status/16/state-ok.svg</file>
     <file>breeze-dark/status/64/dialog-error.svg</file>
   </qresource>

@@ -24,7 +24,8 @@ import deepqt.utils as ut
 import deepqt.gui_utils as gu
 import deepqt.issue_reporter_driver as ird
 from deepqt import __program__, __version__
-from deepqt.driver_api_config import ConfigureAccount
+
+# from deepqt.driver_api_config import ConfigureAccount
 from deepqt.file_table import Column, make_output_filename
 from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 
@@ -114,11 +115,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Make the start and abort buttons 50% taller.
         self.pushButton_start.setMinimumHeight(self.pushButton_start.height() * 1.5)
         self.pushButton_abort.setMinimumHeight(self.pushButton_abort.height() * 1.5)
-
-        # self.label_api_status_good_icon.setPixmap(Qg.QIcon.fromTheme("state-ok").pixmap(Qc.QSize(16, 16)))
-        # self.label_api_status_bad_icon.setPixmap(Qg.QIcon.fromTheme("state-error").pixmap(Qc.QSize(16, 16)))
-        # self.label_api_usage_error_icon.setPixmap(Qg.QIcon.fromTheme("data-error").pixmap(Qc.QSize(16, 16)))
-        # self.label_api_usage_warn_icon.setPixmap(Qg.QIcon.fromTheme("data-warning").pixmap(Qc.QSize(16, 16)))
 
         # Allow the table to accept file drops and hide the ID column.
         self.file_table.setAcceptDrops(True)
@@ -405,6 +401,10 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         else:  # Theme icon
             self.label_backend_logo.setPixmap(Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24)))
+
+        return
+
+        # TODO this shit goes into a separate window.
 
         self.scrollArea_backend_config.load_backend(backend_config)
 
@@ -824,12 +824,10 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     """
 
     def hide_progress(self) -> None:
-        self.progressBar.hide()
-        self.label_progress.hide()
+        self.frame_progress_drawer.hide()
 
     def show_progress(self) -> None:
-        self.progressBar.show()
-        self.label_progress.show()
+        self.frame_progress_drawer.show()
 
     def glossary_enabled(self, enabled: bool) -> None:
         self.lineEdit_glossary_file.setEnabled(enabled)

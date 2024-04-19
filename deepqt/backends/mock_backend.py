@@ -54,20 +54,6 @@ class MockConfig(bi.BackendConfig):
         }
 
 
-@define
-class MockStatus(bi.BackendStatus):
-    ready: bool = True
-
-    def _attribute_metadata(self) -> dict[str, bi.AttributeMetadata]:
-        return {
-            "ready": bi.AttributeMetadata(
-                name="Ready",
-                type=bool,
-                description="Whether the backend is ready to translate.",
-            )
-        }
-
-
 class MockBackend(bi.ReliableBackend):
     """
     Backend for debugging.
@@ -129,9 +115,9 @@ class MockBackend(bi.ReliableBackend):
         except Exception as e:
             raise bi.TranslationFailed(f"Error translating file: {e}")
 
-    def status(self) -> MockStatus:
+    def status(self) -> bi.BackendStatus:
         """
         Contains status information specific to the backend.
         E.g. remaining characters, connection good/bad etc.
         """
-        return MockStatus()
+        return bi.BackendStatus()

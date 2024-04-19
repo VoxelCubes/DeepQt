@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ChangeBackend</class>
- <widget class="QDialog" name="ChangeBackend">
+ <class>BackendSelector</class>
+ <widget class="QDialog" name="BackendSelector">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>420</height>
+    <width>649</width>
+    <height>520</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
     <widget class="QListWidget" name="listWidget_backends"/>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
       <number>12</number>
      </property>
@@ -51,6 +51,26 @@
       </widget>
      </item>
      <item>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="BackendSettings" name="backend_settings">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>411</width>
+          <height>382</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item>
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -64,12 +84,20 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>BackendSettings</class>
+   <extends>QWidget</extends>
+   <header>deepqt.backend_settings</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ChangeBackend</receiver>
+   <receiver>BackendSelector</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -85,7 +113,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ChangeBackend</receiver>
+   <receiver>BackendSelector</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

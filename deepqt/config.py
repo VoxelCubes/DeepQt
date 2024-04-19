@@ -7,6 +7,7 @@ import attrs
 import yaml
 from attrs import define, Factory
 from cattrs import Converter
+from cattrs.gen import make_dict_unstructure_fn, override
 from loguru import logger
 
 import deepqt.backends.backend_interface as bi
@@ -20,8 +21,6 @@ backend_to_config = {
     ct.Backend.MOCK: mb.MockConfig,
     ct.Backend.DEEPL: db.DeepLConfig,
 }
-
-# TODO no-save fields are being saved.
 
 
 @define
@@ -68,8 +67,7 @@ class Config:
             path = ut.get_config_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         temp_path = path.with_suffix(".tmp")
-        converter = config_converter_factory()
-        success = self._unsafe_save(temp_path, converter)
+        success = self._unsafe_save(temp_path)
         if success:
             try:
                 shutil.move(temp_path, path)
@@ -84,26 +82,47 @@ class Config:
                 logger.exception(f"Failed to delete {temp_path}")
         return success
 
-    def _unsafe_save(self, path: Path, converter: Converter) -> bool:
+    def _unsafe_save(self, path: Path) -> bool:
         """
         Write the config to a file.
 
         :param path: The path to write the config to.
-        :param converter: The cattrs converter to use.
         :return: True if the config was written successfully, False otherwise.
         """
         logger.debug("Writing config to disk...")
         try:
             with open(path, "w", encoding="utf-8") as file:
-                json.dump(converter.unstructure(self), file, indent=4)
+                json.dump(self.dump(), file, indent=4)
             return True
         except Exception:
             logger.exception(f"Failed to write profile to {path}")
             return False
 
+    def dump(self, converter: Converter = None) -> dict:
+        """
+        Dump the config to a dictionary.
+        """
+        if converter is None:
+            converter = config_converter_factory()
+
+        data = converter.unstructure(self)
+
+        # Check for any backend attributes that have the "no_save" metadata flag set.
+        # We must exclude these from the dump.
+        # Using cattrs's omit doesn't work because as far as it's concerned, all backends
+        # are of type BackendConfig, but not all of the actual subclasses have the same attributes,
+        # which causes an attribute error for whatever reason.
+
+        for backend, backend_config in self.backend_configs.items():
+            no_save_attrs = backend_config.no_save_attributes()
+            for attr_name in no_save_attrs:
+                del data["backend_configs"][backend][attr_name]
+        return data
+
     def safe_dump(self) -> dict:
         """
-        Dump the config to a dictionary, but do not include the backend configs.
+        Dump the config to a dictionary, but censor api keys.
+        This is dumped to the log, which users are encouraged to share when debugging.
         """
         converter = config_converter_factory()
 
@@ -129,6 +148,12 @@ class Config:
         converter.register_unstructure_hook(ct.Backend, lambda x: x.name)
 
         data = converter.unstructure(self)
+
+        # Do the same cleanup as in dump()
+        for backend, backend_config in self.backend_configs.items():
+            no_save_attrs = backend_config.no_save_attributes()
+            for attr_name in no_save_attrs:
+                del data["backend_configs"][backend.name.upper()][attr_name]
         return data
 
     def pretty_log(self) -> None:

@@ -37,6 +37,7 @@ Files:
       - data-error
       - data-warning
       - state-error
+      - state-offline
       - state-ok
     64:
       - dialog-error

@@ -44,20 +44,20 @@ def check_attribute_metadata(some_thing: bi.BackendConfig | bi.BackendStatus):
     # Check the meta type matches the attribute type.
     for name in attr_names & meta_names:
         if meta[name].type != attributes[name]:
-            raise ValueError(f"Type mismatch for attribute {name}: meta {meta[name].type} != actual {attributes[name]}")
+            raise ValueError(
+                f"Type mismatch for attribute {name}: meta {meta[name].type} != actual {attributes[name]}"
+            )
 
 
 def test_mock():
     """
-    Test the MockConfig and MockStatus classes.
+    Test the MockConfig.
     """
     check_attribute_metadata(mb.MockConfig())
-    check_attribute_metadata(mb.MockStatus())
 
 
 def test_deepl():
     """
-    Test the DeepLConfig and DeepLStatus classes.
+    Test the DeepLConfig.
     """
     check_attribute_metadata(db.DeepLConfig())
-    check_attribute_metadata(db.DeepLStatus())

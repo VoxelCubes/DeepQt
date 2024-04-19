@@ -138,12 +138,12 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <property name="spacing">
-            <number>12</number>
+            <number>6</number>
            </property>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
-             <property name="bottomMargin">
-              <number>0</number>
+            <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
+             <property name="spacing">
+              <number>12</number>
              </property>
              <item>
               <widget class="QLabel" name="label_backend_logo">
@@ -159,46 +159,20 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_backend_change">
-               <property name="text">
-                <string>Change</string>
-               </property>
-               <property name="icon">
-                <iconset theme="exchange-positions">
-                 <normaloff>.</normaloff>.</iconset>
-               </property>
-               <property name="flat">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
            <item>
-            <widget class="QScrollArea" name="scrollArea">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <widget class="APIStatusUsage" name="widget_backend_status" native="true"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton">
+             <property name="text">
+              <string>Configure / Switch API</string>
              </property>
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
+             <property name="icon">
+              <iconset theme="configure">
+               <normaloff>.</normaloff>.</iconset>
              </property>
-             <property name="widgetResizable">
-              <bool>true</bool>
-             </property>
-             <widget class="BackendSettings" name="scrollArea_backend_config">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>390</width>
-                <height>93</height>
-               </rect>
-              </property>
-             </widget>
             </widget>
            </item>
           </layout>
@@ -401,6 +375,9 @@ Leave it blank to have them placed next to the original files.</string>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <property name="bottomMargin">
+              <number>6</number>
+             </property>
              <item>
               <widget class="QLineEdit" name="lineEdit_out_dir">
                <property name="placeholderText">
@@ -429,6 +406,16 @@ Leave it blank to have them placed next to the original files.</string>
               </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_2">
+             <property name="text">
+              <string>Advanced Settings</string>
+             </property>
+             <property name="icon">
+              <iconset theme="configure"/>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -879,9 +866,9 @@ Leave it blank to have them placed next to the original files.</string>
    <header>deepqt.CustomQ.CTooltipLabel</header>
   </customwidget>
   <customwidget>
-   <class>BackendSettings</class>
+   <class>APIStatusUsage</class>
    <extends>QWidget</extends>
-   <header>deepqt.backend_settings</header>
+   <header>deepqt.driver_api_status_usage</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

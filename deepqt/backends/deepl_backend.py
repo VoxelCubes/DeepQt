@@ -79,20 +79,6 @@ class DeepLConfig(bi.BackendConfig):
         }
 
 
-@define
-class DeepLStatus(bi.BackendStatus):
-    ready: bool = True
-
-    def _attribute_metadata(self) -> dict[str, bi.AttributeMetadata]:
-        return {
-            "ready": bi.AttributeMetadata(
-                name="Ready",
-                type=bool,
-                description="Whether the backend is ready to translate.",
-            )
-        }
-
-
 class DeepLBackend(bi.ReliableBackend):
     def connect(self) -> None:
         ...
@@ -128,9 +114,9 @@ class DeepLBackend(bi.ReliableBackend):
     def translate_file(self, file_in: Path, file_out: Path) -> None:
         ...
 
-    def status(self) -> dict[str, Any]:
+    def status(self) -> bi.BackendStatus:
         """
         Contains status information specific to the backend.
         E.g. remaining characters, connection good/bad etc.
         """
-        ...
+        return bi.BackendStatus()

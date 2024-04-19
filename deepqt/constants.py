@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum
+from enum import Enum, StrEnum, auto
 from typing import Sequence, NewType
 
 from attrs import frozen

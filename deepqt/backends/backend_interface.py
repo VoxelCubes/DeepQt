@@ -12,6 +12,7 @@ Unreliable backends may return nonsense and need per segment tweaking to work.
 from abc import abstractmethod, ABC
 from pathlib import Path
 from typing import Protocol, final
+from enum import StrEnum, auto, Enum
 
 from attrs import frozen, define
 
@@ -64,30 +65,24 @@ class AttributeMetadata:
     no_save: bool = False
 
 
+class ConnectionStatus(Enum):
+    Connected = auto()
+    Offline = auto()
+    Error = auto()
+
+
 @frozen
 class BackendStatus:
     """
     Status information specific to the backend.
     E.g. remaining characters, connection good/bad etc.
+    A count of None means to hide usage because it's not applicable.
+    A limit of None means unlimited usage.
     """
 
-    @abstractmethod
-    def _attribute_metadata(self) -> dict[str, AttributeMetadata]:
-        """
-        Internal method to define the metadata for each attribute.
-        This one is to be overridden by the implementing class.
-        """
-        ...
-
-    @final
-    def attribute_metadata(self) -> dict[str, AttributeMetadata]:
-        """
-        Returns the metadata for each attribute.
-        """
-        # Validate each attribute in the class is covered.
-        meta = self._attribute_metadata()
-        # Add whatever is missing from this base class.
-        return meta
+    connection: ConnectionStatus = ConnectionStatus.Offline
+    usage_count: int | None = None
+    usage_limit: int | None = None
 
 
 @define
