@@ -63,7 +63,9 @@ def collect_system_info(callers_file: str) -> str:
     buffer.write(f"Python Version: {sys.version}\n")
     buffer.write(f"PySide (Qt) Version: {PySide6.__version__}\n")
     buffer.write(f"Available Qt Themes: {', '.join(Qw.QStyleFactory.keys())}\n")
-    buffer.write(f"Available Color Themes: {', '.join(map(lambda a: a[1], get_available_themes()))}\n")
+    buffer.write(
+        f"Available Color Themes: {', '.join(map(lambda a: a[1], get_available_themes()))}\n"
+    )
     buffer.write(f"System locale: {Qc.QLocale.system().name()}\n")
     buffer.write(f"CPU Cores: {os.cpu_count()}\n")
 
@@ -86,7 +88,9 @@ def get_config_path() -> Path:
         )
     elif platform.system() == "Darwin":
         path = Path(
-            xdg_path if "XDG_CONFIG_HOME" in os.environ else (Path.home() / "Library" / "Application Support"),
+            xdg_path
+            if "XDG_CONFIG_HOME" in os.environ
+            else (Path.home() / "Library" / "Application Support"),
             __program__,
             __program__ + "config.ini",
         )
@@ -307,7 +311,9 @@ def ensure_unique_file_path(file_path: Path) -> Path:
     counter = 1
     output_file_path = file_path
     while output_file_path.exists():
-        output_file_path = file_path.parent / (file_path.stem + "_" + str(counter) + file_path.suffix)
+        output_file_path = file_path.parent / (
+            file_path.stem + "_" + str(counter) + file_path.suffix
+        )
         counter += 1
     return output_file_path
 
@@ -383,7 +389,9 @@ def load_dict_to_attrs_safely(
             except Exception as e:
                 logger.exception(f"Failed to cast attribute {attribute} to the correct type.")
                 errors.append(
-                    ParseException(f"{type(e).__name__}: Failed to cast attribute {attribute} to the correct type: {e}")
+                    ParseException(
+                        f"{type(e).__name__}: Failed to cast attribute {attribute} to the correct type: {e}"
+                    )
                 )
 
     return errors
@@ -464,4 +472,8 @@ def to_display_name(name: str) -> str:
     # https://stackoverflow.com/a/1176023
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1 \2", name)
     s2 = re.sub("([a-z0-9])([A-Z])", r"\1 \2", s1)
-    return " ".join(word.capitalize() for word in s2.split(" ")).replace("Ai ", "AI ").replace("Ocr", "OCR")
+    return (
+        " ".join(word.capitalize() for word in s2.split(" "))
+        .replace("Ai ", "AI ")
+        .replace("Ocr", "OCR")
+    )

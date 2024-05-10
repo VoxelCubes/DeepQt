@@ -79,7 +79,9 @@ def restore(text_: str) -> None:
 
 if __name__ == "__main__":
     # Parsing arguments
-    parser = argparse.ArgumentParser(description="Replaces/restores matching quotes to make them deepl-safe.")
+    parser = argparse.ArgumentParser(
+        description="Replaces/restores matching quotes to make them deepl-safe."
+    )
     parser.add_argument("inputtext", type=str, help="Input text file.")
     parser.add_argument("outputtext", type=str, help="Output text file.")
     parser.add_argument("--restore", action="store_true", help="Restore the text.")

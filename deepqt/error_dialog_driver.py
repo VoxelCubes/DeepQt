@@ -37,7 +37,9 @@ class ErrorDialog(Qw.QDialog, Ui_ErrorDialog):
         self.pushButton_open_issues.clicked.connect(self.open_issues)
         self.pushButton_clipboard.clicked.connect(self.copy_to_clipboard)
 
-        self.label_name_hidden.setText("Note: Name {name} and api keys were hidden".format(name=lp.get_username()))
+        self.label_name_hidden.setText(
+            "Note: Name {name} and api keys were hidden".format(name=lp.get_username())
+        )
         self.load_session_log()
 
     @staticmethod

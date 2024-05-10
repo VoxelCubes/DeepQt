@@ -14,7 +14,9 @@ from lxml import etree
 warnings.filterwarnings("ignore", category=UserWarning, module="bs4")
 
 
-def prepare_html_text(text: str, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html_text: bool) -> str:
+def prepare_html_text(
+    text: str, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html_text: bool
+) -> str:
     """
     Prepares the raw XML text.
     Apply heuristics to shrink the size.
@@ -237,7 +239,9 @@ def get_epub_cover(epub_path: str | Path) -> Path | None:
           </rootfiles>
         </container>
         """
-        rootfile_path = t.xpath("/u:container/u:rootfiles/u:rootfile", namespaces=namespaces)[0].get("full-path")
+        rootfile_path = t.xpath("/u:container/u:rootfiles/u:rootfile", namespaces=namespaces)[
+            0
+        ].get("full-path")
         logger.debug("Path of root file found: " + rootfile_path)
 
         # We load the "root" file, indicated by the "full_path" attribute of "META-INF/container.xml", using lxml.etree.fromString():
@@ -254,7 +258,9 @@ def get_epub_cover(epub_path: str | Path) -> Path | None:
               ...
             </metadata>"""
 
-            cover_id = t.xpath("//opf:metadata/opf:meta[@name='cover']", namespaces=namespaces)[0].get("content")
+            cover_id = t.xpath("//opf:metadata/opf:meta[@name='cover']", namespaces=namespaces)[
+                0
+            ].get("content")
             logger.debug("ID of cover image found: " + cover_id)
             # Next, we use xpath() to find the <item> (in <manifest>) with this id
             # and get the attribute "href":
@@ -265,9 +271,9 @@ def get_epub_cover(epub_path: str | Path) -> Path | None:
                 ... 
             </manifest>
             """
-            cover_href = t.xpath("//opf:manifest/opf:item[@id='" + cover_id + "']", namespaces=namespaces)[0].get(
-                "href"
-            )
+            cover_href = t.xpath(
+                "//opf:manifest/opf:item[@id='" + cover_id + "']", namespaces=namespaces
+            )[0].get("href")
         except IndexError:
             pass
 
@@ -282,9 +288,9 @@ def get_epub_cover(epub_path: str | Path) -> Path | None:
             </manifest>
             """
             try:
-                cover_href = t.xpath("//opf:manifest/opf:item[@properties='cover-image']", namespaces=namespaces)[
-                    0
-                ].get("href")
+                cover_href = t.xpath(
+                    "//opf:manifest/opf:item[@properties='cover-image']", namespaces=namespaces
+                )[0].get("href")
             except IndexError:
                 pass
 
@@ -302,7 +308,9 @@ def get_epub_cover(epub_path: str | Path) -> Path | None:
                   <itemref idref="s04"/>
                 </spine>
                 """
-                cover_page_id = t.xpath("//opf:spine/opf:itemref", namespaces=namespaces)[0].get("idref")
+                cover_page_id = t.xpath("//opf:spine/opf:itemref", namespaces=namespaces)[0].get(
+                    "idref"
+                )
                 # Next, we use xpath() to find the item (in manifest) with this id
                 # and get the attribute "href":
                 cover_page_href = t.xpath(

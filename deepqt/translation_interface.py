@@ -88,7 +88,9 @@ class DeeplWorker(QRunnable):
     total_chars: int
     processed_chars: int
 
-    def __init__(self, translator: deepl.Translator, input_files: dict[str, st.InputFile], config: cfg.Config) -> None:
+    def __init__(
+        self, translator: deepl.Translator, input_files: dict[str, st.InputFile], config: cfg.Config
+    ) -> None:
         """
         Initialise the worker thread.
 
@@ -124,7 +126,9 @@ class DeeplWorker(QRunnable):
         except Abort:
             logger.warning("Deepl Aborted.")
             if self.state == State.ABORTED and self.current_file_id is not None:
-                self.signals.progress.emit(self.current_file_id, "Translation manually aborted.", None, None)
+                self.signals.progress.emit(
+                    self.current_file_id, "Translation manually aborted.", None, None
+                )
             self.signals.result.emit(State.ABORTED)
 
         except Exception:
@@ -332,14 +336,20 @@ class DeeplWorker(QRunnable):
                 if is_html:
                     length_processed = xp.get_char_count(chunk)
                 else:
-                    length_processed = len(chunk) if isinstance(chunk, str) else sum(len(c) for c in chunk)
+                    length_processed = (
+                        len(chunk) if isinstance(chunk, str) else sum(len(c) for c in chunk)
+                    )
 
                 self.processed_chars += length_processed
                 d_time = time.time() - t_start
                 # Calculate how long it took per 1000 chars. Update the average.
                 time_per_mille = d_time / (length_processed / 1000)
-                self.config.avg_time_per_mille = ut.weighted_average(self.config.avg_time_per_mille, time_per_mille)
-                logger.info(f"Translation took {d_time:.2f} seconds, {time_per_mille:.3f} seconds per 1000 chars.")
+                self.config.avg_time_per_mille = ut.weighted_average(
+                    self.config.avg_time_per_mille, time_per_mille
+                )
+                logger.info(
+                    f"Translation took {d_time:.2f} seconds, {time_per_mille:.3f} seconds per 1000 chars."
+                )
                 return translation
 
             except deepl.TooManyRequestsException as e:
@@ -378,7 +388,9 @@ class DeeplWorker(QRunnable):
         """
         logger.info("Mocking translation.")
         if isinstance(chunk, str):
-            logger.debug(f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes, {len(chunk):n} chars.")
+            logger.debug(
+                f"Requesting translation of {len(chunk.encode('utf-8')):n} bytes, {len(chunk):n} chars."
+            )
         else:
             logger.debug(
                 f"Requesting translation of {sum(len(c.encode('utf-8')) for c in chunk):n} bytes, "
@@ -386,7 +398,10 @@ class DeeplWorker(QRunnable):
             )
         time.sleep(1)
         if isinstance(chunk, list):
-            return [deepl.TextResult(text="Translated " + text, detected_source_lang="EN") for text in chunk]
+            return [
+                deepl.TextResult(text="Translated " + text, detected_source_lang="EN")
+                for text in chunk
+            ]
         else:
             translation = deepl.TextResult(text="Translated" + chunk, detected_source_lang="EN")
         # Pretend that we make progress.
@@ -445,7 +460,9 @@ def partition_text(text: str, max_chunks: int, min_chunk_size: int) -> list[str]
 
     # Sanity check.
     if text_length(chunks) != len(text):
-        logger.error(f"Text length mismatch. Expected {len(text)}, got {text_length(final_chunks)}.")
+        logger.error(
+            f"Text length mismatch. Expected {len(text)}, got {text_length(final_chunks)}."
+        )
         raise ValueError("Text length mismatch.")
 
     return final_chunks

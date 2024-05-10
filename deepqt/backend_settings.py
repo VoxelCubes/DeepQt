@@ -1,20 +1,21 @@
-import re
-from typing import Any, Callable, Optional
-from importlib import resources
+from typing import Any, Callable
 
-import PySide6.QtCore as Qc
-import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
 from loguru import logger
 
 import deepqt.CustomQ.CTooltipLabel as ctl
-import deepqt.constants as ct
-import deepqt.utils as ut
 import deepqt.backends.backend_interface as bi
 import deepqt.backends.deepl_backend as db
+import deepqt.constants as ct
 import deepqt.key_button as kb
 
-# TODO make key type, create button to open dialog to input key.
+
+# If you ever find yourself placing this inside a ScrollArea again, remember this:
+
+# Attention: this is black magic that makes the scroll area resize to the size of the widget inside it.
+# For whatever stupid reason it won't do that by itself when loading the children dynamically.
+# self.scrollArea.sizeHint = lambda: self.scrollArea_backend_config.sizeHint()
+# self.scrollArea.updateGeometry()
 
 
 class BackendOptionWidget(Qw.QHBoxLayout):
@@ -152,11 +153,13 @@ class BackendSettings(Qw.QWidget):
         """
         Load the structure of the backend settings as widgets.
         """
-        attributes: list[tuple[str, bi.AttributeMetadata]] = list(backend.attribute_metadata().items())
+        attributes: list[tuple[str, bi.AttributeMetadata]] = list(
+            backend.attribute_metadata().items()
+        )
 
-        for child in self.layout.children():
-            self.layout.removeWidget(child)
-            child.deleteLater()
+        # Clear out the form layout.
+        for i in reversed(range(self.layout.rowCount())):
+            self.layout.removeRow(i)
 
         def add_attribute(
             _attribute: str, _meta: bi.AttributeMetadata, _backend: bi.BackendConfig
@@ -166,7 +169,7 @@ class BackendSettings(Qw.QWidget):
             if _meta.type == ct.APIKey:
                 # Only certain APIs have API keys.
                 _backend: db.DeepLConfig
-                widget.set_up_key_input(_backend.api_key, _backend.key_help_text)
+                widget.set_up_key_input(_backend.api_key)
             self.layout.addRow(_meta.name, widget)
             return widget
 
@@ -180,7 +183,9 @@ class BackendSettings(Qw.QWidget):
         Load the values of the backend settings.
         """
 
-        attributes: list[tuple[str, bi.AttributeMetadata]] = list(backend.attribute_metadata().items())
+        attributes: list[tuple[str, bi.AttributeMetadata]] = list(
+            backend.attribute_metadata().items()
+        )
 
         for attribute, meta in attributes:
             if meta.hidden:

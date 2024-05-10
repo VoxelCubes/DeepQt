@@ -61,7 +61,9 @@ def process_epub_file(epub: st.EpubFile, glossary: st.Glossary) -> None:
         html_file.text_glossary = process_text(html_file.text, glossary)
 
     # Process toc.
-    glossary_snippets = [process_text(snippet, glossary) for snippet in epub.toc_file.get_texts(epub.toc_file.text)]
+    glossary_snippets = [
+        process_text(snippet, glossary) for snippet in epub.toc_file.get_texts(epub.toc_file.text)
+    ]
     epub.toc_file.text_glossary = epub.toc_file.set_texts(epub.toc_file.text, glossary_snippets)
     epub.toc_file.process_level = st.ProcessLevel.GLOSSARY
 
@@ -142,7 +144,9 @@ def parse_term(
         target_dict[prefix + original_term] = replacement_term
 
 
-def parse_cell(cell: Any, prev_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern) -> None:
+def parse_cell(
+    cell: Any, prev_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern
+) -> None:
     """
     Format agnostic parsing of a cell.
     Pyexcel inserts comment text into cells, which we need to remove using the comment pattern.
@@ -220,7 +224,9 @@ def process_lines(
             continue
 
         if glossary.exact_terms:
-            line = glossary.exact_pattern.sub(lambda match: glossary.exact_terms[match.group()], line)
+            line = glossary.exact_pattern.sub(
+                lambda match: glossary.exact_terms[match.group()], line
+            )
 
         if glossary.honorific_terms:
             line = glossary.honorific_pattern.sub(
@@ -232,7 +238,9 @@ def process_lines(
             line = line.replace(instance, glossary.title_terms[instance[:-1]] + instance[-1])
 
         if glossary.no_suffix_terms:
-            line = glossary.no_suffix_pattern.sub(lambda match: glossary.no_suffix_terms[match.group()], line)
+            line = glossary.no_suffix_pattern.sub(
+                lambda match: glossary.no_suffix_terms[match.group()], line
+            )
 
         # Run unoptimized regex to prevent individual regex from interfering with each other.
         if glossary.regex_terms:

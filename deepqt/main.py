@@ -40,10 +40,14 @@ def main() -> None:
         help="Optionally launch the GUI with files or text on startup:",
     )
 
-    parser_files = subparsers.add_parser("files", help="Translate files. Usage: files file1.txt file2.txt [--options]")
+    parser_files = subparsers.add_parser(
+        "files", help="Translate files. Usage: files file1.txt file2.txt [--options]"
+    )
     parser_files.add_argument("file", nargs="+", help="Files to translate")
 
-    parser_text = subparsers.add_parser("text", help="Translate text. Usage: text 'Your text here' [--options]")
+    parser_text = subparsers.add_parser(
+        "text", help="Translate text. Usage: text 'Your text here' [--options]"
+    )
     parser_text.add_argument("text", help="Text to translate")
 
     parser_clipboard = subparsers.add_parser(
@@ -60,10 +64,16 @@ def main() -> None:
             default=None,
             help="The translation API to use",
         )
-        p.add_argument("--translate-now", "-n", action="store_true", help="Translate immediately at startup")
-        p.add_argument("--debug-api", "-D", action="store_true", help="Enable debug messages for the APIs")
+        p.add_argument(
+            "--translate-now", "-n", action="store_true", help="Translate immediately at startup"
+        )
+        p.add_argument(
+            "--debug-api", "-D", action="store_true", help="Enable debug messages for the APIs"
+        )
         p.add_argument("--debug", "-d", action="store_true", help="Enable debug mode")
-        p.add_argument("--version", "-v", action="version", version=f"{__display_name__} {__version__}")
+        p.add_argument(
+            "--version", "-v", action="version", version=f"{__display_name__} {__version__}"
+        )
 
     args = parser.parse_args()
 
@@ -75,7 +85,9 @@ def main() -> None:
     # Set up a preliminary exception handler so that this still shows up in the log.
     # Once the gui is up and running it'll be replaced with a call to the gui's error dialog.
     def exception_handler(exctype, value, traceback) -> None:
-        logger.opt(depth=1, exception=(exctype, value, traceback)).critical("An uncaught exception was raised")
+        logger.opt(depth=1, exception=(exctype, value, traceback)).critical(
+            "An uncaught exception was raised"
+        )
 
     sys.excepthook = exception_handler
 

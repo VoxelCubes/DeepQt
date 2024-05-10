@@ -46,12 +46,14 @@ class Config:
     epub_ignore_empty_html: bool = True
 
     # Backend configs:
-    last_backend: ct.Backend = ct.Backend.MOCK
+    current_backend: ct.Backend = ct.Backend.MOCK
     backend_configs: dict[ct.Backend, bi.BackendConfig] = Factory(dict)
 
     def __attrs_post_init__(self) -> None:
         # Preload the backend configs.
-        self.backend_configs = {backend: conf_class() for backend, conf_class in backend_to_config.items()}
+        self.backend_configs = {
+            backend: conf_class() for backend, conf_class in backend_to_config.items()
+        }
 
     def save(self, path: Path = None) -> bool:
         """
@@ -195,16 +197,24 @@ def load_config(
             if "backend_configs" in json_data:
                 # Attempt to structure the json data into the correct backend config class,
                 # based on the backend name.
-                backend_configs, backend_errors = structure_backend_configs(json_data["backend_configs"])
+                backend_configs, backend_errors = structure_backend_configs(
+                    json_data["backend_configs"]
+                )
                 config.backend_configs.update(backend_configs)
                 errors.extend(backend_errors)
     except OSError as e:
         logger.exception(f"Failed to read config file {conf_path}")
-        errors = [ut.ParseException(f"{type(e).__name__}: Failed to read config file {conf_path}: {e}")]
+        errors = [
+            ut.ParseException(f"{type(e).__name__}: Failed to read config file {conf_path}: {e}")
+        ]
         success = False
     except json.decoder.JSONDecodeError as e:
         logger.exception(f"Configuration file could not be parsed {conf_path}")
-        errors = [ut.ParseException(f"{type(e).__name__}: Configuration file could not be parsed {conf_path}: {e}")]
+        errors = [
+            ut.ParseException(
+                f"{type(e).__name__}: Configuration file could not be parsed {conf_path}: {e}"
+            )
+        ]
         success = False
 
     # If fubar, reset the config just to be sure.
@@ -258,7 +268,9 @@ def structure_backend_configs(
         except Exception as e:
             logger.exception(f"Failed to structure backend config for {backend}")
             errors.append(
-                ut.ParseException(f"{type(e).__name__}: Failed to structure backend config for {backend}: {e}")
+                ut.ParseException(
+                    f"{type(e).__name__}: Failed to structure backend config for {backend}: {e}"
+                )
             )
 
     return backend_data, errors

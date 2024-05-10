@@ -10,7 +10,7 @@ RC_OUTPUT_DIR := deepqt/rc_generated_files
 UI_OUTPUT_DIR := deepqt/ui_generated_files
 RCC_COMPILER := venv/bin/pyside6-rcc
 UIC_COMPILER := venv/bin/pyside6-uic
-BLACK_LINE_LENGTH := 120
+BLACK_LINE_LENGTH := 100
 BLACK_TARGET_DIR := deepqt/
 BLACK_EXCLUDE_PATTERN := "^$(RC_OUTPUT_DIR)/.*|^$(UI_OUTPUT_DIR)/.*"
 

@@ -70,7 +70,9 @@ def show_exception(
         else:
             exception_type, exception_value, exception_traceback = sys.exc_info()
 
-        logger.opt(depth=depth, exception=(exception_type, exception_value, exception_traceback)).critical(msg)
+        logger.opt(
+            depth=depth, exception=(exception_type, exception_value, exception_traceback)
+        ).critical(msg)
 
     box = ErrorDialog(parent, title, msg)
     box.exec()
@@ -101,7 +103,9 @@ def show_info(parent, title: str, msg: str) -> None:
     box.exec()
 
 
-def show_question(parent, title: str, msg: str, buttons=Qw.QMessageBox.Yes | Qw.QMessageBox.Cancel) -> int:
+def show_question(
+    parent, title: str, msg: str, buttons=Qw.QMessageBox.Yes | Qw.QMessageBox.Cancel
+) -> int:
     msg = msg.ljust(MIN_MSG_LENGTH)
     dlg = Qw.QMessageBox(parent)
     dlg.setWindowTitle(title)
@@ -161,7 +165,9 @@ def clamp_8bit(value: int) -> int:
     return max(0, min(value, 255))
 
 
-def apply_color_effect(source: Qg.QColor, effect_base: Qg.QColor, contrast_amount: float) -> Qg.QColor:
+def apply_color_effect(
+    source: Qg.QColor, effect_base: Qg.QColor, contrast_amount: float
+) -> Qg.QColor:
     """
     Apply a color effect to a source color.
 
@@ -172,8 +178,12 @@ def apply_color_effect(source: Qg.QColor, effect_base: Qg.QColor, contrast_amoun
     """
     # Essentially alpha blend, with the effect having the contrast amount as the alpha pasted on top.
     r = clamp_8bit(int(source.red() * (1 - contrast_amount) + effect_base.red() * contrast_amount))
-    g = clamp_8bit(int(source.green() * (1 - contrast_amount) + effect_base.green() * contrast_amount))
-    b = clamp_8bit(int(source.blue() * (1 - contrast_amount) + effect_base.blue() * contrast_amount))
+    g = clamp_8bit(
+        int(source.green() * (1 - contrast_amount) + effect_base.green() * contrast_amount)
+    )
+    b = clamp_8bit(
+        int(source.blue() * (1 - contrast_amount) + effect_base.blue() * contrast_amount)
+    )
     return Qg.QColor(r, g, b)
 
 
@@ -231,7 +241,9 @@ def load_color_palette(theme: str) -> Qg.QPalette:
                     palette.setColor(Qg.QPalette.Normal, qt_color_role, Qg.QColor(r, g, b))
                     palette.setColor(Qg.QPalette.Inactive, qt_color_role, Qg.QColor(r, g, b))
                     # Calculate the disabled color.
-                    disabled_color = apply_color_effect(Qg.QColor(r, g, b), disabled_color, disabled_contrast_amount)
+                    disabled_color = apply_color_effect(
+                        Qg.QColor(r, g, b), disabled_color, disabled_contrast_amount
+                    )
                     palette.setColor(Qg.QPalette.Disabled, qt_color_role, disabled_color)
     else:
         raise ValueError(f"Could not open theme file: {theme}")

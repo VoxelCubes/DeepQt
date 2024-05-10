@@ -49,7 +49,7 @@ class ConfigIssue:
     critical: bool
 
 
-@frozen
+@define
 class AttributeMetadata:
     """
     Metadata for an attribute.
@@ -61,8 +61,12 @@ class AttributeMetadata:
     name: str = ""
     type: type = None
     description: str = ""
-    hidden: bool = False
+    hidden: bool = None  # Defaults to True if no_save is True, otherwise False.
     no_save: bool = False
+
+    def __attrs_post_init__(self):
+        if self.hidden is None:
+            self.hidden = self.no_save
 
 
 class ConnectionStatus(Enum):
@@ -91,6 +95,9 @@ class BackendConfig(ABC):
     name: str = "Unset"
     icon: str = ":/custom_icons/static/generic-backend.svg"
     description: str = "Blank description."  # Markdown enabled.
+    unreliable: bool = False
+    help: ct.HTML = ""
+    paid: bool = False
     avg_time_per_mille: float = -1.0
 
     @classmethod
@@ -119,22 +126,32 @@ class BackendConfig(ABC):
         """
         Returns the metadata for each attribute.
         Hidden metadata won't be configurable by the user.
+        No-save metadata won't be saved to the config file and is automatically hidden.
         """
         # Validate each attribute in the class is covered.
         meta = {
             "name": AttributeMetadata(
                 type=str,
-                hidden=True,
                 no_save=True,
             ),
             "icon": AttributeMetadata(
                 type=str,
-                hidden=True,
                 no_save=True,
             ),
             "description": AttributeMetadata(
                 type=str,
-                hidden=True,
+                no_save=True,
+            ),
+            "unreliable": AttributeMetadata(
+                type=bool,
+                no_save=True,
+            ),
+            "help": AttributeMetadata(
+                type=ct.HTML,
+                no_save=True,
+            ),
+            "paid": AttributeMetadata(
+                type=bool,
                 no_save=True,
             ),
             "avg_time_per_mille": AttributeMetadata(

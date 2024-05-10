@@ -25,7 +25,7 @@ def test_un_structuring():
     assert dump["gui_theme"] == config.gui_theme
     assert dump["lang_from"] == config.lang_from
     assert dump["lang_to"] == config.lang_to
-    assert dump["last_backend"] == config.last_backend
+    assert dump["current_backend"] == config.current_backend
 
     # Check all backend configs.
     for backend, bconf in config.backend_configs.items():

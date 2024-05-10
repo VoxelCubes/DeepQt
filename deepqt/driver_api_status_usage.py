@@ -23,11 +23,21 @@ class APIStatusUsage(Qw.QWidget, Ui_APIStatusUsage):
         Qw.QWidget.__init__(self, parent)
         self.setupUi(self)
 
-        self.label_status_good_icon.setPixmap(Qg.QIcon.fromTheme("state-ok").pixmap(Qc.QSize(16, 16)))
-        self.label_status_bad_icon.setPixmap(Qg.QIcon.fromTheme("state-error").pixmap(Qc.QSize(16, 16)))
-        self.label_status_offline_icon.setPixmap(Qg.QIcon.fromTheme("data-offline").pixmap(Qc.QSize(16, 16)))
-        self.label_usage_error_icon.setPixmap(Qg.QIcon.fromTheme("data-error").pixmap(Qc.QSize(16, 16)))
-        self.label_usage_warn_icon.setPixmap(Qg.QIcon.fromTheme("data-warning").pixmap(Qc.QSize(16, 16)))
+        self.label_status_good_icon.setPixmap(
+            Qg.QIcon.fromTheme("state-ok").pixmap(Qc.QSize(16, 16))
+        )
+        self.label_status_bad_icon.setPixmap(
+            Qg.QIcon.fromTheme("state-error").pixmap(Qc.QSize(16, 16))
+        )
+        self.label_status_offline_icon.setPixmap(
+            Qg.QIcon.fromTheme("data-offline").pixmap(Qc.QSize(16, 16))
+        )
+        self.label_usage_error_icon.setPixmap(
+            Qg.QIcon.fromTheme("data-error").pixmap(Qc.QSize(16, 16))
+        )
+        self.label_usage_warn_icon.setPixmap(
+            Qg.QIcon.fromTheme("data-warning").pixmap(Qc.QSize(16, 16))
+        )
 
         self.show_status(None)
 

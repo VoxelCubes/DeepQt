@@ -23,9 +23,9 @@ import deepqt.constants as ct
 import deepqt.utils as ut
 import deepqt.gui_utils as gu
 import deepqt.issue_reporter_driver as ird
+import deepqt.driver_backend_configuration as dbc
 from deepqt import __program__, __version__
 
-# from deepqt.driver_api_config import ConfigureAccount
 from deepqt.file_table import Column, make_output_filename
 from deepqt.ui_generated_files.ui_mainwindow import Ui_MainWindow
 
@@ -101,7 +101,11 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     @property
     def translation_mode(self) -> ct.TranslationMode:
         # The translation mode is dictated by the button states in the gui.
-        return ct.TranslationMode.File if self.pushButton_translate_files.isChecked() else ct.TranslationMode.Text
+        return (
+            ct.TranslationMode.File
+            if self.pushButton_translate_files.isChecked()
+            else ct.TranslationMode.Text
+        )
 
     def initialize_ui(self) -> None:
         # Set window height to 650px.
@@ -131,8 +135,14 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.lineEdit_out_dir.editingFinished.connect(partial(self.fixed_out_updated, True))
 
         self.pushButton_glossary_file_browse.clicked.connect(self.browse_glossary_file)
-        self.lineEdit_glossary_file.textEdited.connect(partial(self.glossary_file_updated, self, False))
-        self.lineEdit_glossary_file.editingFinished.connect(partial(self.glossary_file_updated, self, True))
+        self.lineEdit_glossary_file.textEdited.connect(
+            partial(self.glossary_file_updated, self, False)
+        )
+        self.lineEdit_glossary_file.editingFinished.connect(
+            partial(self.glossary_file_updated, self, True)
+        )
+
+        self.pushButton_configure_backend.clicked.connect(self.configure_backend)
 
         # self.pushButton_api_config.clicked.connect(self.configure_api)
         # self.pushButton_refresh.clicked.connect(self.load_config_to_ui)
@@ -313,7 +323,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         Browse for a directory to save files to.
         """
-        dir_path = Qw.QFileDialog.getExistingDirectory(self, "Select output directory", self.config.fixed_output_path)
+        dir_path = Qw.QFileDialog.getExistingDirectory(
+            self, "Select output directory", self.config.fixed_output_path
+        )
         if dir_path:
             self.lineEdit_file_out_dir.setText(dir_path)
             self.config.fixed_output_path = dir_path
@@ -351,7 +363,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         Browse for a glossary file.
         Accepts whatever pyexcel can handle.
         """
-        file_path = Qw.QFileDialog.getOpenFileName(self, "Select glossary file", self.config.glossary_path)
+        file_path = Qw.QFileDialog.getOpenFileName(
+            self, "Select glossary file", self.config.glossary_path
+        )
         if file_path:
             self.lineEdit_glossary_file.setText(file_path[0])
             self.config.glossary_path = file_path[0]
@@ -383,54 +397,48 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
     # ======================================== Backends ========================================
 
-    def load_backend(self, backend: ct.Backend | None) -> None:
+    def load_backend(self, backend: ct.Backend | None = None) -> None:
         """
         Load the backend specified as an argument, or fall back to the config's last used one.
 
-        :param backend: The backend to load.
+        :param backend: [Optional] The backend to load.
         """
         if backend is None:
-            backend = self.config.last_backend
+            backend = self.config.current_backend
 
         backend_config = self.config.backend_configs[backend]
 
         self.label_backend_name.setText(backend_config.name)
         icon_path = backend_config.icon
         if icon_path.startswith(":"):
-            self.label_backend_logo.setPixmap(Qg.QIcon(backend_config.icon).pixmap(Qc.QSize(24, 24)))
+            self.label_backend_logo.setPixmap(
+                Qg.QIcon(backend_config.icon).pixmap(Qc.QSize(24, 24))
+            )
 
         else:  # Theme icon
-            self.label_backend_logo.setPixmap(Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24)))
-
-        return
-
-        # TODO this shit goes into a separate window.
-
-        self.scrollArea_backend_config.load_backend(backend_config)
-
-        # Attention: this is black magic that makes the scroll area resize to the size of the widget inside it.
-        # For whatever stupid reason it won't do that by itself when loading the children dynamically.
-        self.scrollArea.sizeHint = lambda: self.scrollArea_backend_config.sizeHint()
-        self.scrollArea.updateGeometry()
+            self.label_backend_logo.setPixmap(
+                Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24))
+            )
 
     # ======================================== Dialogs ========================================
 
-    def configure_api(self) -> None:
+    def configure_backend(self) -> None:
         """
-        Configure the DeepL API.
+        Open the backend chooser/configuration dialog.
         """
-        api_conf_dialog = ConfigureAccount(self, self.config)
-        response = api_conf_dialog.exec()
+        backend_conf_dialog = dbc.BackendConfiguration(
+            self, self.config, self.debug, self.theme_is_dark, self.theme_is_dark_changed
+        )
+        response = backend_conf_dialog.exec()
         if response == Qw.QDialog.Accepted:
             # Adopt changes from the dialog.
-            self.config.api_key = api_conf_dialog.get_key()
-            self.config.is_pro_version = api_conf_dialog.comboBox_api_type.currentIndex() == 1
+            logger.debug("Adopting backend changes.")
+            self.config = backend_conf_dialog.get_modified_config()
             self.config.save()
+            self.load_backend()
             self.load_config_to_ui()
 
-    """
-    Misc helpers
-    """
+    # ======================================= Misc. Helpers =======================================
 
     def open_translator(self, use_mock: bool = True) -> deepl.Translator | None:
         """
@@ -511,7 +519,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         self.glossary = glossary
         terms_found = len(glossary)
-        self.statusbar.showMessage(f"Loaded {terms_found} {ut.f_plural(terms_found, 'term')} from glossary.")
+        self.statusbar.showMessage(
+            f"Loaded {terms_found} {ut.f_plural(terms_found, 'term')} from glossary."
+        )
         logger.info(f"Glossary loaded, {terms_found} {ut.f_plural(terms_found, 'term')} found.")
         # logger.debug(f"Glossary dump: \n{glossary}")
         self.text_params_changed.emit(self.glossary)
@@ -533,7 +543,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Check if the API is ready.
         translator = self.open_translator()
         if translator is None:
-            gu.show_warning(self, "API Error", "Failed to open DeepL translator. Please check account settings.")
+            gu.show_warning(
+                self, "API Error", "Failed to open DeepL translator. Please check account settings."
+            )
         if self.config.tl_mock:
             gu.show_warning(
                 self,
@@ -557,7 +569,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage("Translating...")
 
         # Send the data off to the worker.
-        worker = ai.DeeplWorker(translator=translator, input_files=self.file_table.files, config=self.config)
+        worker = ai.DeeplWorker(
+            translator=translator, input_files=self.file_table.files, config=self.config
+        )
         worker.signals.result.connect(self.translation_worker_result)
         worker.signals.progress.connect(self.translation_worker_progress)
         worker.signals.error.connect(self.translation_worker_error)
@@ -969,7 +983,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
                     raise SystemExit(1)
                 logger.warning("User overrode lock file.")
             else:
-                logger.warning("Found lock file, but it is older than the current uptime. Overwriting.")
+                logger.warning(
+                    "Found lock file, but it is older than the current uptime. Overwriting."
+                )
 
         with lock_file.open("w") as file:
             file.write(str(Qw.QApplication.applicationPid()))
@@ -1056,6 +1072,16 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.config.gui_theme = theme
             self.config.save()
 
+    def changeEvent(self, event) -> None:
+        """
+        Listen for palette change events to notify all widgets.
+        """
+        if event.type() == Qc.QEvent.PaletteChange:
+            background_color = self.palette().color(Qg.QPalette.Window)
+            self.theme_is_dark.set(background_color.lightness() < 128)
+            logger.info(f"Theme is dark: {self.theme_is_dark.get()}")
+            self.theme_is_dark_changed.emit(self.theme_is_dark)
+
     def simulate_crash(self) -> None:
         """
         Simulate a crash by raising an exception.
@@ -1073,7 +1099,9 @@ def nuke_epub_cache() -> None:
         return
 
     if epub_cache_path.name != "epubs":
-        logger.error(f"Epub cache folder is not named 'epubs', instead {epub_cache_path}. Aborting.")
+        logger.error(
+            f"Epub cache folder is not named 'epubs', instead {epub_cache_path}. Aborting."
+        )
         return
 
     try:

@@ -20,7 +20,9 @@ import deepqt.structures as st
 
 def main() -> None:
     # Use argparse to gather the input and output paths.
-    parser = argparse.ArgumentParser(description="Swap left and right terms in a glossary. Export simplified format.")
+    parser = argparse.ArgumentParser(
+        description="Swap left and right terms in a glossary. Export simplified format."
+    )
     parser.add_argument("glossary", type=Path, help="The glossary file to read.")
     parser.add_argument(
         "output",
@@ -86,7 +88,9 @@ def dump_glossary_ods(glossary: st.Glossary, path: Path) -> None:
     pyexcel.save_as(array=sheet, dest_file_name=str(path))
 
 
-def parse_cell(cell: Any, next_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern) -> None:
+def parse_cell(
+    cell: Any, next_cell: Any, glossary: st.Glossary, comment_pattern: re.Pattern
+) -> None:
     """
     Format agnostic parsing of a cell.
     Pyexcel inserts comment text into cells, which we need to remove using the comment pattern.

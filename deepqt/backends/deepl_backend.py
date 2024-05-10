@@ -8,19 +8,26 @@ import deepqt.backends.backend_interface as bi
 import deepqt.constants as ct
 import deepqt.utils as ut
 
-DEEPL_USAGE_UNLIMITED = 1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
+DEEPL_USAGE_UNLIMITED = (
+    1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
+)
 
 
 @define
 class DeepLConfig(bi.BackendConfig):
     name: str = "DeepL"
     icon: str = ":/custom_icons/static/deepl.png"
+    description: str = (
+        "DeepL is a high-quality translation service that uses neural networks to translate text."
+    )
+    unreliable: bool = True
+    paid: bool = True
     api_key: ct.APIKey = ct.APIKey("sdkfjhasdflasjfhjsalhfla")
     tl_max_chunks: int = 20
     tl_min_chunk_size: int = 5_000
     tl_preserve_formatting: bool = True
     wait_time: ct.Milliseconds = 1000
-    key_help_text: ct.HTML = """<html> <head/> <body>
+    help: ct.HTML = """<html> <head/> <body>
         <p> To use this specific translation service you need a DeepL API key.
             You can get one by signing up for an account at 
             <a href="https://www.deepl.com/pro-api">deepl.com</a>.
@@ -50,11 +57,6 @@ class DeepLConfig(bi.BackendConfig):
             "api_key": bi.AttributeMetadata(
                 name="API key",
                 type=ct.APIKey,
-            ),
-            "key_help_text": bi.AttributeMetadata(
-                type=ct.HTML,
-                hidden=True,
-                no_save=True,
             ),
             "tl_max_chunks": bi.AttributeMetadata(
                 name="Max chunks",

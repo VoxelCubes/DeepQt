@@ -165,7 +165,7 @@
             <widget class="APIStatusUsage" name="widget_backend_status" native="true"/>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="pushButton_configure_backend">
              <property name="text">
               <string>Configure / Switch API</string>
              </property>
@@ -413,7 +413,8 @@ Leave it blank to have them placed next to the original files.</string>
               <string>Advanced Settings</string>
              </property>
              <property name="icon">
-              <iconset theme="configure"/>
+              <iconset theme="configure">
+               <normaloff>.</normaloff>.</iconset>
              </property>
             </widget>
            </item>

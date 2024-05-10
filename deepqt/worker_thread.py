@@ -148,7 +148,9 @@ class Worker(QRunnable):
                 # Use traceback.format_exc() to get the traceback as a string.
                 # Using the raw traceback instead and letting the logger format that instead though.
                 exception_type, value, traceback = sys.exc_info()
-                self.signals.error.emit(WorkerError(exception_type, value, traceback, self.args, self.kwargs))
+                self.signals.error.emit(
+                    WorkerError(exception_type, value, traceback, self.args, self.kwargs)
+                )
             else:
                 self.signals.result.emit(result)  # Return the result of the processing.
             finally:

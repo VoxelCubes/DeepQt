@@ -133,8 +133,8 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.widget_backend_status)
 
-        self.pushButton = QPushButton(self.groupBox_api)
-        self.pushButton.setObjectName(u"pushButton")
+        self.pushButton_configure_backend = QPushButton(self.groupBox_api)
+        self.pushButton_configure_backend.setObjectName(u"pushButton_configure_backend")
         icon3 = QIcon()
         iconThemeName = u"configure"
         if QIcon.hasThemeIcon(iconThemeName):
@@ -142,9 +142,9 @@ class Ui_MainWindow(object):
         else:
             icon3.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton.setIcon(icon3)
+        self.pushButton_configure_backend.setIcon(icon3)
 
-        self.verticalLayout_3.addWidget(self.pushButton)
+        self.verticalLayout_3.addWidget(self.pushButton_configure_backend)
 
 
         self.verticalLayout.addWidget(self.groupBox_api)
@@ -300,8 +300,7 @@ class Ui_MainWindow(object):
 
         self.pushButton_2 = QPushButton(self.groupBox_files)
         self.pushButton_2.setObjectName(u"pushButton_2")
-        icon6 = QIcon(QIcon.fromTheme(u"configure"))
-        self.pushButton_2.setIcon(icon6)
+        self.pushButton_2.setIcon(icon3)
 
         self.verticalLayout_4.addWidget(self.pushButton_2)
 
@@ -338,28 +337,28 @@ class Ui_MainWindow(object):
         font1.setPointSize(10)
         font1.setBold(True)
         self.pushButton_start.setFont(font1)
-        icon7 = QIcon()
+        icon6 = QIcon()
         iconThemeName = u"media-playback-start"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon7 = QIcon.fromTheme(iconThemeName)
+            icon6 = QIcon.fromTheme(iconThemeName)
         else:
-            icon7.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon6.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_start.setIcon(icon7)
+        self.pushButton_start.setIcon(icon6)
 
         self.horizontalLayout_9.addWidget(self.pushButton_start)
 
         self.pushButton_abort = QPushButton(self.layoutWidget)
         self.pushButton_abort.setObjectName(u"pushButton_abort")
         self.pushButton_abort.setFont(font1)
-        icon8 = QIcon()
+        icon7 = QIcon()
         iconThemeName = u"process-stop"
         if QIcon.hasThemeIcon(iconThemeName):
-            icon8 = QIcon.fromTheme(iconThemeName)
+            icon7 = QIcon.fromTheme(iconThemeName)
         else:
-            icon8.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon7.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
 
-        self.pushButton_abort.setIcon(icon8)
+        self.pushButton_abort.setIcon(icon7)
 
         self.horizontalLayout_9.addWidget(self.pushButton_abort)
 
@@ -593,7 +592,7 @@ class Ui_MainWindow(object):
         self.groupBox_api.setTitle(QCoreApplication.translate("MainWindow", u"API", None))
         self.label_backend_logo.setText(QCoreApplication.translate("MainWindow", u"<logo>", None))
         self.label_backend_name.setText(QCoreApplication.translate("MainWindow", u"<current api>", None))
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"Configure / Switch API", None))
+        self.pushButton_configure_backend.setText(QCoreApplication.translate("MainWindow", u"Configure / Switch API", None))
         self.groupBox_language.setTitle(QCoreApplication.translate("MainWindow", u"Language", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"From:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"To:", None))

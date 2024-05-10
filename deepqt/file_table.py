@@ -94,11 +94,17 @@ class FileTable(CTableWidget):
         # Add icon to the filename column.
         logger.debug(f"Adding icon to {file_id}")
         if isinstance(file, st.TextFile):
-            self.item(self.rowCount() - 1, Column.FILENAME).setIcon(Qg.QIcon.fromTheme("text-x-generic"))
+            self.item(self.rowCount() - 1, Column.FILENAME).setIcon(
+                Qg.QIcon.fromTheme("text-x-generic")
+            )
         else:
-            self.item(self.rowCount() - 1, Column.FILENAME).setIcon(Qg.QIcon.fromTheme("application-epub+zip"))
+            self.item(self.rowCount() - 1, Column.FILENAME).setIcon(
+                Qg.QIcon.fromTheme("application-epub+zip")
+            )
         # Align Char count to the right.
-        self.item(self.rowCount() - 1, Column.CHARS).setTextAlignment(Qg.Qt.AlignRight | Qg.Qt.AlignVCenter)
+        self.item(self.rowCount() - 1, Column.CHARS).setTextAlignment(
+            Qg.Qt.AlignRight | Qg.Qt.AlignVCenter
+        )
 
     @staticmethod
     def initialize_file(path: Path) -> st.TextFile | st.EpubFile:
@@ -227,7 +233,8 @@ class FileTable(CTableWidget):
                 apply_glossary=self.config.use_glossary and glossary.is_valid(),
             )
             logger.debug(
-                f"Worker Thread processing epub file {file.path}: " f"Glossary: {glossary_to_pass is not None}"
+                f"Worker Thread processing epub file {file.path}: "
+                f"Glossary: {glossary_to_pass is not None}"
             )
 
         worker.signals.result.connect(self.file_process_worker_result)
@@ -264,7 +271,9 @@ class FileTable(CTableWidget):
 
         if apply_glossary:
             progress_callback.emit((file_id, "Applying glossary..."))
-            if glossary is not None:  # In this case, the glossary was already applied and still cached.
+            if (
+                glossary is not None
+            ):  # In this case, the glossary was already applied and still cached.
                 text_file.text_glossary = gls.process_text(text_file.text, glossary)
                 text_file.glossary_hash = glossary.hash
             # Set it either way, so that the file knows it's been processed.
@@ -316,7 +325,9 @@ class FileTable(CTableWidget):
 
         if apply_glossary:
             progress_callback.emit((file_id, "Applying glossary..."))
-            if glossary is not None:  # In this case, the glossary was already applied and still cached.
+            if (
+                glossary is not None
+            ):  # In this case, the glossary was already applied and still cached.
                 gls.process_epub_file(epub_file, glossary)
             # Set it either way, so that the file knows it's been processed.
             epub_file.process_level = st.ProcessLevel.GLOSSARY
@@ -441,10 +452,16 @@ class FileTable(CTableWidget):
                 return False
 
             if isinstance(file, st.TextFile):
-                if self.files[self.item(row, Column.ID).text()].process_level != expected_process_level_text:
+                if (
+                    self.files[self.item(row, Column.ID).text()].process_level
+                    != expected_process_level_text
+                ):
                     return False
             else:
-                if self.files[self.item(row, Column.ID).text()].process_level != expected_process_level_epub:
+                if (
+                    self.files[self.item(row, Column.ID).text()].process_level
+                    != expected_process_level_epub
+                ):
                     return False
         return True
 
@@ -453,7 +470,9 @@ class FileTable(CTableWidget):
         Browse for a file and add it to the table.
         Supported file types: txt and epub.
         """
-        path = Qw.QFileDialog.getOpenFileName(self, "Select file", filter="Text or Epub (*.txt *.epub)")[0]
+        path = Qw.QFileDialog.getOpenFileName(
+            self, "Select file", filter="Text or Epub (*.txt *.epub)"
+        )[0]
         if path:
             self.add_file(Path(path))
             self.request_text_param_update.emit()

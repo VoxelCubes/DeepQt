@@ -21,6 +21,7 @@ class MockConfig(bi.BackendConfig):
         "This is as opposed to LLM chatbots that may return nonsense at a high rate, "
         "if not outright refuse to perform the task asked of them."
     )
+    unreliable = True
     chunk_size: int = 1000
     wait_time: ct.Milliseconds = 1000
 

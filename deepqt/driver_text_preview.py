@@ -69,7 +69,9 @@ class TextPreview(Qw.QDialog, Ui_TextPreview):
         """
         preview_text = self.tabWidget.currentWidget().findChild(Qw.QPlainTextEdit, "preview_text")
         save_path = self.text_file.path.with_stem(
-            self.text_file.path.stem + "_" + self.tabWidget.tabText(self.tabWidget.currentIndex()).replace(" ", "_")
+            self.text_file.path.stem
+            + "_"
+            + self.tabWidget.tabText(self.tabWidget.currentIndex()).replace(" ", "_")
         )
         file_path = Qw.QFileDialog.getSaveFileName(
             self,
@@ -82,4 +84,6 @@ class TextPreview(Qw.QDialog, Ui_TextPreview):
                 with open(file_path, "w", encoding="utf8") as f:
                     f.write(preview_text.toPlainText())
             except OSError as e:
-                Qw.QMessageBox.warning(self, "Error", f"Could not save preview to {file_path}\n\n{e}")
+                Qw.QMessageBox.warning(
+                    self, "Error", f"Could not save preview to {file_path}\n\n{e}"
+                )

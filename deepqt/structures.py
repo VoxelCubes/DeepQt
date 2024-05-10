@@ -184,13 +184,19 @@ class XMLFile:
 
 @define
 class HTMLFile(XMLFile):
-    def prepare_text(self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool) -> None:
+    def prepare_text(
+        self, nuke_ruby: bool, nuke_indents: bool, nuke_kobo: bool, crush_html: bool
+    ) -> None:
         # Apply heuristic improvements to html files.
         len_before = len(self.text)
 
-        self.text = xml_parser.prepare_html_text(self.text, nuke_ruby, nuke_indents, nuke_kobo, crush_html)
+        self.text = xml_parser.prepare_html_text(
+            self.text, nuke_ruby, nuke_indents, nuke_kobo, crush_html
+        )
 
-        logger.debug(f"Cleaned {self.path.name}, {len_before} -> {len(self.text)}, diff: {len_before - len(self.text)}")
+        logger.debug(
+            f"Cleaned {self.path.name}, {len_before} -> {len(self.text)}, diff: {len_before - len(self.text)}"
+        )
 
 
 @define
@@ -204,7 +210,9 @@ class TocNCXFile(XMLFile):
     @staticmethod
     def get_texts(xml: str) -> list[str]:
         # Find the contents of the <text> tags.
-        return [match.group(1) for match in re.finditer(r"<text>\s*(.*?)\s*</text>", xml, re.DOTALL)]
+        return [
+            match.group(1) for match in re.finditer(r"<text>\s*(.*?)\s*</text>", xml, re.DOTALL)
+        ]
 
     @staticmethod
     def set_texts(xml: str, texts: list[str]) -> str:
@@ -253,13 +261,17 @@ class EpubFile(InputFile):
 
         logger.debug(f"Initializing {self.path.name}...")
 
-        self.html_files, self.css_files, self.toc_file, self.cover_image = extract_epub(self.path, self.cache_dir)
+        self.html_files, self.css_files, self.toc_file, self.cover_image = extract_epub(
+            self.path, self.cache_dir
+        )
 
         # Ignore files that contain no actual text (tags aside).
         logger.debug(f"Found {len(self.html_files)} html files in {self.path}")
 
         if ignore_empty:
-            self.html_files = [file for file in self.html_files if xml_parser.html_contains_text(file.text)]
+            self.html_files = [
+                file for file in self.html_files if xml_parser.html_contains_text(file.text)
+            ]
             logger.debug(f"Found {len(self.html_files)} html files with text in {self.path}")
 
         # Sort the html files by file name.
@@ -271,7 +283,9 @@ class EpubFile(InputFile):
         if make_text_horizontal:
             logger.debug(f"Making text horizontal in {self.path.name}...")
             for css_file in self.css_files:
-                css_file.text = re.sub(r"writing-mode:\s*vertical-rl;", "writing-mode: horizontal-tb;", css_file.text)
+                css_file.text = re.sub(
+                    r"writing-mode:\s*vertical-rl;", "writing-mode: horizontal-tb;", css_file.text
+                )
 
         self.initialized = True
 
@@ -344,7 +358,9 @@ class EpubFile(InputFile):
         self.toc_file.clear_translations()
 
 
-def extract_epub(epub_path: Path, cache_dir: Path) -> tuple[list[HTMLFile], list[CSSFile], TocNCXFile, Path | None]:
+def extract_epub(
+    epub_path: Path, cache_dir: Path
+) -> tuple[list[HTMLFile], list[CSSFile], TocNCXFile, Path | None]:
     """
     Extract the epub file to the cache directory and return a list of XMLFile
     objects representing the html files.
@@ -367,7 +383,9 @@ def extract_epub(epub_path: Path, cache_dir: Path) -> tuple[list[HTMLFile], list
             toc_file = TocNCXFile(xml_path)
 
     if not toc_file:
-        raise ValueError(f"No table of contents toc.ncx file found in {epub_path}. This isn't a valid epub file.")
+        raise ValueError(
+            f"No table of contents toc.ncx file found in {epub_path}. This isn't a valid epub file."
+        )
 
     # Find cover of the epub using the metadata.
     cover_image = xml_parser.get_epub_cover(epub_path)
