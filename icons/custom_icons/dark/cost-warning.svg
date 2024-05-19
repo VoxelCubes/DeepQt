@@ -33,7 +33,7 @@
        type="text/css"
        id="current-color-scheme">
       .ColorScheme-Text {
-        color:#eff0f1;
+        color:#fcfcfc;
       }
       </style>
   </defs>

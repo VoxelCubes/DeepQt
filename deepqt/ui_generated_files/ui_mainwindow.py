@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.3
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -212,12 +212,12 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_8.addWidget(self.checkBox_use_glossary)
 
-        self.label_glossary_info = CTooltipLabel(self.groupBox_files)
-        self.label_glossary_info.setObjectName(u"label_glossary_info")
-        self.label_glossary_info.setToolTipDuration(-1)
-        self.label_glossary_info.setText(u"<helper>")
+        self.label_glossary_help = CTooltipLabel(self.groupBox_files)
+        self.label_glossary_help.setObjectName(u"label_glossary_help")
+        self.label_glossary_help.setToolTipDuration(-1)
+        self.label_glossary_help.setText(u"<helper>")
 
-        self.horizontalLayout_8.addWidget(self.label_glossary_info)
+        self.horizontalLayout_8.addWidget(self.label_glossary_help)
 
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -599,7 +599,7 @@ class Ui_MainWindow(object):
         self.groupBox_files.setTitle(QCoreApplication.translate("MainWindow", u"Translation Settings", None))
         self.checkBox_use_glossary.setText(QCoreApplication.translate("MainWindow", u"Use glossary:", None))
 #if QT_CONFIG(tooltip)
-        self.label_glossary_info.setToolTip(QCoreApplication.translate("MainWindow", u"<html>\n"
+        self.label_glossary_help.setToolTip(QCoreApplication.translate("MainWindow", u"<html>\n"
 "                    <head/>\n"
 "                    <body>\n"
 "                        <p> DeepQt uses glossary files to pre-process files before sending them to the API; \n"

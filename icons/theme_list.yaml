@@ -5,7 +5,10 @@ Theme directories:
 Files:
   actions:
     16:
+      - application-menu
+      - configure
       - dialog-cancel
+      - dialog-ok
       - dialog-ok-apply
       - document-open
       - document-open-folder
@@ -14,18 +17,20 @@ Files:
       - document-multiple
       - download
       - edit-clear
+      - edit-copy
       - edit-delete
       - edit-delete-remove
-      - help-about
+      - games-config-theme
+      - help-contents
+      - help-hint
+      - internet-services
       - list-add
       - media-playback-start
       - process-stop
       - tools-report-bug
-      - help-contents
       - view-refresh
       - view-list-text
-    22:
-      - exchange-positions
+      - window-close
   mimetypes:
     16:
       - text-x-changelog

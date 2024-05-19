@@ -3,6 +3,7 @@ from typing import assert_never
 import PySide6.QtCore as Qc
 import PySide6.QtWidgets as Qw
 import PySide6.QtGui as Qg
+from loguru import logger
 
 import deepqt.utils as ut
 import deepqt.backends.backend_interface as bi
@@ -23,6 +24,16 @@ class APIStatusUsage(Qw.QWidget, Ui_APIStatusUsage):
         Qw.QWidget.__init__(self, parent)
         self.setupUi(self)
 
+        self.load_icons()
+
+        self.show_status(None)
+
+    def changeEvent(self, event) -> None:
+        if event.type() == Qc.QEvent.PaletteChange:
+            self.load_icons()
+
+    def load_icons(self) -> None:
+        logger.warning(f"grabbing icons from path: {Qg.QIcon.themeSearchPaths()}")
         self.label_status_good_icon.setPixmap(
             Qg.QIcon.fromTheme("state-ok").pixmap(Qc.QSize(16, 16))
         )
@@ -38,8 +49,6 @@ class APIStatusUsage(Qw.QWidget, Ui_APIStatusUsage):
         self.label_usage_warn_icon.setPixmap(
             Qg.QIcon.fromTheme("data-warning").pixmap(Qc.QSize(16, 16))
         )
-
-        self.show_status(None)
 
     def show_status(self, status: bi.BackendStatus | None) -> None:
         """

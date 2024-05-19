@@ -54,7 +54,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
     default_palette: Qg.QPalette
     default_style: str
-    default_icon_theme: str
+    # default_icon_theme: str
     theme_is_dark: ut.Shared[bool]
     theme_is_dark_changed = Signal(bool)  # When true, the new theme is dark.
 
@@ -810,7 +810,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         self.pushButton_menu.setMenu(self.hamburger_menu)
         # Add theming menu.
-        self.theming_menu = self.hamburger_menu.addMenu("Theme")
+        self.theming_menu = self.hamburger_menu.addMenu(
+            Qg.QIcon.fromTheme("games-config-theme"), "Theme"
+        )
         themes = [("", "System")]
         themes.extend(ut.get_available_themes())
         for theme, name in themes:
@@ -1013,7 +1015,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         placeholder_color.setAlphaF(0.5)
         logger.debug(f"Placeholder color: {placeholder_color.name()}")
         self.default_palette.setColor(Qg.QPalette.PlaceholderText, placeholder_color)
-        self.default_icon_theme = Qg.QIcon.themeName()
+        # self.default_icon_theme = Qg.QIcon.themeName()
         self.default_style = Qw.QApplication.style().objectName()
 
     def load_config_theme(self) -> None:
@@ -1032,7 +1034,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         if not theme:
             logger.info(f"Using system theme.")
             palette = self.default_palette
-            Qg.QIcon.setThemeName(self.default_icon_theme)
+            # Qg.QIcon.setThemeName(self.default_icon_theme)
             # Check if we need to restore the style.
             if Qw.QApplication.style().objectName() != self.default_style:
                 Qw.QApplication.setStyle(self.default_style)
@@ -1054,17 +1056,26 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         logger.info(f"Theme is dark: {self.theme_is_dark.get()}")
         self.theme_is_dark_changed.emit(self.theme_is_dark)
 
+        # Also just setting the icon theme here, since with qt6 even breeze dark is having issues.
         # Update the fallback icon theme accordingly.
         if self.theme_is_dark.get():
             Qg.QIcon.setFallbackThemeName("breeze-dark")
+            Qg.QIcon.setThemeName("breeze-dark")
+            logger.info("Setting icon theme to breeze-dark.")
         else:
             Qg.QIcon.setFallbackThemeName("breeze")
+            Qg.QIcon.setThemeName("breeze")
+            logger.info("Setting icon theme to breeze.")
 
         # Toggle the theme menu items.
         for action in self.theming_menu.actions():
             action.setChecked(action.theme == theme)
 
         self.update()
+        event = Qc.QEvent(Qc.QEvent.PaletteChange)
+        self.widget_backend_status.changeEvent(event)
+        self.label_glossary_help.changeEvent(event)
+        self.label_outdir_help.changeEvent(event)
 
         # Update the config it necessary.
         prev_value = self.config.gui_theme
@@ -1076,7 +1087,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         Listen for palette change events to notify all widgets.
         """
-        if event.type() == Qc.QEvent.PaletteChange:
+        if event.type() == Qc.QEvent.ApplicationPaletteChange:
             background_color = self.palette().color(Qg.QPalette.Window)
             self.theme_is_dark.set(background_color.lightness() < 128)
             logger.info(f"Theme is dark: {self.theme_is_dark.get()}")

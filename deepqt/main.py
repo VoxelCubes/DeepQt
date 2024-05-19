@@ -123,12 +123,15 @@ def main() -> None:
     # Start Qt runtime.
     app = Qw.QApplication(sys.argv)
 
-    Qg.QIcon.setFallbackSearchPaths([":/icons", ":/icon-themes"])
+    # Something broke with Breeze 6, so now we need to disable system icons.
+    search_paths = Qg.QIcon.themeSearchPaths()
+    search_paths.remove(":/icons")
+    Qg.QIcon.setThemeSearchPaths([":/icon-themes", ":/icons"])
+    Qg.QIcon.setFallbackSearchPaths(search_paths)
     # We need to set an initial theme on Windows, otherwise the icons will fail to load
     # later on, even when switching the theme again.
-    if platform.system() == "Windows" or ut.running_in_flatpak():
+    if platform.system() != "Linux" or ut.running_in_flatpak():
         Qg.QIcon.setThemeName("breeze")
-        Qg.QIcon.setThemeSearchPaths([":/icons", ":/icon-themes"])
 
     command = Command(args.command)
     inputs = None

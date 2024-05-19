@@ -55,6 +55,7 @@ Requirements:
 
 import shutil
 from pathlib import Path
+import xml.etree.ElementTree as ET
 import yaml
 
 SUPPORTED_EXTENSIONS = [".svg", ".png", ".xpm"]
@@ -89,6 +90,46 @@ def find_xdg_icon(file, src_path, extensions) -> str | None:
     return None
 
 
+def is_icon_light(icon_path: Path) -> bool:
+    """
+    Check if the icon is actually dark by reading the file contents.
+    Dark means that the text is light, as in this icon is for a dark background.
+
+    :param icon_path: Path to the icon file.
+    :return: True if the icon is dark, False otherwise.
+    """
+    with icon_path.open("rb") as f:
+        content = f.read()
+
+    # Check if the content contains the dark color.
+    return b"#232629" in content
+
+
+def make_icon_dark(icon_path: Path, output_path: Path) -> None:
+    """
+    Find the style tag and change the text color to dark.
+
+    Example:
+    <style type="text/css" id="current-color-scheme">.ColorScheme-Text{color:#fcfcfc;}</style>
+    to:
+    <style type="text/css" id="current-color-scheme">.ColorScheme-Text{color:#232629;}</style>
+    """
+    # Just do a string replacement.
+    with icon_path.open("r") as f:
+        content = f.read()
+
+    content_old = content
+    content = content.replace("#232629", "#fcfcfc")
+
+    if content_old != content:
+        print(f"Changed {icon_path.name} to dark.")
+    else:
+        print(f"Failed to change {icon_path.name} to dark.")
+
+    with output_path.open("w") as f:
+        f.write(content)
+
+
 def copy_files(theme_dir: Path, yaml_data: dict) -> None:
     """
     Copy the specified files from the source theme directory to the destination directory.
@@ -96,6 +137,8 @@ def copy_files(theme_dir: Path, yaml_data: dict) -> None:
     :param theme_dir: Path to the source theme directory.
     :param yaml_data: Dictionary containing the files to copy.
     """
+    theme_is_dark = "dark" in theme_dir.name.lower()
+
     for category, subcategories in yaml_data["Files"].items():
         for subcategory, files in subcategories.items():
             src_path = theme_dir / str(category) / str(subcategory)
@@ -108,7 +151,19 @@ def copy_files(theme_dir: Path, yaml_data: dict) -> None:
                 found_file = find_xdg_icon(file, src_path, SUPPORTED_EXTENSIONS)
 
                 if found_file:
-                    shutil.copy2(src_path / found_file, dest_path)
+                    # Check if the file is mis-colored.
+                    if theme_is_dark and found_file.endswith(".svg"):
+                        found_file_path = src_path / found_file
+                        dest_file_path = dest_path / found_file
+
+                        if is_icon_light(found_file_path):
+                            make_icon_dark(found_file_path, dest_file_path)
+                        else:
+                            print(f"Not recoloring {found_file} as it is already dark.")
+                            shutil.copy2(src_path / found_file, dest_path)
+
+                    else:
+                        shutil.copy2(src_path / found_file, dest_path)
                 else:
                     print(f"Could not find {file} in {src_path}")
 

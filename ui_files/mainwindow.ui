@@ -260,7 +260,7 @@
               </widget>
              </item>
              <item>
-              <widget class="CTooltipLabel" name="label_glossary_info">
+              <widget class="CTooltipLabel" name="label_glossary_help">
                <property name="toolTip">
                 <string extracomment="The &amp;apos; is the possessive 's apostrophe and should be ignored if the language doesn't call for it.">&lt;html&gt;
                     &lt;head/&gt;

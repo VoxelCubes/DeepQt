@@ -3,6 +3,8 @@ import PySide6.QtGui as Qg
 import PySide6.QtCore as Qc
 from PySide6.QtCore import Qt
 
+from loguru import logger
+
 
 class CTooltipLabel(Qw.QLabel):
     """
@@ -25,11 +27,19 @@ class CTooltipLabel(Qw.QLabel):
         # Make the label focusable to receive keyboard events
         self.setFocusPolicy(Qt.StrongFocus)
 
+    def changeEvent(self, event) -> None:
+        if event.type() == Qc.QEvent.PaletteChange:
+            self.load_icon()
+
     def load_icon(self) -> None:
         """
         Load the display icon.
         """
-        self.setPixmap(Qg.QIcon.fromTheme(self.icon_name).pixmap(16, 16))
+        logger.info(f"Current theme name: {Qg.QIcon.themeName()}")
+        if Qg.QIcon.hasThemeIcon(self.icon_name):
+            self.setPixmap(Qg.QIcon.fromTheme(self.icon_name).pixmap(16, 16))
+        else:
+            logger.error(f"Icon '{self.icon_name}' not found in the current icon theme.")
 
     def setText(self, text: str) -> None:
         """
