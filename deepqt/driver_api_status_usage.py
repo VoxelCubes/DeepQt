@@ -33,7 +33,6 @@ class APIStatusUsage(Qw.QWidget, Ui_APIStatusUsage):
             self.load_icons()
 
     def load_icons(self) -> None:
-        logger.warning(f"grabbing icons from path: {Qg.QIcon.themeSearchPaths()}")
         self.label_status_good_icon.setPixmap(
             Qg.QIcon.fromTheme("state-ok").pixmap(Qc.QSize(16, 16))
         )
@@ -57,7 +56,7 @@ class APIStatusUsage(Qw.QWidget, Ui_APIStatusUsage):
         :param status: The backend status to present.
         """
         if status is None:
-            self.show_status(bi.BackendStatus(bi.ConnectionStatus.Error, 0, 10))
+            self.show_status(bi.BackendStatus(bi.ConnectionStatus.Error, None, None))
             return
 
         self._show_connection(status.connection)

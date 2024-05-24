@@ -16,3 +16,4 @@ lxml
 setuptools
 PyYAML
 psutil
+chardet

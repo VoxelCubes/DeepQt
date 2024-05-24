@@ -3,10 +3,13 @@ import os
 import re
 import platform
 import sys
+import chardet
 import zipfile as zf
 from io import StringIO
 from pathlib import Path
+from contextlib import contextmanager
 from typing import get_type_hints, Generic, TypeVar, Optional
+from io import TextIOWrapper
 
 import PySide6
 import PySide6.QtCore as Qc
@@ -16,6 +19,7 @@ from loguru import logger
 from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME
 
 from deepqt import __program__, __version__
+import deepqt.constants as ct
 import deepqt.rc_generated_files.rc_themes
 
 T = TypeVar("T")
@@ -88,9 +92,11 @@ def get_config_path() -> Path:
         )
     elif platform.system() == "Darwin":
         path = Path(
-            xdg_path
-            if "XDG_CONFIG_HOME" in os.environ
-            else (Path.home() / "Library" / "Application Support"),
+            (
+                xdg_path
+                if "XDG_CONFIG_HOME" in os.environ
+                else (Path.home() / "Library" / "Application Support")
+            ),
             __program__,
             __program__ + "config.ini",
         )
@@ -168,6 +174,7 @@ def get_available_themes() -> list[tuple[str, str]]:
 
     :return: A list of available theme names with their display names.
     """
+    assert deepqt.rc_generated_files.rc_themes
     # Simply discover all files in the themes folder.
     themes = []
     theme_dir = Qc.QDir(":/themes")
@@ -474,6 +481,59 @@ def to_display_name(name: str) -> str:
     s2 = re.sub("([a-z0-9])([A-Z])", r"\1 \2", s1)
     return (
         " ".join(word.capitalize() for word in s2.split(" "))
-        .replace("Ai ", "AI ")
-        .replace("Ocr", "OCR")
+        # .replace("Ai ", "AI ")  # Create further exceptions as needed.
     )
+
+
+def read_mime_type(path: Path) -> ct.Formats:
+    """
+    Read the mime type of the given file.
+    If it can't be read from the file itself, trust the extension.
+
+    :param path: Path to the file.
+    :return: The file format constant.
+    """
+    try:
+        mime_db = Qc.QMimeDatabase()
+        mime_type = mime_db.mimeTypeForFile(str(path))
+        file_mime = mime_type.name()
+    except OSError as e:
+        raise e
+    except Exception:
+        logger.exception(
+            f"Failed to read mime type from file {path}. Falling back to file extension."
+        )
+    else:
+        if file_mime in ct.mime_to_format:
+            return ct.mime_to_format[file_mime]
+
+    if path.suffix.lower() in ct.extension_to_format:
+        return ct.extension_to_format[path.suffix.lower()]
+
+    return ct.Formats.UNKNOWN
+
+
+def detect_encoding(file_path: Path) -> str:
+    with open(file_path, "rb") as file:
+        detector = chardet.universaldetector.UniversalDetector()
+        for line in file:
+            detector.feed(line)
+            if detector.done:
+                break
+        detector.close()
+    return detector.result["encoding"]
+
+
+@contextmanager
+def read_autodetect_encoding(file_path: Path) -> TextIOWrapper:
+    """
+    Open a file for reading with the encoding autodetected.
+
+    :param file_path: Path to the file.
+    """
+    encoding = detect_encoding(file_path)
+    file = open(file_path, "r", encoding=encoding)
+    try:
+        yield file
+    finally:
+        file.close()

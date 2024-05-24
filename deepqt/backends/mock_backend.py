@@ -60,11 +60,17 @@ class MockBackend(bi.ReliableBackend):
     Backend for debugging.
     """
 
-    _config: MockConfig
+    _config: MockConfig  # Needs to be passed from the config.
+    _connection: bi.ConnectionStatus
 
-    def connect(self) -> None:
+    def __init__(self, config: MockConfig) -> None:
+        self._config = config
+        self._status = bi.ConnectionStatus.Offline
+
+    def connect(self) -> bool:
         # No connection needed.
-        pass
+        self._status = bi.ConnectionStatus.Connected
+        return True
 
     def disconnect(self) -> None:
         # Nothing to disconnect.
@@ -110,7 +116,8 @@ class MockBackend(bi.ReliableBackend):
 
     def translate_file(self, file_in: Path, file_out: Path) -> None:
         try:
-            text = file_in.read_text()
+            with ut.read_autodetect_encoding(file_in) as f:
+                text = f.read()
             translated = self.translate_text(text)
             file_out.write_text(translated)
         except Exception as e:
@@ -121,4 +128,4 @@ class MockBackend(bi.ReliableBackend):
         Contains status information specific to the backend.
         E.g. remaining characters, connection good/bad etc.
         """
-        return bi.BackendStatus()
+        return bi.BackendStatus(self._status, None, None)

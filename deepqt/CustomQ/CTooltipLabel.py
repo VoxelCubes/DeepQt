@@ -35,7 +35,6 @@ class CTooltipLabel(Qw.QLabel):
         """
         Load the display icon.
         """
-        logger.info(f"Current theme name: {Qg.QIcon.themeName()}")
         if Qg.QIcon.hasThemeIcon(self.icon_name):
             self.setPixmap(Qg.QIcon.fromTheme(self.icon_name).pixmap(16, 16))
         else:
