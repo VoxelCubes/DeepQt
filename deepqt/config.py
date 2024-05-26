@@ -30,7 +30,6 @@ class Config:
     lang_from: str = ""
     lang_to: str = ""
 
-    use_fixed_output_path: bool = False
     fixed_output_path: str = ""
 
     glossary_path: str = ""

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.2
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -451,7 +451,7 @@ class Ui_MainWindow(object):
         self.page_interactive_reliable.setObjectName(u"page_interactive_reliable")
         self.gridLayout_2 = QGridLayout(self.page_interactive_reliable)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.verticalSpacer_7 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer_7 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.gridLayout_2.addItem(self.verticalSpacer_7, 2, 1, 1, 1)
 
@@ -479,6 +479,19 @@ class Ui_MainWindow(object):
         self.plainTextEdit_from_interactive.setObjectName(u"plainTextEdit_from_interactive")
 
         self.verticalLayout_2.addWidget(self.plainTextEdit_from_interactive)
+
+        self.pushButton_show_from_interactive_glossary = QPushButton(self.page_interactive_reliable)
+        self.pushButton_show_from_interactive_glossary.setObjectName(u"pushButton_show_from_interactive_glossary")
+        icon8 = QIcon(QIcon.fromTheme(u"arrow-up"))
+        self.pushButton_show_from_interactive_glossary.setIcon(icon8)
+        self.pushButton_show_from_interactive_glossary.setCheckable(True)
+
+        self.verticalLayout_2.addWidget(self.pushButton_show_from_interactive_glossary)
+
+        self.plainTextEdit_from_interactive_glossary = QPlainTextEdit(self.page_interactive_reliable)
+        self.plainTextEdit_from_interactive_glossary.setObjectName(u"plainTextEdit_from_interactive_glossary")
+
+        self.verticalLayout_2.addWidget(self.plainTextEdit_from_interactive_glossary)
 
 
         self.gridLayout_2.addLayout(self.verticalLayout_2, 1, 1, 1, 1)
@@ -508,10 +521,22 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_7.addWidget(self.plainTextEdit_to_interactive)
 
+        self.pushButton_show_to_interactive_glossary = QPushButton(self.page_interactive_reliable)
+        self.pushButton_show_to_interactive_glossary.setObjectName(u"pushButton_show_to_interactive_glossary")
+        self.pushButton_show_to_interactive_glossary.setIcon(icon8)
+        self.pushButton_show_to_interactive_glossary.setCheckable(True)
+
+        self.verticalLayout_7.addWidget(self.pushButton_show_to_interactive_glossary)
+
+        self.plainTextEdit_to_interactive_glossary = QPlainTextEdit(self.page_interactive_reliable)
+        self.plainTextEdit_to_interactive_glossary.setObjectName(u"plainTextEdit_to_interactive_glossary")
+
+        self.verticalLayout_7.addWidget(self.plainTextEdit_to_interactive_glossary)
+
 
         self.gridLayout_2.addLayout(self.verticalLayout_7, 1, 3, 1, 1)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 51, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer_2 = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.gridLayout_2.addItem(self.verticalSpacer_2, 0, 1, 1, 1)
 
@@ -528,12 +553,12 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addItem(self.horizontalSpacer_6, 1, 4, 1, 1)
 
         self.gridLayout_2.setRowStretch(0, 1)
-        self.gridLayout_2.setRowStretch(1, 10)
+        self.gridLayout_2.setRowStretch(1, 20)
         self.gridLayout_2.setRowStretch(2, 1)
         self.gridLayout_2.setColumnStretch(0, 1)
-        self.gridLayout_2.setColumnStretch(1, 10)
+        self.gridLayout_2.setColumnStretch(1, 20)
         self.gridLayout_2.setColumnStretch(2, 1)
-        self.gridLayout_2.setColumnStretch(3, 10)
+        self.gridLayout_2.setColumnStretch(3, 20)
         self.gridLayout_2.setColumnStretch(4, 1)
         self.stackedWidget.addWidget(self.page_interactive_reliable)
         self.page_interactive_unreliable = QWidget()
@@ -578,7 +603,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.pushButton_translate_files.setDefault(True)
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -650,7 +675,9 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", u"Output Path", None));
         self.label_drop_2.setText(QCoreApplication.translate("MainWindow", u"Drag and Drop Files or Folders Here", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Translate from", None))
+        self.pushButton_show_from_interactive_glossary.setText(QCoreApplication.translate("MainWindow", u"Show input after glossary", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Translate into", None))
+        self.pushButton_show_to_interactive_glossary.setText(QCoreApplication.translate("MainWindow", u"Show translation before applying glossary", None))
         self.label_progress.setText(QCoreApplication.translate("MainWindow", u"<progress>", None))
     # retranslateUi
 

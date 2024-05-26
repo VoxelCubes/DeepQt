@@ -508,7 +508,7 @@ Leave it blank to have them placed next to the original files.</string>
       </widget>
       <widget class="QStackedWidget" name="stackedWidget">
        <property name="currentIndex">
-        <number>3</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="page_files">
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -679,7 +679,7 @@ Leave it blank to have them placed next to the original files.</string>
         </layout>
        </widget>
        <widget class="QWidget" name="page_interactive_reliable">
-        <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,10,1" columnstretch="1,10,1,10,1">
+        <layout class="QGridLayout" name="gridLayout_2" rowstretch="1,20,1" columnstretch="1,20,1,20,1">
          <item row="2" column="1">
           <spacer name="verticalSpacer_7">
            <property name="orientation">
@@ -688,7 +688,7 @@ Leave it blank to have them placed next to the original files.</string>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>10</height>
             </size>
            </property>
           </spacer>
@@ -722,6 +722,22 @@ Leave it blank to have them placed next to the original files.</string>
            <item>
             <widget class="QPlainTextEdit" name="plainTextEdit_from_interactive"/>
            </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_show_from_interactive_glossary">
+             <property name="text">
+              <string>Show input after glossary</string>
+             </property>
+             <property name="icon">
+              <iconset theme="arrow-up"/>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPlainTextEdit" name="plainTextEdit_from_interactive_glossary"/>
+           </item>
           </layout>
          </item>
          <item row="1" column="3">
@@ -753,6 +769,22 @@ Leave it blank to have them placed next to the original files.</string>
            <item>
             <widget class="QPlainTextEdit" name="plainTextEdit_to_interactive"/>
            </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_show_to_interactive_glossary">
+             <property name="text">
+              <string>Show translation before applying glossary</string>
+             </property>
+             <property name="icon">
+              <iconset theme="arrow-up"/>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPlainTextEdit" name="plainTextEdit_to_interactive_glossary"/>
+           </item>
           </layout>
          </item>
          <item row="0" column="1">
@@ -763,7 +795,7 @@ Leave it blank to have them placed next to the original files.</string>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>51</height>
+             <height>10</height>
             </size>
            </property>
           </spacer>

@@ -6,6 +6,8 @@ Files:
   actions:
     16:
       - application-menu
+      - arrow-down
+      - arrow-up
       - configure
       - dialog-cancel
       - dialog-ok

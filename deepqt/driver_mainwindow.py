@@ -11,7 +11,7 @@ import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
 import deepl
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Slot
 from loguru import logger
 
 import deepqt.translation_interface as ai
@@ -126,6 +126,10 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.file_table.setColumnWidth(Column.FILENAME, 200)
         self.file_table.setColumnWidth(Column.STATUS, 200)
 
+        # Set up interactive panels.
+        self.set_interactive_input_from_glossary_visible(False)
+        self.set_interactive_translation_to_glossary_visible(False)
+
         # Connect signals.
         self.connect_combobox_slots()
 
@@ -146,6 +150,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         # self.pushButton_api_config.clicked.connect(self.configure_api)
         # self.pushButton_refresh.clicked.connect(self.load_config_to_ui)
+        self.pushButton_show_to_interactive_glossary.toggled.connect(
+            self.set_interactive_translation_to_glossary_visible
+        )
+        self.pushButton_show_from_interactive_glossary.toggled.connect(
+            self.set_interactive_input_from_glossary_visible
+        )
 
         self.text_output_changed.connect(self.file_table.update_all_output_filenames)
         self.text_params_changed.connect(self.file_table.update_all_text_params)
@@ -250,21 +260,20 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     """
 
     def load_config_to_ui(self) -> None:
-        return
         """
         Apply data from config to ui widgets.
         """
         logger.debug("Loading config to UI.")
 
-        self.checkBox_file_fixed_dir.setChecked(self.config.use_fixed_output_path)
-        self.lineEdit_file_out_dir.setText(self.config.fixed_output_path)
+        self.lineEdit_out_dir.setText(self.config.fixed_output_path)
 
         self.lineEdit_glossary_file.setText(self.config.glossary_path)
         self.checkBox_use_glossary.setChecked(self.config.use_glossary)
-        # self.checkBox_extra_quote_protection.setChecked(self.config.use_quote_protection)
 
         self.glossary_enabled(self.config.use_glossary)
+        self.set_interactive_glossary_visible(self.config.use_glossary)
 
+        return
         # Ignore the mock because it cannot give language options. It is only to be used for translation.
         translator = self.open_translator(use_mock=False)
 
@@ -353,6 +362,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         self.config.use_glossary = self.checkBox_use_glossary.isChecked()
         self.glossary_enabled(self.config.use_glossary)
+        self.set_interactive_glossary_visible(self.config.use_glossary)
         self.config.save()
         if self.config.use_glossary:
             self.load_glossary()
@@ -835,15 +845,49 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         issue_reporter = ird.IssueReporter(self)
         issue_reporter.exec()
 
-    """
-    Simple UI manipulation functions
-    """
+    # ============================= Simple UI manipulation functions =============================
 
     def hide_progress(self) -> None:
         self.frame_progress_drawer.hide()
 
     def show_progress(self) -> None:
         self.frame_progress_drawer.show()
+
+    @Slot(bool)
+    def set_interactive_input_from_glossary_visible(self, visible: bool) -> None:
+        self.plainTextEdit_from_interactive_glossary.setVisible(visible)
+        if visible:
+            self.pushButton_show_from_interactive_glossary.setIcon(Qg.QIcon.fromTheme("arrow-down"))
+            self.pushButton_show_from_interactive_glossary.setText("Hide input after glossary")
+        else:
+            self.pushButton_show_from_interactive_glossary.setIcon(Qg.QIcon.fromTheme("arrow-up"))
+            self.pushButton_show_from_interactive_glossary.setText("Show input after glossary")
+
+    @Slot(bool)
+    def set_interactive_translation_to_glossary_visible(self, visible: bool) -> None:
+        self.plainTextEdit_to_interactive_glossary.setVisible(visible)
+        if visible:
+            self.pushButton_show_to_interactive_glossary.setIcon(Qg.QIcon.fromTheme("arrow-down"))
+            self.pushButton_show_to_interactive_glossary.setText(
+                "Show translation before applying glossary"
+            )
+        else:
+            self.pushButton_show_to_interactive_glossary.setIcon(Qg.QIcon.fromTheme("arrow-up"))
+            self.pushButton_show_to_interactive_glossary.setText(
+                "Hide translation before applying glossary"
+            )
+
+    def set_interactive_glossary_visible(self, visible: bool) -> None:
+        # This will entirely hide both glossary panels and the buttons.
+        # This is for when the glossary isn't enabled to begin with.
+        show_from_textfield = self.pushButton_show_from_interactive_glossary.isChecked() and visible
+        show_to_textfield = self.pushButton_show_to_interactive_glossary.isChecked() and visible
+
+        self.set_interactive_input_from_glossary_visible(show_from_textfield)
+        self.set_interactive_translation_to_glossary_visible(show_to_textfield)
+
+        self.pushButton_show_from_interactive_glossary.setVisible(visible)
+        self.pushButton_show_to_interactive_glossary.setVisible(visible)
 
     def glossary_enabled(self, enabled: bool) -> None:
         self.lineEdit_glossary_file.setEnabled(enabled)
