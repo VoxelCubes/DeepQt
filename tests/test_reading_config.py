@@ -35,7 +35,6 @@ def test_coercible_types():
     assert not errors
     assert isinstance(config, cfg.Config)
     assert config.lang_from == "Valid language code"
-    assert config.use_fixed_output_path is False
     assert config.use_glossary is True
     assert config.backend_configs[ct.Backend.MOCK].avg_time_per_mille == -2
     assert config.backend_configs[ct.Backend.MOCK].chunk_size == 1000
@@ -94,10 +93,14 @@ def test_missing_and_extra_keys():
     assert "nonsense" not in config.__annotations__
     assert config.use_glossary == default_config.use_glossary
     assert (
-        config.backend_configs[ct.Backend.MOCK].wait_time == default_config.backend_configs[ct.Backend.MOCK].wait_time
+        config.backend_configs[ct.Backend.MOCK].wait_time
+        == default_config.backend_configs[ct.Backend.MOCK].wait_time
     )
     assert "more nonsense" not in config.backend_configs[ct.Backend.MOCK].__annotations__
-    assert config.backend_configs[ct.Backend.MOCK].name == default_config.backend_configs[ct.Backend.MOCK].name
+    assert (
+        config.backend_configs[ct.Backend.MOCK].name
+        == default_config.backend_configs[ct.Backend.MOCK].name
+    )
 
 
 def test_missing_backend():
@@ -113,7 +116,8 @@ def test_missing_backend():
     assert config.lang_from == "Valid language code"
     assert config.use_glossary == default_config.use_glossary
     assert (
-        config.backend_configs[ct.Backend.MOCK].wait_time == default_config.backend_configs[ct.Backend.MOCK].wait_time
+        config.backend_configs[ct.Backend.MOCK].wait_time
+        == default_config.backend_configs[ct.Backend.MOCK].wait_time
     )
     assert (
         config.backend_configs[ct.Backend.DEEPL].tl_preserve_formatting
@@ -136,7 +140,8 @@ def test_type_mismatch():
     assert config.lang_from == "Valid language code"
     assert config.use_glossary == default_config.use_glossary
     assert (
-        config.backend_configs[ct.Backend.MOCK].wait_time == default_config.backend_configs[ct.Backend.MOCK].wait_time
+        config.backend_configs[ct.Backend.MOCK].wait_time
+        == default_config.backend_configs[ct.Backend.MOCK].wait_time
     )
 
 

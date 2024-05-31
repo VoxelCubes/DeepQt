@@ -7,20 +7,12 @@ import attrs
 import yaml
 from attrs import define, Factory
 from cattrs import Converter
-from cattrs.gen import make_dict_unstructure_fn, override
 from loguru import logger
 
 import deepqt.backends.backend_interface as bi
-import deepqt.backends.deepl_backend as db
-import deepqt.backends.mock_backend as mb
+import deepqt.backends.lookups as b_lut  # backend lookup table
 import deepqt.constants as ct
 import deepqt.utils as ut
-
-
-backend_to_config = {
-    ct.Backend.MOCK: mb.MockConfig,
-    ct.Backend.DEEPL: db.DeepLConfig,
-}
 
 
 @define
@@ -51,7 +43,7 @@ class Config:
     def __attrs_post_init__(self) -> None:
         # Preload the backend configs.
         self.backend_configs = {
-            backend: conf_class() for backend, conf_class in backend_to_config.items()
+            backend: conf_class() for backend, conf_class in b_lut.backend_to_config.items()
         }
 
     def save(self, path: Path = None) -> bool:
@@ -254,16 +246,13 @@ def structure_backend_configs(
         # Alternatively, to be fully correct, use backend.value but the static type checker
         # didn't like it for some reason, likely a false positive.
         try:
-            if backend == ct.Backend.MOCK:
-                backend_data[backend], backend_errors = mb.MockConfig.from_dict(json_data[backend])
-            elif backend == ct.Backend.DEEPL:
-                backend_data[backend], backend_errors = db.DeepLConfig.from_dict(json_data[backend])
-            else:
-                logger.error(f"Unknown backend: {backend}")
-                backend_errors = [ut.ParseException(f"Unknown backend: {backend}")]
-
+            config_obj = b_lut.backend_to_config[backend]
+            backend_data[backend], backend_errors = config_obj.from_dict(json_data[backend])
             errors.extend(backend_errors)
 
+        except KeyError:
+            logger.error(f"Unknown backend: {backend}")
+            errors.append(ut.ParseException(f"Unknown backend: {backend}"))
         except Exception as e:
             logger.exception(f"Failed to structure backend config for {backend}")
             errors.append(
