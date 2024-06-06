@@ -15,6 +15,8 @@ from PySide6.QtCore import Signal, Slot
 from loguru import logger
 
 import deepqt.translation_interface as ai
+import deepqt.backends.backend_interface as bi
+import deepqt.backends.lookups as b_lut
 import deepqt.config as cfg
 import deepqt.glossary as gl
 import deepqt.structures as st
@@ -39,9 +41,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
     translation_mode: ct.TranslationMode
 
-    threadpool: Qc.QThreadPool
+    backend_objects: dict[ct.Backend, bi.Backend]
 
-    api_widgets: dict[ct.Backend, Qw.QWidget]
+    threadpool: Qc.QThreadPool
 
     hamburger_menu: Qw.QMenu
     theming_menu: Qw.QMenu
@@ -87,13 +89,15 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.config = self.load_config()
         self.config.save()
         self.config.pretty_log()
-        self.load_config_to_ui()
         # Share config with the file table.
         self.file_table.set_config(self.config)
 
         self.save_default_palette()
         self.load_config_theme()
 
+        self.backend_objects = {
+            ct.Backend(backend): b_lut.backend_to_class[backend]() for backend in ct.Backend
+        }
         self.load_backend(api)
 
         Qc.QTimer.singleShot(0, self.post_init)
@@ -273,6 +277,21 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.glossary_enabled(self.config.use_glossary)
         self.set_interactive_glossary_visible(self.config.use_glossary)
 
+        backend = self.config.current_backend
+        backend_config = self.config.backend_configs[backend]
+
+        self.label_backend_name.setText(backend_config.name)
+        icon_path = backend_config.icon
+        if icon_path.startswith(":"):
+            self.label_backend_logo.setPixmap(
+                Qg.QIcon(backend_config.icon).pixmap(Qc.QSize(24, 24))
+            )
+
+        else:  # Theme icon
+            self.label_backend_logo.setPixmap(
+                Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24))
+            )
+
         return
         # Ignore the mock because it cannot give language options. It is only to be used for translation.
         translator = self.open_translator(use_mock=False)
@@ -413,22 +432,23 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         :param backend: [Optional] The backend to load.
         """
-        if backend is None:
-            backend = self.config.current_backend
+        if backend is not None:
+            logger.info(f"Loading backend: {backend.name}")
+            self.config.current_backend = backend
+        else:
+            logger.info(f"Reloading current backend: {self.config.current_backend.name}")
 
+        self.load_config_to_ui()
+
+        # Prompt the backend to connect.
+        backend = self.config.current_backend
+        backend_obj = self.backend_objects[backend]
         backend_config = self.config.backend_configs[backend]
 
-        self.label_backend_name.setText(backend_config.name)
-        icon_path = backend_config.icon
-        if icon_path.startswith(":"):
-            self.label_backend_logo.setPixmap(
-                Qg.QIcon(backend_config.icon).pixmap(Qc.QSize(24, 24))
-            )
+        backend_obj.set_config(backend_config)
 
-        else:  # Theme icon
-            self.label_backend_logo.setPixmap(
-                Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24))
-            )
+        if backend_obj.status().connection == bi.ConnectionStatus.Offline:
+            backend_obj.connect()
 
     # ======================================== Dialogs ========================================
 
@@ -446,7 +466,6 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             self.config = backend_conf_dialog.get_modified_config()
             self.config.save()
             self.load_backend()
-            self.load_config_to_ui()
 
     # ======================================= Misc. Helpers =======================================
 

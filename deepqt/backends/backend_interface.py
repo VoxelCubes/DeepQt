@@ -25,7 +25,15 @@ class TranslationFailed(Exception):
     Raised when a translation fails for any reason.
     """
 
-    ...
+    pass
+
+
+class UnsupportedFileFormat(Exception):
+    """
+    Raised when a file format is not supported by the backend.
+    """
+
+    pass
 
 
 class TranslationAborted(Exception):
@@ -33,7 +41,7 @@ class TranslationAborted(Exception):
     Raised when a translation is aborted by the user.
     """
 
-    ...
+    pass
 
 
 @frozen
@@ -174,7 +182,10 @@ class BackendConfig(ABC):
 
 
 class Backend(Protocol):
-    def connect(self) -> bool: ...
+
+    def __init__(self) -> None: ...
+
+    def connect(self) -> None: ...
 
     def disconnect(self) -> None: ...
 
@@ -199,7 +210,7 @@ class Backend(Protocol):
 
     def translate_text(self, text: str) -> str: ...
 
-    def translate_file(self, file_in: Path, file_out: Path) -> None: ...
+    def translate_file(self, file_in: Path, file_type: ct.Formats, file_out: Path) -> None: ...
 
     def status(self) -> BackendStatus:
         """

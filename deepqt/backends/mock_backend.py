@@ -60,20 +60,21 @@ class MockBackend(bi.ReliableBackend):
     Backend for debugging.
     """
 
-    _config: MockConfig  # Needs to be passed from the config.
+    _config: MockConfig | None  # Needs to be passed from the config.
     _connection: bi.ConnectionStatus
 
-    def __init__(self, config: MockConfig) -> None:
-        self._config = config
+    def __init__(self) -> None:
+        super().__init__()
+        self._config = None
         self._status = bi.ConnectionStatus.Offline
 
-    def connect(self) -> bool:
+    def connect(self) -> None:
         # No connection needed.
         self._status = bi.ConnectionStatus.Connected
-        return True
 
     def disconnect(self) -> None:
         # Nothing to disconnect.
+        self._status = bi.ConnectionStatus.Offline
         pass
 
     def supported_languages(self) -> list[tuple[str, str]]:
@@ -114,14 +115,17 @@ class MockBackend(bi.ReliableBackend):
                 buffer.write(char)
         return buffer.getvalue()
 
-    def translate_file(self, file_in: Path, file_out: Path) -> None:
-        try:
-            with ut.read_autodetect_encoding(file_in) as f:
-                text = f.read()
-            translated = self.translate_text(text)
-            file_out.write_text(translated)
-        except Exception as e:
-            raise bi.TranslationFailed(f"Error translating file: {e}")
+    def translate_file(self, file_in: Path, file_type: ct.Formats, file_out: Path) -> None:
+        if file_type is ct.Formats.TEXT:
+            try:
+                with ut.read_autodetect_encoding(file_in) as f:
+                    text = f.read()
+                translated = self.translate_text(text)
+                file_out.write_text(translated)
+            except Exception as e:
+                raise bi.TranslationFailed(f"Error translating file: {e}")
+        else:
+            raise bi.UnsupportedFileFormat(f"Unsupported file format: {file_type}")
 
     def status(self) -> bi.BackendStatus:
         """
