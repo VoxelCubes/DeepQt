@@ -46,5 +46,5 @@ Files:
       - state-error
       - state-offline
       - state-ok
-    64:
+    22:
       - dialog-error

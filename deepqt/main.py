@@ -1,6 +1,7 @@
 import argparse
 import platform
 import sys
+from importlib import resources
 
 import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
@@ -10,15 +11,13 @@ import deepqt.utils as ut
 from deepqt import __program__, __display_name__, __version__, __description__
 from deepqt.constants import Command, Backend
 import deepqt.gui_utils as gu
+import deepqt.data.theme_icons as theme_icons_data
 from deepqt.driver_mainwindow import MainWindow
 
 
 # TODO Implement the damn thing
 # TODO Testing
-
-import deepqt.rc_generated_files.rc_themes
-import deepqt.rc_generated_files.rc_theme_icons
-import deepqt.rc_generated_files.rc_icons
+# TODO add memwatcher icons
 
 
 def main() -> None:
@@ -114,19 +113,13 @@ def main() -> None:
     if args.debug:
         logger.debug(f"Launch arguments: {args}")
 
-    # Assert the compiled resource files were imported.
-    assert deepqt.rc_generated_files.rc_themes
-    assert deepqt.rc_generated_files.rc_theme_icons
-    assert deepqt.rc_generated_files.rc_icons
-
     # Start Qt runtime.
     app = Qw.QApplication(sys.argv)
 
-    # Something broke with Breeze 6, so now we need to disable system icons.
-    search_paths = Qg.QIcon.themeSearchPaths()
-    search_paths.remove(":/icons")
-    Qg.QIcon.setThemeSearchPaths([":/icon-themes", ":/icons"])
-    Qg.QIcon.setFallbackSearchPaths(search_paths)
+    with resources.files(theme_icons_data) as data_path:
+        theme_icons = str(data_path)
+
+    Qg.QIcon.setFallbackSearchPaths([":/icons", theme_icons])
     # We need to set an initial theme on Windows, otherwise the icons will fail to load
     # later on, even when switching the theme again.
     if platform.system() != "Linux" or ut.running_in_flatpak():

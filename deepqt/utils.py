@@ -10,7 +10,9 @@ from pathlib import Path
 from contextlib import contextmanager
 from typing import get_type_hints, Generic, TypeVar, Optional
 from io import TextIOWrapper
+from importlib import resources
 
+import psutil
 import PySide6
 import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
@@ -20,7 +22,7 @@ from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME
 
 from deepqt import __program__, __version__
 import deepqt.constants as ct
-import deepqt.rc_generated_files.rc_themes
+from deepqt.data import color_themes
 
 T = TypeVar("T")
 
@@ -67,11 +69,21 @@ def collect_system_info(callers_file: str) -> str:
     buffer.write(f"Python Version: {sys.version}\n")
     buffer.write(f"PySide (Qt) Version: {PySide6.__version__}\n")
     buffer.write(f"Available Qt Themes: {', '.join(Qw.QStyleFactory.keys())}\n")
+    current_app_theme = Qw.QApplication.style()
+    current_app_theme_name = (
+        current_app_theme.objectName() if current_app_theme else "System Default"
+    )
+    buffer.write(f"Current Qt Theme: {current_app_theme_name}\n")
+    icon_theme_name = Qg.QIcon.themeName()
+    icon_theme_name = icon_theme_name if icon_theme_name else "System Default"
+    buffer.write(f"Current Icon Theme: {icon_theme_name}\n")
     buffer.write(
         f"Available Color Themes: {', '.join(map(lambda a: a[1], get_available_themes()))}\n"
     )
     buffer.write(f"System locale: {Qc.QLocale.system().name()}\n")
     buffer.write(f"CPU Cores: {os.cpu_count()}\n")
+    buffer.write(f"Memory: {psutil.virtual_memory().total / 1024 ** 3:.2f} GiB\n")
+    buffer.write(f"Swap: {psutil.swap_memory().total / 1024 ** 3:.2f} GiB\n")
 
     return buffer.getvalue()
 
@@ -164,7 +176,7 @@ def get_lock_file_path() -> Path:
 
 def get_available_themes() -> list[tuple[str, str]]:
     """
-    Check the Qt Resource System for available themes in :/themes/.
+    Check the data/color_themes directory for available themes.
     The theme name is the plain file name. The display name is either defined in the
     theme file under section General, key name.
     If not defined, the display name is the theme name but capitalized and
@@ -174,33 +186,33 @@ def get_available_themes() -> list[tuple[str, str]]:
 
     :return: A list of available theme names with their display names.
     """
-    assert deepqt.rc_generated_files.rc_themes
     # Simply discover all files in the themes folder.
     themes = []
-    theme_dir = Qc.QDir(":/themes")
-    for entry in theme_dir.entryInfoList():
-        theme_name = entry.fileName()
-        theme_file = Qc.QFile(f":/themes/{theme_name}")
-        if theme_file.open(Qc.QFile.ReadOnly | Qc.QFile.Text):
-            stream = Qc.QTextStream(theme_file)
-            content = stream.readAll()
-            display_name = theme_name.replace("_", " ").capitalize()
-            in_general_section = False
-            for line in content.split("\n"):
-                line = line.strip()
-                if line.startswith("[General]"):
-                    in_general_section = True
-                elif line.startswith("[") and line.endswith("]"):
-                    if in_general_section:
-                        # We found general, but came across the next section now.
-                        break
-                    in_general_section = False
-                elif "=" in line:
-                    key, value = map(str.strip, line.split("=", 1))
-                    if key == "Name":
-                        display_name = value
-                        break
-            themes.append((theme_name, display_name))
+    with resources.path(color_themes, "") as theme_dir:
+        theme_dir = Path(theme_dir)
+    for theme_file in theme_dir.iterdir():
+        # Skip dirs and empty files.
+        if theme_file.is_dir() or theme_file.stat().st_size == 0:
+            continue
+        theme_name = theme_file.stem
+        content = theme_file.read_text()
+        display_name = theme_name.replace("_", " ").capitalize()
+        in_general_section = False
+        for line in content.split("\n"):
+            line = line.strip()
+            if line.startswith("[General]"):
+                in_general_section = True
+            elif line.startswith("[") and line.endswith("]"):
+                if in_general_section:
+                    # We found general, but came across the next section now.
+                    break
+                in_general_section = False
+            elif "=" in line:
+                key, value = map(str.strip, line.split("=", 1))
+                if key == "Name":
+                    display_name = value
+                    break
+        themes.append((theme_name, display_name))
 
     return themes
 
