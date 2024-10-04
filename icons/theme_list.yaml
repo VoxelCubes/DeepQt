@@ -12,6 +12,7 @@ Files:
       - dialog-cancel
       - dialog-ok
       - dialog-ok-apply
+      - dialog-warning
       - document-open
       - document-open-folder
       - document-preview

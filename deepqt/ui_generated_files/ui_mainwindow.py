@@ -482,7 +482,13 @@ class Ui_MainWindow(object):
 
         self.pushButton_show_from_interactive_glossary = QPushButton(self.page_interactive_reliable)
         self.pushButton_show_from_interactive_glossary.setObjectName(u"pushButton_show_from_interactive_glossary")
-        icon8 = QIcon(QIcon.fromTheme(u"arrow-up"))
+        icon8 = QIcon()
+        iconThemeName = u"arrow-up"
+        if QIcon.hasThemeIcon(iconThemeName):
+            icon8 = QIcon.fromTheme(iconThemeName)
+        else:
+            icon8.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+
         self.pushButton_show_from_interactive_glossary.setIcon(icon8)
         self.pushButton_show_from_interactive_glossary.setCheckable(True)
 
@@ -570,6 +576,38 @@ class Ui_MainWindow(object):
         self.splitter.addWidget(self.stackedWidget)
 
         self.verticalLayout_8.addWidget(self.splitter)
+
+        self.widget_oom_banner = QWidget(self.centralwidget)
+        self.widget_oom_banner.setObjectName(u"widget_oom_banner")
+        self.horizontalLayout_16 = QHBoxLayout(self.widget_oom_banner)
+        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
+        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_16.addItem(self.horizontalSpacer_9)
+
+        self.horizontalLayout_17 = QHBoxLayout()
+        self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
+        self.label_oom_icon = QLabel(self.widget_oom_banner)
+        self.label_oom_icon.setObjectName(u"label_oom_icon")
+        self.label_oom_icon.setText(u"<warning icon>")
+
+        self.horizontalLayout_17.addWidget(self.label_oom_icon)
+
+        self.label_oom_message = QLabel(self.widget_oom_banner)
+        self.label_oom_message.setObjectName(u"label_oom_message")
+        self.label_oom_message.setText(u"<warning msg>")
+
+        self.horizontalLayout_17.addWidget(self.label_oom_message)
+
+
+        self.horizontalLayout_16.addLayout(self.horizontalLayout_17)
+
+        self.horizontalSpacer_10 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_16.addItem(self.horizontalSpacer_10)
+
+
+        self.verticalLayout_8.addWidget(self.widget_oom_banner)
 
         self.frame_progress_drawer = QFrame(self.centralwidget)
         self.frame_progress_drawer.setObjectName(u"frame_progress_drawer")

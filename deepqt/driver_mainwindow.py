@@ -19,6 +19,7 @@ import deepqt.backends.backend_interface as bi
 import deepqt.backends.lookups as b_lut
 import deepqt.config as cfg
 import deepqt.glossary as gl
+import deepqt.memory_watcher as mw
 import deepqt.structures as st
 import deepqt.worker_thread as wt
 import deepqt.constants as ct
@@ -60,6 +61,9 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
     theme_is_dark: ut.Shared[bool]
     theme_is_dark_changed = Signal(bool)  # When true, the new theme is dark.
 
+    memory_watcher: mw.MemoryWatcher  # The memory watcher for the window.
+    mem_watcher_thread: Qc.QThread  # The thread for the memory watcher.
+
     def __init__(
         self,
         command: ct.Command,
@@ -83,6 +87,8 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.hamburger_menu = Qw.QMenu()
 
         self.initialize_ui()
+
+        self.start_memory_watcher()
 
         self.threadpool = Qc.QThreadPool.globalInstance()
 
@@ -115,6 +121,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         # Set window height to 650px.
         # self.resize(self.width(), 650)
         self.hide_progress()
+        self.init_oom_banner()
         self.start_button_enabled(False)
         self.show_button_start()
         self.set_up_statusbar()
@@ -202,6 +209,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         """
         logger.info("Closing window.")
         self.free_lock_file()
+        self.memory_watcher.stop()
         self.abort_translation_worker.emit()
         if self.threadpool.activeThreadCount():
             self.statusbar.showMessage("Waiting for threads to finish...")
@@ -1161,6 +1169,33 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         Simulate a crash by raising an exception.
         """
         raise Exception("This is a simulated crash.")
+
+    def start_memory_watcher(self) -> None:
+        """
+        Run the memory watcher in a separate thread.
+        Callbacks are sent over signals.
+        """
+        self.memory_watcher = mw.MemoryWatcher()
+        self.memory_watcher.oom_warning.connect(self.show_oom_warning)
+        self.memory_watcher.oom_relaxed.connect(self.hide_oom_warning)
+        self.memory_watcher.start()
+
+    @Slot(str)
+    def show_oom_warning(self, message: str) -> None:
+        logger.warning(message)
+        self.widget_oom_banner.show()
+        self.label_oom_message.setText(message)
+
+    def hide_oom_warning(self) -> None:
+        self.widget_oom_banner.hide()
+
+    def init_oom_banner(self) -> None:
+        self.widget_oom_banner.hide()
+        self.label_oom_icon.setPixmap(Qg.QIcon.fromTheme("dialog-warning").pixmap(24, 24))
+        self.widget_oom_banner.setStyleSheet(f"background-color: #550000; color: #ffffff;")
+        font = self.label_oom_message.font()
+        font.setPointSize(round(font.pointSize() * 1.5))
+        self.label_oom_message.setFont(font)
 
 
 def nuke_epub_cache() -> None:
