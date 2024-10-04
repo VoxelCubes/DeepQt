@@ -1,13 +1,12 @@
 from copy import deepcopy
 
 import PySide6.QtCore as Qc
-import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
 from PySide6.QtCore import Signal
 
 import deepqt.config as cfg
 import deepqt.constants as ct
-import deepqt.gui_utils as gt
+import deepqt.gui_utils as gu
 import deepqt.utils as ut
 from deepqt.gui_utils import show_info
 from deepqt.ui_generated_files.ui_backend_configuration import Ui_BackendConfiguration
@@ -68,19 +67,13 @@ class BackendConfiguration(Qw.QDialog, Ui_BackendConfiguration):
         self.label_reliability_icon.setToolTip("This backend requires per-segment supervision.")
         self.label_cost_icon.setToolTip("This backend may incur costs.")
         if self.theme_is_dark.get():
-            self.label_reliability_icon.setPixmap(
-                Qg.QIcon(":/custom_icons/dark/unreliable-service.svg").pixmap(24)
-            )
-            self.label_cost_icon.setPixmap(
-                Qg.QIcon(":/custom_icons/dark/cost-warning.svg").pixmap(24)
-            )
+            style = "dark"
         else:
-            self.label_reliability_icon.setPixmap(
-                Qg.QIcon(":/custom_icons/light/unreliable-service.svg").pixmap(24)
-            )
-            self.label_cost_icon.setPixmap(
-                Qg.QIcon(":/custom_icons/light/cost-warning.svg").pixmap(24)
-            )
+            style = "light"
+        self.label_reliability_icon.setPixmap(
+            gu.load_custom_icon("unreliable-service", style).pixmap(24)
+        )
+        self.label_cost_icon.setPixmap(gu.load_custom_icon("cost-warning", style).pixmap(24))
 
     def populate_backend_list(self) -> None:
         # If debugging, show debug backends as well.
@@ -127,7 +120,7 @@ class BackendConfiguration(Qw.QDialog, Ui_BackendConfiguration):
     def add_backend_to_list(self, backend: ct.Backend) -> None:
         backend_conf = self.config.backend_configs[backend]
         self.listWidget_backends.addIconTextItemLinkedData(
-            Qg.QIcon(backend_conf.icon), backend_conf.name, backend
+            backend_conf.load_icon(), backend_conf.name, backend
         )
 
     def select_current_backend(self) -> None:
@@ -148,14 +141,14 @@ class BackendConfiguration(Qw.QDialog, Ui_BackendConfiguration):
         self.config.current_backend = backend
         backend_conf = self.config.backend_configs[backend]
         self.label_backend_name.setText(backend_conf.name)
-        self.label_icon.setPixmap(Qg.QIcon(backend_conf.icon).pixmap(64))
+        self.label_icon.setPixmap(backend_conf.load_icon().pixmap(64))
         self.label_description.setText(backend_conf.description)
         self.label_reliability_icon.setVisible(backend_conf.unreliable)
 
         if backend_conf.help:
             self.buttonBox.addButton(Qw.QDialogButtonBox.Help)
             self.buttonBox.button(Qw.QDialogButtonBox.Help).clicked.connect(
-                lambda: gt.show_info(self, "Info", backend_conf.help)
+                lambda: gu.show_info(self, "Info", backend_conf.help)
             )
         else:
             self.buttonBox.removeButton(self.buttonBox.button(Qw.QDialogButtonBox.Help))

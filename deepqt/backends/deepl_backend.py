@@ -16,7 +16,7 @@ DEEPL_USAGE_UNLIMITED = (
 @define
 class DeepLConfig(bi.BackendConfig):
     name: str = "DeepL"
-    icon: str = ":/custom_icons/static/deepl.png"
+    icon: str = bi.BackendIconType.CUSTOM / "deepl.png"
     description: str = (
         "DeepL is a high-quality translation service that uses neural networks to translate text."
     )

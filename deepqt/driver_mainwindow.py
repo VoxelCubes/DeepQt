@@ -118,6 +118,10 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         )
 
     def initialize_ui(self) -> None:
+        if platform.system() == "Windows":
+            self.setWindowIcon(gu.load_custom_icon("logo.ico"))
+        else:
+            self.setWindowIcon(gu.load_custom_icon("logo.svg"))
         # Set window height to 650px.
         # self.resize(self.width(), 650)
         self.hide_progress()
@@ -290,15 +294,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
         self.label_backend_name.setText(backend_config.name)
         icon_path = backend_config.icon
-        if icon_path.startswith(":"):
-            self.label_backend_logo.setPixmap(
-                Qg.QIcon(backend_config.icon).pixmap(Qc.QSize(24, 24))
-            )
-
-        else:  # Theme icon
-            self.label_backend_logo.setPixmap(
-                Qg.QIcon.fromTheme(backend_config.icon).pixmap(Qc.QSize(24, 24))
-            )
+        self.label_backend_logo.setPixmap(backend_config.load_icon().pixmap(Qc.QSize(24, 24)))
 
         return
         # Ignore the mock because it cannot give language options. It is only to be used for translation.
@@ -1041,20 +1037,26 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         if lock_file.exists():
             # Check if the lock file is newer than the current uptime.
             if lock_file.stat().st_mtime >= psutil.boot_time():
-                logger.warning("Found active lock file.")
-                response = gu.show_critical(
-                    self,
-                    "Multiple Instances",
-                    "Another instance of Panel Cleaner appears to be running already "
-                    "or the previous instance was killed. "
-                    "Opening a new instance will make the old session unstable.\n\n"
-                    "Continue anyway?",
-                    detailedText=self.tr("Found process ID in lock file: ") + lock_file.read_text(),
-                )
-                if response == Qw.QMessageBox.Abort:
-                    logger.critical("User aborted due to lock file.")
-                    raise SystemExit(1)
-                logger.warning("User overrode lock file.")
+                # Make sure other referenced PID is still running.
+                if psutil.pid_exists(int(lock_file.read_text())):
+                    logger.warning("Found active lock file.")
+                    response = gu.show_critical(
+                        self,
+                        self.tr("Multiple Instances"),
+                        self.tr(
+                            "Another instance of DeepQt appears to be running already."
+                            "Opening a new instance will make the old session unstable.\n\n"
+                            "Continue anyway?"
+                        ),
+                        detailedText=self.tr("Found process ID in lock file: ")
+                        + lock_file.read_text(),
+                    )
+                    if response == Qw.QMessageBox.Abort:
+                        logger.critical("User aborted due to lock file.")
+                        raise SystemExit(1)
+                    logger.warning("User overrode lock file.")
+                else:
+                    logger.warning("Found lock file, but referenced PID is not running.")
             else:
                 logger.warning(
                     "Found lock file, but it is older than the current uptime. Overwriting."

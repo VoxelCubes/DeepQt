@@ -1,28 +1,29 @@
 import difflib
 import os
-import re
 import platform
+import re
 import sys
-import chardet
 import zipfile as zf
-from io import StringIO
-from pathlib import Path
 from contextlib import contextmanager
-from typing import get_type_hints, Generic, TypeVar, Optional
-from io import TextIOWrapper
 from importlib import resources
+from io import StringIO
+from io import TextIOWrapper
+from pathlib import Path
+from typing import get_type_hints, Generic, TypeVar, Optional
 
-import psutil
 import PySide6
 import PySide6.QtCore as Qc
 import PySide6.QtGui as Qg
 import PySide6.QtWidgets as Qw
+import chardet
+import psutil
 from loguru import logger
 from xdg import XDG_CONFIG_HOME, XDG_CACHE_HOME
 
-from deepqt import __program__, __version__
 import deepqt.constants as ct
+from deepqt import __program__, __version__
 from deepqt.data import color_themes
+
 
 T = TypeVar("T")
 

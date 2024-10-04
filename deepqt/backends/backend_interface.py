@@ -10,13 +10,15 @@ Unreliable backends may return nonsense and need per segment tweaking to work.
 """
 
 from abc import abstractmethod, ABC
+from enum import StrEnum, auto, Enum
 from pathlib import Path
 from typing import Protocol, final
-from enum import StrEnum, auto, Enum
 
+import PySide6.QtGui as Qg
 from attrs import frozen, define
 
 import deepqt.constants as ct
+import deepqt.gui_utils as gu
 
 
 # Any backend's translation functions can only raise these two exceptions.
@@ -55,6 +57,26 @@ class ConfigIssue:
     attribute: str
     message: str
     critical: bool
+
+
+class BackendIconType(StrEnum):
+    """
+    This defines the available namespaces for backend icons.
+    Custom: Icons supplied by DeepQt.
+    XDG: Icons supplied by the system.
+    User: Icons supplied by the user, e.g. a custom path.
+    """
+
+    CUSTOM = "custom/"
+    XDG = "xdg/"
+    USER = "user/"
+
+    def __truediv__(self, other: str):
+        """
+        Concatenate the icon type with a string. This serves to show that this
+        enum is a namespace for icons.
+        """
+        return self.value + other
 
 
 @define
@@ -101,7 +123,7 @@ class BackendStatus:
 class BackendConfig(ABC):
     # How long it took to translate 1000 characters on average. (-1 if unknown)
     name: str = "Unset"
-    icon: str = ":/custom_icons/static/generic-backend.svg"
+    icon: str = BackendIconType.CUSTOM / "generic-backend.svg"
     description: str = "Blank description."  # Markdown enabled.
     unreliable: bool = False
     help: ct.HTML = ""
@@ -171,6 +193,23 @@ class BackendConfig(ABC):
         child_meta = self._attribute_metadata()
         meta.update(child_meta)
         return meta
+
+    def load_icon(self) -> Qg.QIcon:
+        """
+        Load the icon from the icon path, depending on the namespace.
+        If a USER icon fails to load, it will return a placeholder.
+        """
+        if self.icon.startswith(BackendIconType.CUSTOM):
+            custom_icon_name = self.icon.removeprefix(BackendIconType.CUSTOM)
+            return gu.load_custom_icon(custom_icon_name)
+        elif self.icon.startswith(BackendIconType.XDG):
+            return Qg.QIcon.fromTheme(self.icon.removeprefix(BackendIconType.XDG))
+        elif self.icon.startswith(BackendIconType.USER):
+            icon = Qg.QIcon(self.icon.removeprefix(BackendIconType.USER))
+            if icon.isNull():
+                return Qg.QIcon.fromTheme("image-missing")
+        else:
+            raise ValueError(f"Invalid icon type: {self.icon}")
 
     def no_save_attributes(self) -> list[str]:
         """
