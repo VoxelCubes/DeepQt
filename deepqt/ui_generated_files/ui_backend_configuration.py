@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'backend_configuration.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -43,7 +43,7 @@ class Ui_BackendConfiguration(object):
         self.listWidget_backends.setFrameShape(QFrame.NoFrame)
         self.listWidget_backends.setFrameShadow(QFrame.Plain)
         self.listWidget_backends.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.listWidget_backends.setProperty("showDropIndicator", False)
+        self.listWidget_backends.setProperty(u"showDropIndicator", False)
         self.listWidget_backends.setIconSize(QSize(24, 24))
         self.listWidget_backends.setSpacing(6)
 

@@ -4,6 +4,7 @@ import PySide6.QtWidgets as Qw
 from loguru import logger
 
 import deepqt.log_parser as lp
+import deepqt.state_saver as ss
 from deepqt.ui_generated_files.ui_ErrorDialog import Ui_ErrorDialog
 
 
@@ -34,13 +35,33 @@ class ErrorDialog(Qw.QDialog, Ui_ErrorDialog):
         self.label_message.setText(message)
 
         self.pushButton_close.clicked.connect(self.close)
+        self.pushButton_kill.clicked.connect(self.kill)
         self.pushButton_open_issues.clicked.connect(self.open_issues)
         self.pushButton_clipboard.clicked.connect(self.copy_to_clipboard)
 
         self.label_name_hidden.setText(
-            "Note: Name {name} and api keys were hidden".format(name=lp.get_username())
+            self.tr('Note: Name "{name}" and API keys were hidden').format(name=lp.get_username())
         )
         self.load_session_log()
+
+        self.state_saver = ss.StateSaver("error_dialog")
+        self.init_state_saver()
+        self.state_saver.restore()
+
+    def closeEvent(self, event: Qg.QCloseEvent) -> None:
+        """
+        Called when the window is closed.
+        """
+        self.state_saver.save()
+        event.accept()
+
+    def init_state_saver(self) -> None:
+        """
+        Load the state from the state saver.
+        """
+        self.state_saver.register(
+            self,
+        )
 
     @staticmethod
     def open_issues() -> None:
@@ -73,3 +94,13 @@ class ErrorDialog(Qw.QDialog, Ui_ErrorDialog):
         """
         logger.debug("Copying issue report to clipboard.")
         Qg.QGuiApplication.clipboard().setText(self.session_log.text)
+
+    def kill(self) -> None:
+        """
+        Kill the application.
+        This may be necessary when repeated errors occur and the application is unresponsive.
+        """
+        logger.critical("User killed the application.")
+        Qw.QApplication.instance().quit()  # Embrace death.
+        self.close()
+        raise SystemExit(255)

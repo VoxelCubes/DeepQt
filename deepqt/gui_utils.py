@@ -34,8 +34,7 @@ def show_exception(
     parent,
     title: str,
     msg: str,
-    worker_error: None | wt.WorkerError = None,
-    exception_information: tuple[type[BaseException], BaseException, TracebackType] | None = None,
+    error_bundle: None | wt.WorkerError | tuple[type, BaseException, TracebackType] = None,
     collect_exception: bool = True,
 ) -> None:
     """
@@ -49,8 +48,7 @@ def show_exception(
     :param parent: The parent widget.
     :param title: The title of the dialog.
     :param msg: The message to show.
-    :param worker_error: [Optional] A worker error object to read the exception from.
-    :param exception_information: [Optional] A tuple of exception information to use instead of the current context.
+    :param error_bundle: [Optional] A worker error or a tuple of exception information.
     :param collect_exception: [Optional] Whether to add exception information to the log.
     """
 
@@ -58,20 +56,27 @@ def show_exception(
         exception_type: type[BaseException]
         exception_value: BaseException
         exception_traceback: TracebackType
-        depth = 1
 
-        if worker_error is not None:
-            exception_type = worker_error.exception_type
-            exception_value = worker_error.value
-            exception_traceback = worker_error.traceback
-        elif exception_information is not None:
-            exception_type, exception_value, exception_traceback = exception_information
-            depth = 2
+        if error_bundle is not None:
+            if isinstance(error_bundle, tuple):
+                exception_type, exception_value, exception_traceback = error_bundle
+            elif isinstance(error_bundle, wt.WorkerError):
+                exception_type = error_bundle.exception_type
+                exception_value = error_bundle.value
+                exception_traceback = error_bundle.traceback
+            else:
+                logger.error(f"Invalid error bundle: {error_bundle}")
+                exception_type, exception_value, exception_traceback = sys.exc_info()
         else:
             exception_type, exception_value, exception_traceback = sys.exc_info()
 
+        # Ignore the exception if it's a KeyboardInterrupt.
+        if exception_type is KeyboardInterrupt:
+            logger.warning("User interrupted the process.")
+            return
+
         logger.opt(
-            depth=depth, exception=(exception_type, exception_value, exception_traceback)
+            depth=1, exception=(exception_type, exception_value, exception_traceback)
         ).critical(msg)
 
     box = ErrorDialog(parent, title, msg)

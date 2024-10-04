@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -59,7 +59,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon = QIcon.fromTheme(iconThemeName)
         else:
-            icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_translate_files.setIcon(icon)
         self.pushButton_translate_files.setCheckable(True)
@@ -75,7 +75,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon1 = QIcon.fromTheme(iconThemeName)
         else:
-            icon1.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon1.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_translate_text.setIcon(icon1)
         self.pushButton_translate_text.setCheckable(True)
@@ -95,7 +95,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon2 = QIcon.fromTheme(iconThemeName)
         else:
-            icon2.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon2.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_menu.setIcon(icon2)
         self.pushButton_menu.setFlat(True)
@@ -140,7 +140,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon3 = QIcon.fromTheme(iconThemeName)
         else:
-            icon3.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon3.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_configure_backend.setIcon(icon3)
 
@@ -241,7 +241,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon4 = QIcon.fromTheme(iconThemeName)
         else:
-            icon4.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon4.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_glossary_file_browse.setIcon(icon4)
         self.pushButton_glossary_file_browse.setFlat(True)
@@ -288,7 +288,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon5 = QIcon.fromTheme(iconThemeName)
         else:
-            icon5.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon5.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_out_dir_browse.setIcon(icon5)
         self.pushButton_out_dir_browse.setFlat(True)
@@ -342,7 +342,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon6 = QIcon.fromTheme(iconThemeName)
         else:
-            icon6.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon6.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_start.setIcon(icon6)
 
@@ -356,7 +356,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon7 = QIcon.fromTheme(iconThemeName)
         else:
-            icon7.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon7.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_abort.setIcon(icon7)
 

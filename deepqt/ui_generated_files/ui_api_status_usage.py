@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'api_status_usage.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -77,7 +77,7 @@ class Ui_APIStatusUsage(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon = QIcon.fromTheme(iconThemeName)
         else:
-            icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_refresh.setIcon(icon)
         self.pushButton_refresh.setFlat(True)

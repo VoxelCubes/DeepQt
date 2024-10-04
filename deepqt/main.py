@@ -77,19 +77,9 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    ut.get_log_path().parent.mkdir(parents=True, exist_ok=True)
-
     # Set up logging.
     logger.remove()
-
-    # Set up a preliminary exception handler so that this still shows up in the log.
-    # Once the gui is up and running it'll be replaced with a call to the gui's error dialog.
-    def exception_handler(exctype, value, traceback) -> None:
-        logger.opt(depth=1, exception=(exctype, value, traceback)).critical(
-            "An uncaught exception was raised"
-        )
-
-    sys.excepthook = exception_handler
+    ut.get_log_path().parent.mkdir(parents=True, exist_ok=True)
 
     # When bundling an executable, stdout can be None if no console is supplied.
     if sys.stdout is not None:
@@ -100,6 +90,15 @@ def main() -> None:
 
     # Log up to 10MB to the log file.
     logger.add(str(ut.get_log_path()), rotation="10 MB", retention="1 week", level="DEBUG")
+
+    # Set up a preliminary exception handler so that this still shows up in the log.
+    # Once the gui is up and running it'll be replaced with a call to the gui's error dialog.
+    def exception_handler(exctype, value, traceback) -> None:
+        logger.opt(depth=1, exception=(exctype, value, traceback)).critical(
+            "An uncaught exception was raised before the GUI was initialized."
+        )
+
+    sys.excepthook = exception_handler
 
     if args.debug_api:
         import logging

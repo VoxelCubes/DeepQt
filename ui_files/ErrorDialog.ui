@@ -119,6 +119,17 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButton_kill">
+         <property name="text">
+          <string>Terminate DeepQt</string>
+         </property>
+         <property name="icon">
+          <iconset theme="process-stop">
+           <normaloff>.</normaloff>.</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_close">
          <property name="text">
           <string>Close</string>

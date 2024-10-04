@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'text_preview.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -44,7 +44,7 @@ class Ui_TextPreview(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon = QIcon.fromTheme(iconThemeName)
         else:
-            icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_save.setIcon(icon)
 

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'ErrorDialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -85,7 +85,7 @@ class Ui_ErrorDialog(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon = QIcon.fromTheme(iconThemeName)
         else:
-            icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_clipboard.setIcon(icon)
 
@@ -98,22 +98,35 @@ class Ui_ErrorDialog(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon1 = QIcon.fromTheme(iconThemeName)
         else:
-            icon1.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon1.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.pushButton_open_issues.setIcon(icon1)
 
         self.horizontalLayout.addWidget(self.pushButton_open_issues)
 
-        self.pushButton_close = QPushButton(ErrorDialog)
-        self.pushButton_close.setObjectName(u"pushButton_close")
+        self.pushButton_kill = QPushButton(ErrorDialog)
+        self.pushButton_kill.setObjectName(u"pushButton_kill")
         icon2 = QIcon()
-        iconThemeName = u"window-close"
+        iconThemeName = u"process-stop"
         if QIcon.hasThemeIcon(iconThemeName):
             icon2 = QIcon.fromTheme(iconThemeName)
         else:
-            icon2.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
+            icon2.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
-        self.pushButton_close.setIcon(icon2)
+        self.pushButton_kill.setIcon(icon2)
+
+        self.horizontalLayout.addWidget(self.pushButton_kill)
+
+        self.pushButton_close = QPushButton(ErrorDialog)
+        self.pushButton_close.setObjectName(u"pushButton_close")
+        icon3 = QIcon()
+        iconThemeName = u"window-close"
+        if QIcon.hasThemeIcon(iconThemeName):
+            icon3 = QIcon.fromTheme(iconThemeName)
+        else:
+            icon3.addFile(u".", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+
+        self.pushButton_close.setIcon(icon3)
 
         self.horizontalLayout.addWidget(self.pushButton_close)
 
@@ -132,6 +145,7 @@ class Ui_ErrorDialog(object):
     def retranslateUi(self, ErrorDialog):
         self.pushButton_clipboard.setText(QCoreApplication.translate("ErrorDialog", u"Copy to Clipboard", None))
         self.pushButton_open_issues.setText(QCoreApplication.translate("ErrorDialog", u"Open Issue Tracker", None))
+        self.pushButton_kill.setText(QCoreApplication.translate("ErrorDialog", u"Terminate DeepQt", None))
         self.pushButton_close.setText(QCoreApplication.translate("ErrorDialog", u"Close", None))
         pass
     # retranslateUi
