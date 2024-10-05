@@ -12,7 +12,6 @@ Files:
       - dialog-cancel
       - dialog-ok
       - dialog-ok-apply
-      - dialog-warning
       - document-open
       - document-open-folder
       - document-preview
@@ -48,5 +47,6 @@ Files:
       - state-offline
       - state-ok
       - image-missing
+      - dialog-warning
     22:
       - dialog-error

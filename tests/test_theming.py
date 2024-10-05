@@ -1,20 +1,15 @@
 import yaml
 from pathlib import Path, PosixPath
-
-import PySide6.QtCore as Qc
+from importlib import resources
 
 import deepqt.utils as ut
-import deepqt.rc_generated_files.rc_themes
-import deepqt.rc_generated_files.rc_theme_icons
+import deepqt.data.theme_icons as theme_icons_module
 
 
 def test_get_available_themes():
     """
     Test the get_available_themes function.
     """
-    assert deepqt.rc_generated_files.rc_themes
-    assert deepqt.rc_generated_files.rc_theme_icons
-
     themes = ut.get_available_themes()
 
     assert themes
@@ -25,12 +20,10 @@ def test_theme_icon_presence():
     """
     Test that all icons are present in the resources.
     """
-    assert deepqt.rc_generated_files.rc_themes
-    assert deepqt.rc_generated_files.rc_theme_icons
-    
     # Read the icon list from the yaml file located at DeepQt/icons/theme_list.yaml
     yaml_path = Path(__file__).parent.parent / "icons" / "theme_list.yaml"
-    qrc_theme_icons = Qc.QDir(":/icon-themes/")
+    with resources.files(theme_icons_module) as theme_icons_path:
+        theme_icons_root = Path(theme_icons_path)
 
     with yaml_path.open() as file:
         data = yaml.safe_load(file)
@@ -44,14 +37,22 @@ def test_theme_icon_presence():
     # then scanned recursively.
     for theme_path in theme_directories:
         # Only use the last directory name of the theme path.
-        theme_directory = PosixPath(theme_path).name
+        theme_directory_name = PosixPath(theme_path).name
         for category, sizes in theme_icons.items():
             for size, icons in sizes.items():
                 for icon in icons:
-                    expected_path = PosixPath(theme_directory) / category / str(size) / icon
+                    expected_relative_path = (
+                        PosixPath(theme_directory_name) / category / str(size) / icon
+                    )
 
                     for suffix in ["svg", "png"]:
-                        if qrc_theme_icons.exists(expected_path.with_suffix(f".{suffix}").as_posix()):
+                        full_path = (
+                            theme_icons_root
+                            / expected_relative_path.with_suffix(f".{suffix}").as_posix()
+                        )
+                        if full_path.exists():
                             break
                     else:
-                        assert False, f"Icon {expected_path} not found in the theme_icons.qrc file."
+                        assert (
+                            False
+                        ), f"Icon {expected_relative_path} not found among the theme_icons data files."

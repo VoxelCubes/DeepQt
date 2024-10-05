@@ -158,15 +158,15 @@ def copy_files(theme_dir: Path, yaml_data: dict, dest_dir: Path) -> None:
                         dest_file_path = dest_path / found_file
 
                         if is_icon_light(found_file_path):
+                            print(f"Warning: Correcting {found_file} to dark.")
                             make_icon_dark(found_file_path, dest_file_path)
                         else:
-                            print(f"Not recoloring {found_file} as it is already dark.")
                             shutil.copy2(src_path / found_file, dest_path)
 
                     else:
                         shutil.copy2(src_path / found_file, dest_path)
                 else:
-                    print(f"Could not find {file} in {src_path}")
+                    print(f"Error: Could not find {file} in {src_path}")
 
 
 def create_sparse_copy(theme_dir: Path, yaml_data: dict, destination_dir: Path) -> None:
