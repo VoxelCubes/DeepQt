@@ -30,9 +30,9 @@ class Command(Enum):
 
 
 class Backend(StrEnum):
-    MOCK = "mock"  # Mocking a reliable backend.
-    # MOCK_LLM = "mock_llm"  # Mocking an unreliable backend.
-    DEEPL = "deepl"
+    MOCK = "MOCK"  # Mocking a reliable backend.
+    # MOCK_LLM = "MOCK_LLM"  # Mocking an unreliable backend.
+    DEEPL = "DEEPL"
 
 
 # debug_backends = [Backend.MOCK, Backend.MOCK_LLM]

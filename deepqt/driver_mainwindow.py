@@ -42,7 +42,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
 
     translation_mode: ct.TranslationMode
 
-    backend_objects: dict[ct.Backend, bi.Backend]
+    backend_objects: dict[bi.BackendID, bi.Backend]
 
     threadpool: Qc.QThreadPool
 
@@ -68,7 +68,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self,
         command: ct.Command,
         inputs: list[str] | str | None,
-        api: ct.Backend | None,
+        api_name: str | None,
         translate_now: bool,
         debug: bool,
     ) -> None:
@@ -101,10 +101,10 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.save_default_palette()
         self.load_config_theme()
 
-        self.backend_objects = {
-            ct.Backend(backend): b_lut.backend_to_class[backend]() for backend in ct.Backend
-        }
-        self.load_backend(api)
+        # self.backend_objects = {
+        #     ct.Backend(backend): b_lut.backend_to_class[backend]() for backend in ct.Backend
+        # }
+        # self.load_backend(api)
 
         Qc.QTimer.singleShot(0, self.post_init)
 
@@ -290,11 +290,11 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.set_interactive_glossary_visible(self.config.use_glossary)
 
         backend = self.config.current_backend
-        backend_config = self.config.backend_configs[backend]
-
-        self.label_backend_name.setText(backend_config.name)
-        icon_path = backend_config.icon
-        self.label_backend_logo.setPixmap(backend_config.load_icon().pixmap(Qc.QSize(24, 24)))
+        # if backend in self.backend_objects:
+        #     backend_config = self.config.backend_configs[backend]
+        #
+        #     self.label_backend_name.setText(backend_config.name)
+        #     self.label_backend_logo.setPixmap(backend_config.load_icon().pixmap(Qc.QSize(24, 24)))
 
         return
         # Ignore the mock because it cannot give language options. It is only to be used for translation.

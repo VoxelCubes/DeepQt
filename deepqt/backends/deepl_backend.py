@@ -8,13 +8,13 @@ import deepqt.backends.backend_interface as bi
 import deepqt.constants as ct
 import deepqt.utils as ut
 
-DEEPL_USAGE_UNLIMITED = (
-    1_000_000_000_000  # This is the value returned by the API if the user has unlimited usage.
-)
+# This is the value returned by the API if the user has unlimited usage.
+DEEPL_USAGE_UNLIMITED = 1_000_000_000_000
 
 
 @define
 class DeepLConfig(bi.BackendConfig):
+    backend_type: ct.Backend = ct.Backend.DEEPL
     name: str = "DeepL"
     icon: str = bi.BackendIconType.CUSTOM / "deepl.png"
     description: str = (
@@ -82,6 +82,17 @@ class DeepLConfig(bi.BackendConfig):
 
 
 class DeepLBackend(bi.ReliableBackend):
+    """
+    Backend for DeepL.
+    """
+
+    _config: DeepLConfig | None  # Needs to be passed from the config.
+    _connection: bi.ConnectionStatus
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._status = bi.ConnectionStatus.Offline
+
     def connect(self) -> None: ...
 
     def disconnect(self) -> None: ...

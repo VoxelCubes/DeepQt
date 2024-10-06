@@ -17,8 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QDialog,
     QDialogButtonBox, QFrame, QHBoxLayout, QLabel,
-    QListWidgetItem, QScrollArea, QSizePolicy, QSpacerItem,
-    QVBoxLayout, QWidget)
+    QListWidgetItem, QPushButton, QScrollArea, QSizePolicy,
+    QSpacerItem, QVBoxLayout, QWidget)
 
 from deepqt.CustomQ.CListWidget import CListWidget
 from deepqt.backend_settings import BackendSettings
@@ -31,6 +31,8 @@ class Ui_BackendConfiguration(object):
         self.horizontalLayout_2 = QHBoxLayout(BackendConfiguration)
         self.horizontalLayout_2.setSpacing(12)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.listWidget_backends = CListWidget(BackendConfiguration)
         self.listWidget_backends.setObjectName(u"listWidget_backends")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
@@ -47,7 +49,17 @@ class Ui_BackendConfiguration(object):
         self.listWidget_backends.setIconSize(QSize(24, 24))
         self.listWidget_backends.setSpacing(6)
 
-        self.horizontalLayout_2.addWidget(self.listWidget_backends)
+        self.verticalLayout_2.addWidget(self.listWidget_backends)
+
+        self.pushButton_new_backend = QPushButton(BackendConfiguration)
+        self.pushButton_new_backend.setObjectName(u"pushButton_new_backend")
+        icon = QIcon(QIcon.fromTheme(u"list-add"))
+        self.pushButton_new_backend.setIcon(icon)
+
+        self.verticalLayout_2.addWidget(self.pushButton_new_backend)
+
+
+        self.horizontalLayout_2.addLayout(self.verticalLayout_2)
 
         self.line = QFrame(BackendConfiguration)
         self.line.setObjectName(u"line")
@@ -108,7 +120,7 @@ class Ui_BackendConfiguration(object):
         self.scrollArea.setWidgetResizable(True)
         self.backend_settings = BackendSettings()
         self.backend_settings.setObjectName(u"backend_settings")
-        self.backend_settings.setGeometry(QRect(0, 0, 408, 350))
+        self.backend_settings.setGeometry(QRect(0, 0, 406, 362))
         self.scrollArea.setWidget(self.backend_settings)
 
         self.verticalLayout.addWidget(self.scrollArea)
@@ -134,6 +146,7 @@ class Ui_BackendConfiguration(object):
 
     def retranslateUi(self, BackendConfiguration):
         BackendConfiguration.setWindowTitle(QCoreApplication.translate("BackendConfiguration", u"Translation Services", None))
+        self.pushButton_new_backend.setText(QCoreApplication.translate("BackendConfiguration", u"Add New API", None))
         self.label_cost_icon.setText(QCoreApplication.translate("BackendConfiguration", u"<cost icon>", None))
     # retranslateUi
 

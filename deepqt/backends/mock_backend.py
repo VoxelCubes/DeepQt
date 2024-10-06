@@ -13,6 +13,7 @@ import deepqt.utils as ut
 # Note: dataclass attributes MUST have a type annotation, otherwise they won't be loaded from the subclass.
 @define
 class MockConfig(bi.BackendConfig):
+    backend_type = ct.Backend.MOCK
     name: str = "Mock"
     description: str = (
         'This is a "fake" backend for **testing purposes**.\n '
@@ -65,7 +66,6 @@ class MockBackend(bi.ReliableBackend):
 
     def __init__(self) -> None:
         super().__init__()
-        self._config = None
         self._status = bi.ConnectionStatus.Offline
 
     def connect(self) -> None:

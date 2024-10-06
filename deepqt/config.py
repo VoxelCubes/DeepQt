@@ -1,13 +1,14 @@
 import json
 import shutil
 from pathlib import Path
-from typing import Callable, Any
+from typing import Callable, Any, NewType
 
 import attrs
 import yaml
 from attrs import define, Factory
 from cattrs import Converter
 from loguru import logger
+from collections import namedtuple
 
 import deepqt.backends.backend_interface as bi
 import deepqt.backends.lookups as b_lut  # backend lookup table
@@ -37,14 +38,8 @@ class Config:
     epub_ignore_empty_html: bool = True
 
     # Backend configs:
-    current_backend: ct.Backend = ct.Backend.MOCK
-    backend_configs: dict[ct.Backend, bi.BackendConfig] = Factory(dict)
-
-    def __attrs_post_init__(self) -> None:
-        # Preload the backend configs.
-        self.backend_configs = {
-            backend: conf_class() for backend, conf_class in b_lut.backend_to_config.items()
-        }
+    current_backend: bi.BackendID = bi.BackendIdNone
+    backend_configs: dict[bi.BackendID, bi.BackendConfig] = Factory(dict)
 
     def save(self, path: Path = None) -> bool:
         """
@@ -106,10 +101,10 @@ class Config:
         # are of type BackendConfig, but not all of the actual subclasses have the same attributes,
         # which causes an attribute error for whatever reason.
 
-        for backend, backend_config in self.backend_configs.items():
+        for backend_id, backend_config in self.backend_configs.items():
             no_save_attrs = backend_config.no_save_attributes()
             for attr_name in no_save_attrs:
-                del data["backend_configs"][backend][attr_name]
+                del data["backend_configs"][backend_id][attr_name]
         return data
 
     def safe_dump(self) -> dict:
@@ -137,16 +132,16 @@ class Config:
         # Using yaml safe dump to avoid having any object constructors in the output.
         # Convert all Backend string enums to their base string, so safe_dump can handle them.
 
-        # Using the name instead of the value because I think the upper case looks nicer.
-        converter.register_unstructure_hook(ct.Backend, lambda x: x.name)
+        # TODO This piece of shit won't unstructure the damn Backend enums.
+        converter.register_unstructure_hook(ct.Backend, lambda x: x.value)
 
         data = converter.unstructure(self)
 
         # Do the same cleanup as in dump()
-        for backend, backend_config in self.backend_configs.items():
+        for backend_id, backend_config in self.backend_configs.items():
             no_save_attrs = backend_config.no_save_attributes()
             for attr_name in no_save_attrs:
-                del data["backend_configs"][backend.name.upper()][attr_name]
+                del data["backend_configs"][backend_id][attr_name]
         return data
 
     def pretty_log(self) -> None:
@@ -187,12 +182,14 @@ def load_config(
 
             if "backend_configs" in json_data:
                 # Attempt to structure the json data into the correct backend config class,
-                # based on the backend name.
-                backend_configs, backend_errors = structure_backend_configs(
+                # based on the backend type.
+                backend_configs, backend_errors, critical_failure = structure_backend_configs(
                     json_data["backend_configs"]
                 )
                 config.backend_configs.update(backend_configs)
                 errors.extend(backend_errors)
+                if critical_failure:
+                    success = False
     except OSError as e:
         logger.exception(f"Failed to read config file {conf_path}")
         errors = [
@@ -216,52 +213,67 @@ def load_config(
 
 
 def structure_backend_configs(
-    json_data: dict[str, dict]
-) -> tuple[dict[ct.Backend, bi.BackendConfig], list[ut.ParseException]]:
+    json_data: dict[int, dict]
+) -> tuple[dict[bi.BackendID, bi.BackendConfig], list[ut.ParseException], bool]:
     """
     Attempt to structure the json data into the correct backend config class,
-    based on the backend name.
+    based on the backend type in the id.
 
     If the error list is empty, no exceptions occurred.
 
     :param json_data: The json data to structure.
-    :return: The structured backend configs and any errors that occurred.
+    :return: The structured backend configs and any errors that occurred and if a critical failure occurred.
     """
     errors: list[ut.ParseException] = []
     json_keys = list(json_data.keys())
-    backend_data: dict[ct.Backend, bi.BackendConfig | dict] = {}
+    backend_data: dict[bi.BackendID, bi.BackendConfig | dict] = {}
+    critical_failure = False
 
-    # Cast the key strings to the Backend enum.
-    for backend_name in json_keys:
+    # Cast the key ints to the BackendID type.
+    # It honestly doesn't matter what type they are, as long as they're hashable,
+    # which they are, coming from json.
+    for backend_id in json_keys:
+        backend_data[bi.BackendID(backend_id)] = json_data[backend_id]
+
+    for backend_id in backend_data:
         try:
-            backend_enum = ct.Backend(backend_name)
-            backend_data[backend_enum] = json_data[backend_name]
+            # Look into the backend_type field to determine the backend type.
+            backend_type = ct.Backend(json_data[backend_id]["backend_type"])
+        except KeyError:
+            logger.error(f"Backend {backend_id} has no backend_type field")
+            errors.append(
+                ut.ParseException(
+                    f"Backend {backend_id} has no backend_type field. The backend could not be loaded!"
+                )
+            )
+            critical_failure = True
+            continue
         except ValueError:
-            logger.error(f"Unknown backend: {backend_name}")
-            errors.append(ut.ParseException(f"Unknown backend: {backend_name}"))
+            logger.error(f"Unknown backend: {backend_id}")
+            errors.append(ut.ParseException(f"Unknown backend: {backend_id}"))
+            critical_failure = True
+            continue
 
-    for backend in backend_data:
         # Because the string and the strenum hashes are identical and Python treats them as equal,
         # we can simply ask the json_data using the strenum as a key as well.
         # Alternatively, to be fully correct, use backend.value but the static type checker
         # didn't like it for some reason, likely a false positive.
         try:
-            config_obj = b_lut.backend_to_config[backend]
-            backend_data[backend], backend_errors = config_obj.from_dict(json_data[backend])
+            config_obj = b_lut.backend_to_config[backend_type]
+            backend_data[backend_id], backend_errors = config_obj.from_dict(
+                backend_data[backend_id]
+            )
             errors.extend(backend_errors)
 
-        except KeyError:
-            logger.error(f"Unknown backend: {backend}")
-            errors.append(ut.ParseException(f"Unknown backend: {backend}"))
         except Exception as e:
-            logger.exception(f"Failed to structure backend config for {backend}")
+            logger.exception(f"Failed to structure backend config for {backend_id} {backend_type}")
             errors.append(
                 ut.ParseException(
-                    f"{type(e).__name__}: Failed to structure backend config for {backend}: {e}"
+                    f"{type(e).__name__}: Failed to structure backend config for {backend_id} {backend_type}: {e}"
                 )
             )
 
-    return backend_data, errors
+    return backend_data, errors, critical_failure
 
 
 def config_converter_factory() -> Converter:

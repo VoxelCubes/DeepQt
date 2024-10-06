@@ -96,7 +96,7 @@ def get_config_path() -> Path:
     xdg_path = os.getenv("XDG_CONFIG_HOME") or Path.home() / ".config"
 
     if platform.system() == "Linux":
-        path = Path(XDG_CONFIG_HOME, __program__ + "rc")
+        path = Path(XDG_CONFIG_HOME, __program__, __program__ + "rc")
     elif platform.system() == "Windows":
         path = Path(
             xdg_path if "XDG_CONFIG_HOME" in os.environ else os.getenv("APPDATA"),

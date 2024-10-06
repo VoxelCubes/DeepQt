@@ -1,6 +1,6 @@
 """
 This is the generic interface for reliable and unreliable backends.
-As a protocol, it dictates the public methods of a backend,
+As a baseclass, it dictates the public methods of a backend,
 to make dependency inversion and injection possible.
 
 Reliable backends are expected to translate the text consistently and correctly.
@@ -12,13 +12,18 @@ Unreliable backends may return nonsense and need per segment tweaking to work.
 from abc import abstractmethod, ABC
 from enum import StrEnum, auto, Enum
 from pathlib import Path
-from typing import Protocol, final
+from typing import Protocol, final, NewType
 
 import PySide6.QtGui as Qg
 from attrs import frozen, define
 
 import deepqt.constants as ct
 import deepqt.gui_utils as gu
+
+# This is some unique identifier for the backend,
+# since multiple may be of the same type.
+BackendID = NewType("BackendId", int)
+BackendIdNone = BackendID(-1)
 
 
 # Any backend's translation functions can only raise these two exceptions.
@@ -122,6 +127,7 @@ class BackendStatus:
 @define
 class BackendConfig(ABC):
     # How long it took to translate 1000 characters on average. (-1 if unknown)
+    backend_type: ct.Backend = None  # Needed to parse the config.
     name: str = "Unset"
     icon: str = BackendIconType.CUSTOM / "generic-backend.svg"
     description: str = "Blank description."  # Markdown enabled.
@@ -159,9 +165,13 @@ class BackendConfig(ABC):
         """
         # Validate each attribute in the class is covered.
         meta = {
+            "backend_type": AttributeMetadata(
+                type=ct.Backend,
+                hidden=True,
+            ),
             "name": AttributeMetadata(
                 type=str,
-                no_save=True,
+                hidden=True,  # Name is displayed in the header, so hide it from the list.
             ),
             "icon": AttributeMetadata(
                 type=str,
@@ -220,14 +230,25 @@ class BackendConfig(ABC):
         return [key for key, meta in self.attribute_metadata().items() if meta.no_save]
 
 
-class Backend(Protocol):
+class Backend(ABC):
+    """
+    This class defines the working interface for a backend,
+    managing the connection and api calls.
+    This is composed with a BackendConfig object to store the settings.
+    """
 
-    def __init__(self) -> None: ...
+    _config: BackendConfig | None  # Needs to be passed from the config.
 
+    def __init__(self) -> None:
+        self._config = None
+
+    @abstractmethod
     def connect(self) -> None: ...
 
+    @abstractmethod
     def disconnect(self) -> None: ...
 
+    @abstractmethod
     def supported_languages(self) -> list[tuple[str, str]]:
         """
         Returns a list of supported languages in the form of tuples (code, name).
@@ -235,22 +256,29 @@ class Backend(Protocol):
         """
         ...
 
+    @abstractmethod
     def supported_formats(self) -> list[ct.Formats]:
         """
         These are the supported file formats: Text, Epub, PDF etc.
         """
         ...
 
+    @abstractmethod
     def config(self) -> BackendConfig: ...
 
+    @abstractmethod
     def default_config(self) -> BackendConfig: ...
 
+    @abstractmethod
     def set_config(self, config: BackendConfig) -> None: ...
 
+    @abstractmethod
     def translate_text(self, text: str) -> str: ...
 
+    @abstractmethod
     def translate_file(self, file_in: Path, file_type: ct.Formats, file_out: Path) -> None: ...
 
+    @abstractmethod
     def status(self) -> BackendStatus:
         """
         Contains status information specific to the backend.
@@ -259,7 +287,7 @@ class Backend(Protocol):
         ...
 
 
-class ReliableBackend(Backend): ...
+class ReliableBackend(Backend, ABC): ...
 
 
-class UnreliableBackend(Backend): ...
+class UnreliableBackend(Backend, ABC): ...
