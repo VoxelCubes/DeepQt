@@ -123,6 +123,8 @@ class Config:
                     value = ut.censor_key(value)
                 if attrs.has(value):
                     # If the value is also an attrs class, unstructure it recursively
+                    value = censor_keys_hook(value)
+                else:
                     value = converter.unstructure(value)
                 result[field.name] = value
             return result
@@ -132,7 +134,6 @@ class Config:
         # Using yaml safe dump to avoid having any object constructors in the output.
         # Convert all Backend string enums to their base string, so safe_dump can handle them.
 
-        # TODO This piece of shit won't unstructure the damn Backend enums.
         converter.register_unstructure_hook(ct.Backend, lambda x: x.value)
 
         data = converter.unstructure(self)
@@ -153,24 +154,27 @@ class Config:
         logger.debug("Config:\n" + yaml.safe_dump(data, default_flow_style=False, sort_keys=False))
 
 
-def load_config(
-    conf_path: Path, config_factory: Callable[[], Any] = Config
-) -> tuple[Config, bool, list[ut.ParseException]]:
+def load_config(conf_path: Path, config_factory: Callable[[], Any] = Config) -> tuple[
+    Config,
+    list[ut.RecoverableParseException],
+    list[ut.ParseError],
+    list[ut.CriticalParseError],
+]:
     """
     Load the configuration from the given path.
-    If no errors occur, return the config, True, and an empty list.
-    If a critical error occurs, return the config, False, and the error.
-    If non-critical errors occur, return the config, True, and the errors.
+    If any errors occur, they will be returned as Exception objects in the corresponding
+    severity list.
 
     :param conf_path: Path to the configuration file.
     :param config_factory: [Optional] Factory function to create a new config object.
-    :return: The configuration, whether it was loaded successfully (fully or in part), and any errors.
+    :return: The configuration and 3 lists of errors.
     """
 
     config = config_factory()
 
-    success = True
-    errors: list[ut.ParseException]
+    recoverable_exceptions: list[ut.RecoverableParseException] = []
+    errors: list[ut.ParseError] = []
+    critical_errors: list[ut.CriticalParseError] = []
 
     try:
         with open(conf_path, "r") as f:
@@ -178,56 +182,60 @@ def load_config(
             # This way, missing values will be filled in with the default values.
             json_data = json.load(f)
 
-            errors = ut.load_dict_to_attrs_safely(config, json_data, skip_attrs=["backend_configs"])
+            recoverable_exceptions = ut.load_dict_to_attrs_safely(
+                config, json_data, skip_attrs=["backend_configs"]
+            )
 
             if "backend_configs" in json_data:
                 # Attempt to structure the json data into the correct backend config class,
                 # based on the backend type.
-                backend_configs, backend_errors, critical_failure = structure_backend_configs(
-                    json_data["backend_configs"]
+                backend_configs, backend_recoverable_exceptions, backend_errors = (
+                    structure_backend_configs(json_data["backend_configs"])
                 )
                 config.backend_configs.update(backend_configs)
+                recoverable_exceptions.extend(backend_recoverable_exceptions)
                 errors.extend(backend_errors)
-                if critical_failure:
-                    success = False
     except OSError as e:
         logger.exception(f"Failed to read config file {conf_path}")
-        errors = [
-            ut.ParseException(f"{type(e).__name__}: Failed to read config file {conf_path}: {e}")
+        critical_errors = [
+            ut.CriticalParseError(
+                f"{type(e).__name__}: Failed to read config file {conf_path}: {e}"
+            )
         ]
-        success = False
     except json.decoder.JSONDecodeError as e:
         logger.exception(f"Configuration file could not be parsed {conf_path}")
-        errors = [
-            ut.ParseException(
+        critical_errors = [
+            ut.CriticalParseError(
                 f"{type(e).__name__}: Configuration file could not be parsed {conf_path}: {e}"
             )
         ]
-        success = False
 
-    # If fubar, reset the config just to be sure.
-    if not success:
+    # If's fubar, reset the config just to be sure.
+    if critical_errors:
         config = config_factory()
 
-    return config, success, errors
+    return config, recoverable_exceptions, errors, critical_errors
 
 
 def structure_backend_configs(
-    json_data: dict[int, dict]
-) -> tuple[dict[bi.BackendID, bi.BackendConfig], list[ut.ParseException], bool]:
+    json_data: dict[str, dict]
+) -> tuple[
+    dict[bi.BackendID, bi.BackendConfig], list[ut.RecoverableParseException], list[ut.ParseError]
+]:
     """
     Attempt to structure the json data into the correct backend config class,
     based on the backend type in the id.
 
-    If the error list is empty, no exceptions occurred.
+    If the error lists are empty, no errors occurred.
 
     :param json_data: The json data to structure.
-    :return: The structured backend configs and any errors that occurred and if a critical failure occurred.
+    :return: The structured backend configs and any recoverable and non-recoverable errors.
     """
-    errors: list[ut.ParseException] = []
+    recoverable_exceptions: list[ut.RecoverableParseException] = []
+    errors: list[ut.ParseError] = []
     json_keys = list(json_data.keys())
     backend_data: dict[bi.BackendID, bi.BackendConfig | dict] = {}
-    critical_failure = False
+    corrupted_backends: list[bi.BackendID] = []
 
     # Cast the key ints to the BackendID type.
     # It honestly doesn't matter what type they are, as long as they're hashable,
@@ -238,20 +246,28 @@ def structure_backend_configs(
     for backend_id in backend_data:
         try:
             # Look into the backend_type field to determine the backend type.
-            backend_type = ct.Backend(json_data[backend_id]["backend_type"])
+            backend_type_raw = str(json_data[backend_id]["backend_type"]).upper()
+            backend_type = ct.Backend(backend_type_raw)
         except KeyError:
-            logger.error(f"Backend {backend_id} has no backend_type field")
+            logger.error(f'Backend "{backend_id}" has no backend_type field')
             errors.append(
-                ut.ParseException(
-                    f"Backend {backend_id} has no backend_type field. The backend could not be loaded!"
+                ut.ParseError(
+                    f'Backend "{backend_id}" has no backend_type field. The backend could not be loaded!'
                 )
             )
-            critical_failure = True
+            # Purge this backend from the data.
+            corrupted_backends.append(backend_id)
             continue
         except ValueError:
-            logger.error(f"Unknown backend: {backend_id}")
-            errors.append(ut.ParseException(f"Unknown backend: {backend_id}"))
-            critical_failure = True
+            backend_type_raw = str(json_data[backend_id]["backend_type"])
+            logger.error(f'Unknown backend type: "{backend_type_raw}" for backend "{backend_id}"')
+            errors.append(
+                ut.ParseError(
+                    f'Unknown backend type: "{backend_type_raw}" for backend "{backend_id}"'
+                )
+            )
+            # Purge this backend from the data.
+            corrupted_backends.append(backend_id)
             continue
 
         # Because the string and the strenum hashes are identical and Python treats them as equal,
@@ -260,20 +276,31 @@ def structure_backend_configs(
         # didn't like it for some reason, likely a false positive.
         try:
             config_obj = b_lut.backend_to_config[backend_type]
-            backend_data[backend_id], backend_errors = config_obj.from_dict(
+            backend_data[backend_id], backend_exceptions = config_obj.from_dict(
                 backend_data[backend_id]
             )
-            errors.extend(backend_errors)
+            # Prepend the backend id to the error messages.
+            backend_exceptions = [
+                ut.RecoverableParseException(f'Backend "{backend_id}": {str(e)}')
+                for e in backend_exceptions
+            ]
+            recoverable_exceptions.extend(backend_exceptions)
 
         except Exception as e:
-            logger.exception(f"Failed to structure backend config for {backend_id} {backend_type}")
+            logger.exception(
+                f'Failed to structure backend config for "{backend_id}" "{backend_type}"'
+            )
             errors.append(
-                ut.ParseException(
-                    f"{type(e).__name__}: Failed to structure backend config for {backend_id} {backend_type}: {e}"
+                ut.ParseError(
+                    f'{type(e).__name__}: Failed to structure backend config for "{backend_id}" "{backend_type}": {e}'
                 )
             )
 
-    return backend_data, errors, critical_failure
+    # Purge corrupted backends.
+    for backend_id in corrupted_backends:
+        del backend_data[backend_id]
+
+    return backend_data, recoverable_exceptions, errors
 
 
 def config_converter_factory() -> Converter:

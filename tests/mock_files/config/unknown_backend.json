@@ -12,14 +12,21 @@
     "epub_crush": false,
     "epub_make_text_horizontal": true,
     "epub_ignore_empty_html": true,
-    "last_backend": "deepl",
+    "last_backend": "1",
     "backend_configs": {
-        "The Unknown???": {
+        "Wrong backend type": {
+            "backend_type": "The Unknown???",
             "avg_time_per_mille": -1.0,
             "chunk_size": 1000,
             "wait_time": 1000
         },
-        "deepl": {
+        "Missing backend type": {
+            "avg_time_per_mille": -1.0,
+            "chunk_size": 1000,
+            "wait_time": 1000
+        },
+        "1": {
+            "backend_type": "DEEPL",
             "avg_time_per_mille": -1.0,
             "api_key": "sdkfjhasdflasjfhjsalhfla",
             "tl_max_chunks": 20,

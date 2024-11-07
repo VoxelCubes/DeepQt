@@ -16,6 +16,8 @@ from loguru import logger
 
 import deepqt.translation_interface as ai
 import deepqt.backends.backend_interface as bi
+import deepqt.backends.deepl_backend as deepl_b
+import deepqt.backends.mock_backend as mock_b
 import deepqt.backends.lookups as b_lut
 import deepqt.config as cfg
 import deepqt.glossary as gl
@@ -93,6 +95,7 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         self.threadpool = Qc.QThreadPool.globalInstance()
 
         self.config = self.load_config()
+        self.config.backend_configs[bi.BackendID("0")] = mock_b.MockConfig()
         self.config.save()
         self.config.pretty_log()
         # Share config with the file table.
@@ -236,22 +239,52 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
             logger.info(f"No config found at {config_path}.")
             return cfg.Config()
 
-        config, success, errors = cfg.load_config(config_path)
+        config, recoverable_exceptions, errors, critical_errors = cfg.load_config(config_path)
 
-        # Format them like: ValueError: 'lang_from' must be a string.
-        errors_str = "\n".join(map(str, errors))
-
-        if not success:
-            gu.show_warning(
+        # Critical errors force deepqt to nuke the config and use the default.
+        if critical_errors:
+            backup_path = ut.backup_file(config_path)
+            # Format them like: "ValueError: 'lang_from' must be a string."
+            critical_errors_str = "\n\n".join(map(str, critical_errors))
+            response = gu.show_critical(
                 self,
-                "Config Error",
-                f"Failed to load the config file.\n\n{errors_str}\n\nProceeding with the default configuration.",
+                "Critical Configuration Error",
+                f"Failed to load the config file.\n\n"
+                f"A backup of the config file was created at \n{backup_path}.\n\n"
+                f"Proceed with the default configuration?",
+                detailedText=f"Critical errors:\n\n{critical_errors_str}",
             )
-        elif errors:
+            if response == Qw.QMessageBox.Abort:
+                logger.critical("User aborted due to critical config errors.")
+                Qw.QApplication.instance().quit()  # Embrace death.
+                raise SystemExit(255)
+            return config
+
+        # Errors and recoverable exceptions can occur at the same time, they don't
+        # require throwing out the whole config.
+        if errors:
+            backup_path = ut.backup_file(config_path)
+            errors_str = "\n\n".join(map(str, errors))
+            response = gu.show_critical(
+                self,
+                "Configuration Error",
+                f"Failed to load parts of the config file.\n\n"
+                f"A backup of the config file was created at \n{backup_path}.\n\n"
+                f"Proceed with the default configuration for affected sections?",
+                detailedText=f"Critical errors:\n\n{errors_str}",
+            )
+            if response == Qw.QMessageBox.Abort:
+                logger.critical("User aborted due to critical config errors.")
+                Qw.QApplication.instance().quit()  # Embrace death.
+                raise SystemExit(255)
+
+        if recoverable_exceptions:
+            recoverable_exceptions_str = "\n\n".join(map(str, recoverable_exceptions))
             gu.show_info(
                 self,
                 "Config Warnings",
-                f"Minor issues were found and corrected in the config file.\n\n{errors_str}",
+                f"Minor issues were found and corrected in the config file.",
+                detailedText=f"Recoverable exceptions:\n\n{recoverable_exceptions_str}",
             )
 
         return config

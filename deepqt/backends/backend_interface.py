@@ -22,8 +22,8 @@ import deepqt.gui_utils as gu
 
 # This is some unique identifier for the backend,
 # since multiple may be of the same type.
-BackendID = NewType("BackendId", int)
-BackendIdNone = BackendID(-1)
+BackendID = NewType("BackendId", str)
+BackendIdNone = BackendID("")
 
 
 # Any backend's translation functions can only raise these two exceptions.

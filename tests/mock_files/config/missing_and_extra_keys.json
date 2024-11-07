@@ -3,13 +3,15 @@
     "lang_from": "Valid language code",
     "lang_to": "EN-US",
     "backend_configs": {
-        "mock": {
-            "name": "This should never be here",
+        "0": {
+            "backend_type": "MOCK",
+            "help": "This should never be here",
             "avg_time_per_mille": -1.0,
             "chunk_size": 1000,
             "more nonsense": 42
         },
-        "deepl": {
+        "1": {
+            "backend_type": "DEEPL",
             "avg_time_per_mille": -1.0,
             "tl_preserve_formatting": true,
             "wait_time": 1000

@@ -12,7 +12,7 @@
     "epub_crush": false,
     "epub_make_text_horizontal": true,
     "epub_ignore_empty_html": true,
-    "last_backend": "deepl",
+    "last_backend": "0",
     "backend_configs": {
     }
 }

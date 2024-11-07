@@ -116,8 +116,7 @@ def main() -> None:
     # Start Qt runtime.
     app = Qw.QApplication(sys.argv)
 
-    with resources.files(theme_icons_data) as data_path:
-        theme_icons = str(data_path)
+    theme_icons = str(resources.files(theme_icons_data))
 
     Qg.QIcon.setFallbackSearchPaths([":/icons", theme_icons])
     # We need to set an initial theme on Windows, otherwise the icons will fail to load

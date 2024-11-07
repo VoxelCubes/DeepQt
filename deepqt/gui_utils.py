@@ -98,15 +98,19 @@ def show_critical(parent, title: str, msg: str, **kwargs) -> int:
     return box.exec()
 
 
-def show_warning(parent, title: str, msg: str) -> None:
+def show_warning(parent, title: str, msg: str, **kwargs) -> None:
     msg = msg.ljust(MIN_MSG_LENGTH)
-    box = SelectableMessageBox(Qw.QMessageBox.Warning, title, msg, Qw.QMessageBox.Ok, parent)
+    box = SelectableMessageBox(
+        Qw.QMessageBox.Warning, title, msg, Qw.QMessageBox.Ok, parent, **kwargs
+    )
     box.exec()
 
 
-def show_info(parent, title: str, msg: str) -> None:
+def show_info(parent, title: str, msg: str, **kwargs) -> None:
     msg = msg.ljust(MIN_MSG_LENGTH)
-    box = SelectableMessageBox(Qw.QMessageBox.Information, title, msg, Qw.QMessageBox.Ok, parent)
+    box = SelectableMessageBox(
+        Qw.QMessageBox.Information, title, msg, Qw.QMessageBox.Ok, parent, **kwargs
+    )
     box.exec()
 
 

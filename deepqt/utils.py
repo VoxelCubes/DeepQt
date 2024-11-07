@@ -2,6 +2,7 @@ import difflib
 import os
 import platform
 import re
+import shutil
 import sys
 import zipfile as zf
 from contextlib import contextmanager
@@ -338,6 +339,17 @@ def ensure_unique_file_path(file_path: Path) -> Path:
     return output_file_path
 
 
+def backup_file(path: Path, extension: str = ".backup") -> Path:
+    """
+    Create a backup of the file by copying it to the same location with the given extension.
+    """
+    backup_path = path.with_suffix(path.suffix + extension)
+    backup_path = ensure_unique_file_path(backup_path)
+    logger.info(f"Backing up file {path} to {backup_path}")
+    shutil.copy(path, backup_path)
+    return backup_path
+
+
 def weighted_average(old_value: float, new_value: float, weight: float = 0.25) -> float:
     """
     Calculate a weighted average.
@@ -353,10 +365,31 @@ def censor_key(key: str) -> str:
     return "*" * len(key)
 
 
-class ParseException(Exception):
+class RecoverableParseException(Exception):
     """
     This serves to wrap any exceptions that occur during parsing,
     so that additional info about the file can be included.
+    These exceptions could be recovered from.
+    """
+
+    pass
+
+
+class ParseError(Exception):
+    """
+    This serves to wrap any errors that occur during parsing,
+    so that additional info about the file can be included.
+    Errors imply a failure to parse major parts of the file.
+    """
+
+    pass
+
+
+class CriticalParseError(Exception):
+    """
+    This serves to wrap any critical errors that occur during parsing,
+    so that additional info about the file can be included.
+    A critical error implies a failure to parse the file at all.
     """
 
     pass
@@ -368,14 +401,15 @@ def load_dict_to_attrs_safely(
     *,
     skip_attrs: list[str] | None = None,
     include_until_base: type | list[type] | None = None,
-) -> list[ParseException]:
+) -> list[RecoverableParseException]:
     """
     Load a dictionary into an attrs class while ensuring types are correct.
     Any type issues are logged and returned as a list of exceptions.
     If no exceptions are returned, the loading was successful.
     In the worst case, the object is simply left unchanged.
     When you have a dataclass that inherits from another one, type annotations won't be inherited,
-    so set include_until_base to the base class to include all attributes up to (and including) that class.
+    so set include_until_base to the base class to include all attributes up to (and including)
+    that class (multiple inheritance is supported).
 
     :param dataclass: The dataclass to load the dictionary into.
     :param data: The dictionary to load.
@@ -383,7 +417,7 @@ def load_dict_to_attrs_safely(
     :param include_until_base: [Optional] Include attributes until this base class.
     :return: A list of exceptions that occurred during loading.
     """
-    errors: list[ParseException] = []
+    recoverable_exceptions: list[RecoverableParseException] = []
     type_info = get_type_hints(dataclass)
     # Gather type hints from base classes if requested.
     if include_until_base:
@@ -408,13 +442,13 @@ def load_dict_to_attrs_safely(
                 setattr(dataclass, attribute, expected_type(value))
             except Exception as e:
                 logger.exception(f"Failed to cast attribute {attribute} to the correct type.")
-                errors.append(
-                    ParseException(
+                recoverable_exceptions.append(
+                    RecoverableParseException(
                         f"{type(e).__name__}: Failed to cast attribute {attribute} to the correct type: {e}"
                     )
                 )
 
-    return errors
+    return recoverable_exceptions
 
 
 def zip_folder_to_epub(folder_unzipped: Path, destination: Path) -> bool:
