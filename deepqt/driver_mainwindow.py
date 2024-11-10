@@ -881,9 +881,12 @@ class MainWindow(Qw.QMainWindow, Ui_MainWindow):
         )
         themes = [("", "System")]
         themes.extend(ut.get_available_themes())
+        theme_action_group = Qg.QActionGroup(self)
+        theme_action_group.setExclusive(True)
         for theme, name in themes:
             action = Qg.QAction(name, self)
             action.setCheckable(True)
+            theme_action_group.addAction(action)
             action.theme = theme
             action.triggered.connect(partial(self.set_theme, theme))
             self.theming_menu.addAction(action)
